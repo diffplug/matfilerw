@@ -3,7 +3,7 @@
 
     <groupId>net.sourceforge.jmatio</groupId>
     <artifactId>jmatio</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
     <packaging>jar</packaging>
     <description>
         Matlab's MAT-file I/O API in JAVA. Supports Matlab 5 MAT-flie format reading and writing. Written in pure JAVA.
@@ -73,7 +73,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
+<!--             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
                 <version>1.1</version>
@@ -90,7 +90,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin> -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.4</version>

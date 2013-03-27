@@ -60,6 +60,24 @@ public class MLSparse extends MLNumericArray<Double>
         }
         return ir;
     }
+    
+    /**
+     * Gets column indices
+     * 
+     * <tt>ic</tt> points to an integer array of length nzmax containing the column indices of
+     * the corresponding elements in <tt>pr</tt> and <tt>pi</tt>.
+     */
+    public int[] getIC()
+    {
+        int[] ic = new int[nzmax];
+        int i = 0;
+        for ( IndexMN index : indexSet )
+        {
+            ic[i++] = index.n;
+        }
+        return ic;
+    }
+    
     /**
      * Gets column indices. 
      * 
