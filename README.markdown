@@ -11,4 +11,5 @@ For example: in MatFileWriter.java I have cut down the use of needless ByteArray
 
 These changes are completely irrelevant with small matlab files (sub 100Mb) but when the data being written is in the gigabytes these changes resulted in substantial memory usage improvements
 
- 
+In addition, support for reading from streams has been added. 
+
