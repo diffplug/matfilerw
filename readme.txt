@@ -19,6 +19,9 @@ Have fun :)
 Wojciech Gradkowski
 
 CHANGE LOG:
+[09.05.2013]
++ added read/write support for input/output streams (ss, jsh)
+
 [04.12.2012]
 + adding various fixes (thanks to: Kristofer Sandlund)
 + adding read support for objects, java objects, other types
