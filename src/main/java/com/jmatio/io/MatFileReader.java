@@ -18,12 +18,12 @@ import java.nio.channels.FileChannel;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.zip.InflaterInputStream;
 
 import com.jmatio.common.MatDataTypes;
+import com.jmatio.io.MatFileWriter.ByteArrayOutputStream2;
 import com.jmatio.types.ByteStorageSupport;
 import com.jmatio.types.MLArray;
 import com.jmatio.types.MLCell;
@@ -63,8 +63,9 @@ import com.jmatio.types.MLUInt8;
  * @author Wojciech Gradkowski (<a href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
  */
 /**
- * @author Wojciech Gradkowski (<a href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
- *
+ * @author Wojciech Gradkowski (<a
+ *         href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
+ * 
  */
 public class MatFileReader
 {
@@ -159,6 +160,48 @@ public class MatFileReader
         filter  = new MatFileFilter();
         data    = new LinkedHashMap<String, MLArray>();
     }
+
+    /**
+     * Creates instance of <code>MatFileReader</code> and reads MAT-file from
+     * <code>file</code>.
+     * 
+     * This method reads MAT-file without filtering.
+     * 
+     * @param stream
+     *            the MAT-file stream
+     * @throws IOException
+     *             when error occurred while processing the file.
+     */
+    public MatFileReader(InputStream stream) throws IOException
+    {
+        this(stream, new MatFileFilter());
+    }
+
+    /**
+     * Creates instance of <code>MatFileReader</code> and reads MAT-file from
+     * <code>file</code>.
+     * <p>
+     * Results are filtered by <code>MatFileFilter</code>. Arrays that do not
+     * meet filter match condition will not be available in results.
+     * <p>
+     * <i>Note: this method reads file using the memory mapped file policy, see
+     * notes to </code>
+     * {@link #read(File, MatFileFilter, com.jmatio.io.MatFileReader.MallocPolicy)}
+     * </code>
+     * 
+     * @param stream
+     *            the MAT-file stream
+     * @param MatFileFilter
+     *            array name filter.
+     * @throws IOException
+     *             when error occurred while processing the file.
+     */
+    public MatFileReader(InputStream stream, MatFileFilter filter) throws IOException
+    {
+        this();
+
+        read(stream, filter);
+    }
     
     /**
      * Reads the content of a MAT-file and returns the mapped content.
@@ -176,6 +219,23 @@ public class MatFileReader
     {
        return read(file, new MatFileFilter(), MEMORY_MAPPED_FILE);
     }
+
+    /**
+     * Reads the content of a MAT-file and returns the mapped content.
+     * <p>
+     * This method calls <code>read(stream, new MatFileFilter())</code>.
+     * 
+     * @param stream
+     *            a valid MAT-file stream to be read
+     * @return the same as <code>{@link #getContent()}</code>
+     * @throws IOException
+     *             if error occurs during file processing
+     */
+    public synchronized Map<String, MLArray> read(InputStream stream) throws IOException
+    {
+        return read(stream, new MatFileFilter());
+    }
+
     /**
      * Reads the content of a MAT-file and returns the mapped content.
      * <p>
@@ -341,6 +401,50 @@ public class MatFileReader
         
     }
     
+    /**
+     * Read a mat file from a stream. Internally this will read the stream fully
+     * into memory before parsing it.
+     * 
+     * @param stream
+     *            a valid MAT-file stream to be read
+     * @param filter
+     *            the array filter applied during reading
+     * 
+     * @return the same as <code>{@link #getContent()}</code>
+     * @see MatFileFilter
+     * @throws IOException
+     *             if error occurs during file processing
+     */
+    public synchronized Map<String, MLArray> read(InputStream stream, MatFileFilter filter) throws IOException
+    {
+        this.filter = filter;
+
+        data.clear();
+
+        ByteBuffer buf = null;
+
+        final ByteArrayOutputStream2 baos = new ByteArrayOutputStream2();
+        copy(stream, baos);
+        buf = ByteBuffer.wrap(baos.getBuf(), 0, baos.getCount());
+
+        // read in file header
+        readHeader(buf);
+
+        while (buf.remaining() > 0)
+        {
+            readData(buf);
+        }
+
+        return getContent();
+    }
+
+    private void copy(InputStream stream, ByteArrayOutputStream2 output) throws IOException {
+        final byte[] buffer = new byte[1024 * 4];
+        int n = 0;
+        while (-1 != (n = stream.read(buffer))) {
+            output.write(buffer, 0, n);
+        }
+    }
     /**
      * Workaround taken from bug <a
      * href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4724038">#4724038</a>
@@ -1175,4 +1279,5 @@ public class MatFileReader
             return ac;
         }
     }
+
 }

@@ -1,6 +1,5 @@
 package com.jmatio.io;
 
-
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -25,7 +24,9 @@ import com.jmatio.types.MLStructure;
  * MAT-file writer.
  * 
  * Usage:
- * <pre><code>
+ * 
+ * <pre>
+ * <code>
  * //1. First create example arrays
  * double[] src = new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 };
  * MLDouble mlDouble = new MLDouble( "double_arr", src, 3 );
@@ -37,17 +38,23 @@ import com.jmatio.types.MLStructure;
  * list.add( mlChar );
  * 
  * new MatFileWriter( "mat_file.mat", list );
- * </code></pre>
+ * </code>
+ * </pre>
  * 
  * this is "equal" to Matlab commands:
- * <pre><code>
+ * 
+ * <pre>
+ * <code>
  * >> double_arr = [ 1 2; 3 4; 5 6];
  * >> char_arr = 'I am dummy';
  * >>
  * >> save('mat_file.mat', 'double_arr', 'char_arr');
- * </pre></code>
+ * </pre>
  * 
- * @author Wojciech Gradkowski (<a href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
+ * </code>
+ * 
+ * @author Wojciech Gradkowski (<a
+ *         href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
  */
 public class MatFileWriter
 {
