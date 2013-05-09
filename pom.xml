@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.sourceforge.jmatio</groupId>
 	<artifactId>jmatio</artifactId>
-	<version>1.2-SNAPSHOT</version>
+	<version>1.2</version>
 	<description>
 		 Matlab's MAT-file I/O API in JAVA. Supports Matlab 5 MAT-flie format reading and writing. Written in pure JAVA.
   	</description>
