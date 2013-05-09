@@ -13,8 +13,8 @@ import com.jmatio.types.ByteStorageSupport;
  */
 class MatFileInputStream
 {
-    private int type;
-    private ByteBuffer buf;
+    private final int type;
+    private final ByteBuffer buf;
     
     /**
      * Attach MAT-file input stream to <code>InputStream</code>
@@ -197,29 +197,31 @@ class MatFileInputStream
                 if ( clazz.equals( Double.class) )
                 {
                     dest.putDouble( readDouble() );
-                    continue;
                 }
-                if ( clazz.equals( Byte.class) )
+                else if ( clazz.equals( Byte.class) )
                 {
                     dest.put( readByte() );
-                    continue;
                 }
-                if ( clazz.equals( Integer.class) )
+                else if ( clazz.equals( Integer.class) )
                 {
                     dest.putInt( readInt() );
-                    continue;
                 }
-                if ( clazz.equals( Long.class) )
+                else if ( clazz.equals( Long.class) )
                 {
                     dest.putLong( readLong() );
-                    continue;
                 }
-                if ( clazz.equals( Float.class) )
+                else  if ( clazz.equals( Float.class) )
                 {
                     dest.putFloat( readFloat() );
-                    continue;
                 }
-                throw new RuntimeException("Not supported buffer reader for " + clazz );
+                else if ( clazz.equals( Short.class) )
+                {
+                    dest.putShort( readShort() );
+                }
+                else
+                {
+                    throw new RuntimeException("Not supported buffer reader for " + clazz );
+                }
             }
         }
         dest.rewind();
@@ -250,7 +252,32 @@ class MatFileInputStream
                 throw new IllegalArgumentException("Unknown data type: " + type);
         }
     }
-
+    private short readShort()
+    {
+        switch ( type )
+        {
+            case MatDataTypes.miUINT8:
+                return (short)( buf.get() & 0xFF);
+            case MatDataTypes.miINT8:
+                return (short) buf.get();
+            case MatDataTypes.miUINT16:
+                return (short)( buf.getShort() & 0xFFFF);
+            case MatDataTypes.miINT16:
+                return (short) buf.getShort();
+            case MatDataTypes.miUINT32:
+                return (short)( buf.getInt() & 0xFFFFFFFF);
+            case MatDataTypes.miINT32:
+                return (short) buf.getInt();
+            case MatDataTypes.miUINT64:
+                return (short) buf.getLong();
+            case MatDataTypes.miINT64:
+                return (short) buf.getLong();
+            case MatDataTypes.miDOUBLE:
+                return (short) buf.getDouble();
+            default:
+                throw new IllegalArgumentException("Unknown data type: " + type);
+        }
+    }
     private long readLong()
     {
         switch ( type )
@@ -277,6 +304,9 @@ class MatFileInputStream
                 throw new IllegalArgumentException("Unknown data type: " + type);
         }
     }
-    
 
+	public void skip(int padding) 
+	{
+		buf.position( buf.position() + padding );
+	}
 }

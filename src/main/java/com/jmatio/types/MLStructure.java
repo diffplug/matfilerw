@@ -164,8 +164,8 @@ public class MLStructure extends MLArray
         
     }
     /**
-     * Gets a value of the field described by name from current structe
-     * in struc array.
+     * Gets a value of the field described by name from current struct
+     * in struct array or null if the field doesn't exist.
      * 
      * @param name
      * @return
@@ -175,8 +175,8 @@ public class MLStructure extends MLArray
         return getField(name, currentIndex);
     }
     /**
-     * Gets a value of the field described by name from (m,n)'th structe
-     * in struc array.
+     * Gets a value of the field described by name from (m,n)'th struct
+     * in struct array or null if the field doesn't exist.
      * 
      * @param name
      * @param m
@@ -188,15 +188,18 @@ public class MLStructure extends MLArray
         return getField(name, getIndex(m,n) );
     }
     /**
-     * Gets a value of the field described by name from index'th structe
-     * in struc array.
+     * Gets a value of the field described by name from index'th struct
+     * in struct array or null if the field doesn't exist.
      * 
      * @param name
      * @param index
-     * @return
+     * @return value of the field or null if the field doesn't exist
      */
     public MLArray getField(String name, int index)
     {
+    	if (mlStructArray.isEmpty()) {
+    		return null;
+    	}
         return mlStructArray.get(index).get(name);
     }
     /* (non-Javadoc)

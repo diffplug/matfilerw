@@ -1,11 +1,13 @@
 package com.jmatio.io;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
@@ -28,12 +30,17 @@ import com.jmatio.types.MLCell;
 import com.jmatio.types.MLChar;
 import com.jmatio.types.MLDouble;
 import com.jmatio.types.MLEmptyArray;
+import com.jmatio.types.MLInt16;
+import com.jmatio.types.MLInt32;
 import com.jmatio.types.MLInt64;
 import com.jmatio.types.MLInt8;
+import com.jmatio.types.MLJavaObject;
 import com.jmatio.types.MLNumericArray;
+import com.jmatio.types.MLObject;
 import com.jmatio.types.MLSingle;
 import com.jmatio.types.MLSparse;
 import com.jmatio.types.MLStructure;
+import com.jmatio.types.MLUInt32;
 import com.jmatio.types.MLUInt64;
 import com.jmatio.types.MLUInt8;
 
@@ -425,99 +432,6 @@ public class MatFileReader
         return data;
     }
     
-    private static class _ByteArrayOutputStream extends ByteArrayOutputStream {
-        _ByteArrayOutputStream() {
-            super();
-        }
-    
-        _ByteArrayOutputStream(int initialSize) {
-            super(initialSize);
-        }
-        
-        byte[] getReferenceToByteArray() {
-            return this.buf;
-        }
-    }
-
-    private static class _InputStreamFromBuffer extends InputStream {
-        private ByteBuffer buf;
-        private int limit;
-
-        public _InputStreamFromBuffer(final ByteBuffer buf, final int limit) {
-            this.buf = buf;
-            this.limit = limit;
-        }
-
-            @Override
-            public synchronized int read() throws IOException
-            {
-                // TODO Auto-generated method stub
-                throw new RuntimeException("Not yet implemented");
-            } 
-            public synchronized int read(byte[] bytes, int off, int len) throws IOException {
-                if ( !(limit > 0) )
-                {
-                    return -1;
-                }
-                len = Math.min(len, limit);
-                // Read only what's left
-                buf.get(bytes, off, len);
-                limit -= len;
-                return len;
-            }        
-    }
-
-    /**
-     * Decompresses (inflates) bytes from input stream. Stream marker is being set at +<code>numOfBytes</code>
-     * position of the stream.
-     *
-     * @param is -
-     *            input byte buffer
-     * @param numOfBytes -
-     *            number of bytes to be red
-     * @return - new <code>ByteBuffer</code> with inflated block of data
-     * @throws IOException
-     *             when error occurs while reading or inflating the buffer .
-     */
-    private ByteBuffer inflate(final ByteBuffer buf, final int numOfBytes) throws IOException
-    {
-        if ( buf.remaining() < numOfBytes )
-        {
-            throw new MatlabIOException("Compressed buffer length miscalculated!");
-        }
-
-        //instead of standard Inlater class instance I use an inflater input
-        //stream... gives a great boost to the performance
-        InflaterInputStream iis = new InflaterInputStream(new _InputStreamFromBuffer(buf, numOfBytes));
-        
-        //process data decompression
-        byte[] result = new byte[128];
-        _ByteArrayOutputStream baos = new _ByteArrayOutputStream(numOfBytes);
-        int i;
-        try
-        {
-            do
-            {
-                i = iis.read(result, 0, result.length);
-                int len = Math.max(0, i);
-                baos.write(result, 0, len);
-            }
-            while ( i > 0 );
-        }
-        catch ( IOException e )
-        {
-            throw new MatlabIOException("Could not decompress data: " + e );
-        }
-        finally
-        {
-            iis.close();
-        }
-        //create a ByteBuffer from the deflated data
-        ByteBuffer out = ByteBuffer.wrap( baos.getReferenceToByteArray(), 0, baos.size() );
-        //with proper byte ordering
-        out.order( byteOrder );
-        return out;
-    }
     /**
      * Reads data form byte buffer. Searches for either
      * <code>miCOMPRESSED</code> data or <code>miMATRIX</code> data.
@@ -538,8 +452,59 @@ public class MatFileReader
         switch ( tag.type )
         {
             case MatDataTypes.miCOMPRESSED:
+                int numOfBytes = tag.size;
                 //inflate and recur
-                readData( inflate(buf, tag.size)  );
+                if ( buf.remaining() < numOfBytes )
+                {
+                    throw new MatlabIOException("Compressed buffer length miscalculated!");
+                }
+                //instead of standard Inlater class instance I use an inflater input
+                //stream... gives a great boost to the performance
+                InflaterInputStream iis = new InflaterInputStream(new ByteBufferInputStream(buf, numOfBytes));
+                
+                //process data decompression
+                byte[] result = new byte[1024];
+                
+                HeapBufferDataOutputStream dos = new HeapBufferDataOutputStream();
+                int i;
+                try
+                {
+                    do
+                    {
+                        i = iis.read(result, 0, result.length);
+                        int len = Math.max(0, i);
+                        dos.write(result, 0, len);
+                    }
+                    while ( i > 0 );
+                }
+                catch ( IOException e )
+                {
+                    throw new MatlabIOException("Could not decompress data: " + e );
+                }
+                finally
+                {
+                    iis.close();
+                    dos.flush();
+                }
+                //create a ByteBuffer from the deflated data
+                ByteBuffer out = dos.getByteBuffer();
+                
+                //with proper byte ordering
+                out.order( byteOrder );
+                
+                try
+                {
+                    readData( out );
+                    
+                }
+                catch ( IOException e )
+                {
+                    throw e;
+                }
+                finally
+                {
+                    dos.close();
+                }
                 break;
             case MatDataTypes.miMATRIX:
                 
@@ -547,8 +512,8 @@ public class MatFileReader
                 int pos = buf.position();
                 
                 MLArray element = readMatrix( buf, true );
-                
-                if ( element != null )
+       
+                if ( element != null && !data.containsKey( element.getName() ) )
                 {
                     data.put( element.getName(), element );
                 }
@@ -633,8 +598,6 @@ public class MatFileReader
                 //calculate number of fields
                 int numOfFields = tag.size/maxlen;
                 
-                //padding after field names
-                int padding = (tag.size%8) != 0 ? 8-(tag.size%8) : 0;
 
                 String[] fieldNames = new String[numOfFields];
                 for ( int i = 0; i < numOfFields; i++ )
@@ -643,7 +606,8 @@ public class MatFileReader
                     buf.get(names);
                     fieldNames[i] = zeroEndByteArrayToString(names);
                 }
-                buf.position( buf.position() + padding );
+
+                buf.position( buf.position() + tag.padding );
                 //read fields
                 for ( int index = 0; index < struct.getM()*struct.getN(); index++ )
                 {
@@ -651,6 +615,7 @@ public class MatFileReader
                     {
                         //read matrix recursively
                         tag = new ISMatTag(buf);
+
                         if ( tag.size > 0 )
                         {
                             MLArray fieldValue = readMatrix( buf, false);
@@ -723,9 +688,53 @@ public class MatFileReader
                     tag.readToByteBuffer( ((MLNumericArray<?>) mlArray).getImaginaryByteBuffer(),
                             (MLNumericArray<?>) mlArray );
                 }
+
                 break;
             case MLArray.mxINT8_CLASS:
                 mlArray = new MLInt8(name, dims, type, attributes);
+                //read real
+                tag = new ISMatTag(buf);
+                tag.readToByteBuffer( ((MLNumericArray<?>) mlArray).getRealByteBuffer(),
+                                            (MLNumericArray<?>) mlArray );
+                //read complex
+                if ( mlArray.isComplex() )
+                {
+                    tag = new ISMatTag(buf);
+                    tag.readToByteBuffer( ((MLNumericArray<?>) mlArray).getImaginaryByteBuffer(),
+                            (MLNumericArray<?>) mlArray );
+                }
+                break;
+
+            case MLArray.mxINT16_CLASS:
+                mlArray = new MLInt16(name, dims, type, attributes);
+                //read real
+                tag = new ISMatTag(buf);
+                tag.readToByteBuffer( ((MLNumericArray<?>) mlArray).getRealByteBuffer(),
+                                            (MLNumericArray<?>) mlArray );
+                //read complex
+                if ( mlArray.isComplex() )
+                {
+                    tag = new ISMatTag(buf);
+                    tag.readToByteBuffer( ((MLNumericArray<?>) mlArray).getImaginaryByteBuffer(),
+                            (MLNumericArray<?>) mlArray );
+                }
+                break;
+            case MLArray.mxINT32_CLASS:                
+                mlArray = new MLInt32(name, dims, type, attributes);
+                //read real
+                tag = new ISMatTag(buf);
+                tag.readToByteBuffer( ((MLNumericArray<?>) mlArray).getRealByteBuffer(),
+                                            (MLNumericArray<?>) mlArray );
+                //read complex
+                if ( mlArray.isComplex() )
+                {
+                    tag = new ISMatTag(buf);
+                    tag.readToByteBuffer( ((MLNumericArray<?>) mlArray).getImaginaryByteBuffer(),
+                            (MLNumericArray<?>) mlArray );
+                }
+                break;
+            case MLArray.mxUINT32_CLASS:                
+                mlArray = new MLUInt32(name, dims, type, attributes);
                 //read real
                 tag = new ISMatTag(buf);
                 tag.readToByteBuffer( ((MLNumericArray<?>) mlArray).getRealByteBuffer(),
@@ -771,10 +780,12 @@ public class MatFileReader
                 
                 //read real
                 tag = new ISMatTag(buf);
-                char[] ac = tag.readToCharArray();
-                for ( int i = 0; i < ac.length; i++ )
+//                char[] ac = tag.readToCharArray();
+                String str = tag.readToString();
+
+                for ( int i = 0; i < str.length(); i++ )
                 {
-                    mlchar.setChar( ac[i], i );
+                    mlchar.setChar( str.charAt(i), i );
                 }
                 mlArray = mlchar;
                 break;
@@ -814,65 +825,115 @@ public class MatFileReader
                 }
                 mlArray = sparse;
                 break;
-//            case MLArray.mxOPAQUE_CLASS:
-//                //read ir (row indices)
-//                tag = new ISMatTag(buf);
-//                bytes = new byte[tag.size];
-////                //buf.get(bytes);
-//                System.out.println( "Class name: " + new String(tag.readToCharArray()));
+
+
+            case MLArray.mxOPAQUE_CLASS:
+                //read class name
+                tag = new ISMatTag(buf);
+                // class name
+                String className = tag.readToString();
+//                System.out.println( "Class name: " + className );
+                // should be "java"
 //                System.out.println( "Array name: " + name );
-//                System.out.println( "Array type: " + type);
-//                
-//                byte[] nn = new byte[dims.length];
-//                for ( int i = 0; i < dims.length; i++ )
-//                {
-//                    nn[i] = (byte)dims[i];
-//                }
-//                System.out.println( "Array name: " + new String ( nn ) );
-//                
-//                readData(buf);
-//                
-//                mlArray = null;
-//                break;
-//            case MLArray.mxUINT8_CLASS:
-//                tag = new ISMatTag(buf);
-//                //System.out.println( "Array name: " + name );
-//                System.out.println( "Array type: " + type);
-//                System.out.println( "Array size: " + tag);
-//                System.out.println( "Array flags: " + Arrays.toString(flags));
-//                System.out.println( "Array attributes: " + attributes);
-//                
-//                
-//                char[] chars = tag.readToCharArray();
-//                byte[] bytes = new byte[chars.length];
-//                for ( int i = 0; i < chars.length; i++ )
-//                {
-//                    bytes[i] = (byte)chars[i];
-//                }
-//                try
-//                {
-//                    ObjectInputStream ois = new ObjectInputStream( new ByteArrayInputStream(bytes) );
-//                    System.out.println( ois.readObject() );
-//                }
-//                catch (Exception e)
-//                {
-//                    System.out.println(chars);
-//                    //System.out.println(Arrays.toString(chars));
-//                    // TODO Auto-generated catch block
-//                    //e.printStackTrace();
-//                    
-//                }
-//                mlArray = null;
-//                
-//                
-//                break;
+                
+                // the stored array name 
+                // read array name stored in dims (!)
+                byte[] nn = new byte[dims.length];
+                for ( int i = 0; i < dims.length; i++ )
+                {
+                    nn[i] = (byte)dims[i];
+                }
+                String arrName = new String(nn);
+//                System.out.println( "Array name: " + arrName );
+                
+                // next tag should be miMatrix
+                ISMatTag contentTag = new ISMatTag(buf);
+                
+                if ( contentTag.type == MatDataTypes.miMATRIX )
+                {
+                    // should return UInt8
+                    MLUInt8 content = (MLUInt8) readMatrix( buf, false );
+                    
+                    // de-serialize object
+                    ObjectInputStream ois = new ObjectInputStream( 
+                            new ByteBufferInputStream( content.getRealByteBuffer(), 
+                                                       content.getRealByteBuffer().limit()  ) );
+                    try
+                    {
+                        Object  o = ois.readObject();                
+                        mlArray = new MLJavaObject( arrName, className, o );
+                    }
+                    catch (Exception e) 
+                    {
+                        throw new IOException( e );
+                    }
+                    finally
+                    {
+                        ois.close();
+                    }
+                }
+                else
+                {
+                    throw new IOException("Unexpected java object content");
+                }
+                break;
+            case MLArray.mxOBJECT_CLASS:
+                //read class name
+                tag = new ISMatTag(buf);
+                
+                // class name
+                className = tag.readToString();
+                
+                // TODO: currently copy pasted from structure
+                
+                struct = new MLStructure(name, dims, type, attributes);
+                
+                //field name lenght - this subelement always uses the compressed data element format
+                tag = new ISMatTag(buf);
+                maxlen = buf.getInt(); //maximum field length
+                
+                //////  read fields data as Int8
+                tag = new ISMatTag(buf);
+                //calculate number of fields
+                numOfFields = tag.size/maxlen;
+                
+                fieldNames = new String[numOfFields];
+                for ( int i = 0; i < numOfFields; i++ )
+                {
+                    byte[] names = new byte[maxlen];
+                    buf.get(names);
+                    fieldNames[i] = zeroEndByteArrayToString(names);
+                }
+    
+                buf.position( buf.position() + tag.padding );
+                //read fields
+                for ( int index = 0; index < 1; index++ )
+                {
+                    for ( int i = 0; i < numOfFields; i++ )
+                    {
+                        //read matrix recursively
+                        tag = new ISMatTag(buf);
+
+                        if ( tag.size > 0 )
+                        {
+                            MLArray fieldValue = readMatrix( buf, false);
+                            struct.setField( fieldNames[i], fieldValue, index );
+                        }
+                        else
+                        {
+                            struct.setField(fieldNames[i], new MLEmptyArray(), index);
+                        }
+                    }
+                }
+                
+                mlArray = new MLObject( name, className, struct );
+                break;
             default:
                 throw new MatlabIOException("Incorrect matlab array class: " + MLArray.typeToString(type) );
                
         }
         return mlArray;
     }
-    byte[] bytes;
     /**
      * Converts byte array to <code>String</code>. 
      * 
@@ -884,14 +945,11 @@ public class MatFileReader
      */
     private String zeroEndByteArrayToString(byte[] bytes) throws IOException
     {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream( baos );
+        int i = 0;
         
-        for ( int i = 0; i < bytes.length && bytes[i] != 0; i++ )
-        {
-            dos.writeByte(bytes[i]);
-        }
-        return baos.toString();
+        for ( i = 0; i < bytes.length && bytes[i] != 0; i++ );
+        
+        return new String( bytes, 0, i );
         
     }
     /**
@@ -939,13 +997,9 @@ public class MatFileReader
      */
     private String readName(ByteBuffer buf) throws IOException
     {
-        String s;
-        
         ISMatTag tag = new ISMatTag(buf);
-        char[] ac = tag.readToCharArray();
-        s = new String(ac);
 
-        return s;
+        return tag.readToString();
     }
     /**
      * Reads MAT-file header.
@@ -1012,17 +1066,16 @@ public class MatFileReader
      */
     private static class ISMatTag extends MatTag
     {
-        public ByteBuffer buf;
-        private int padding;
+        private final MatFileInputStream mfis;
+        private final int padding;
+		private final boolean compressed;
         
         public ISMatTag(ByteBuffer buf) throws IOException
         {
             //must call parent constructor
             super(0,0);
-            this.buf = buf;
             int tmp = buf.getInt();
             
-            boolean compressed;
             //data not packed in the tag
             if ( tmp >> 16 == 0 )
             {    
@@ -1037,17 +1090,15 @@ public class MatFileReader
                 compressed = true;
             }
             padding = getPadding(size, compressed);
+            mfis = new MatFileInputStream(buf, type);
         } 
+        
+        
         public void readToByteBuffer( ByteBuffer buff, ByteStorageSupport<?> storage ) throws IOException
         {
-            MatFileInputStream mfis = new MatFileInputStream( buf, type );
             int elements = size/sizeOf();
             mfis.readToByteBuffer( buff, elements, storage );
-            //skip padding
-            if ( padding > 0 )
-            {
-                buf.position( buf.position() + padding );
-            }
+            mfis.skip( padding );
         }
         public byte[] readToByteArray() throws IOException
         {
@@ -1055,7 +1106,6 @@ public class MatFileReader
             int elements = size/sizeOf();
             byte[] ab = new byte[elements];
             
-            MatFileInputStream mfis = new MatFileInputStream( buf, type );
 
             for ( int i = 0; i < elements; i++ )
             {
@@ -1063,10 +1113,8 @@ public class MatFileReader
             }
             
             //skip padding
-            if ( padding > 0 )
-            {
-                buf.position( buf.position() + padding );
-            }
+            mfis.skip( padding );
+
             return ab;
         }
         public double[] readToDoubleArray() throws IOException
@@ -1075,7 +1123,6 @@ public class MatFileReader
             int elements = size/sizeOf();
             double[] ad = new double[elements];
             
-            MatFileInputStream mfis = new MatFileInputStream( buf, type );
 
             for ( int i = 0; i < elements; i++ )
             {
@@ -1083,10 +1130,8 @@ public class MatFileReader
             }
             
             //skip padding
-            if ( padding > 0 )
-            {
-                buf.position( buf.position() + padding );
-            }
+
+            mfis.skip( padding );
             return ad;
         }
         public int[] readToIntArray() throws IOException
@@ -1095,27 +1140,30 @@ public class MatFileReader
             int elements = size/sizeOf();
             int[] ai = new int[elements];
             
-            MatFileInputStream mfis = new MatFileInputStream( buf, type );
-
             for ( int i = 0; i < elements; i++ )
             {
                 ai[i] = mfis.readInt();
             }
             
             //skip padding
-            if ( padding > 0 )
-            {
-                buf.position( buf.position() + padding );
-            }
+            mfis.skip( padding );
             return ai;
         }
+        public String readToString() throws IOException
+        {
+            //
+            byte[] bytes = readToByteArray();
+            
+            return new String( bytes, "UTF-8" );
+        	
+        }
+        
         public char[] readToCharArray() throws IOException
         {
             //allocate memory for array elements
             int elements = size/sizeOf();
             char[] ac = new char[elements];
             
-            MatFileInputStream mfis = new MatFileInputStream( buf, type );
 
             for ( int i = 0; i < elements; i++ )
             {
@@ -1123,10 +1171,7 @@ public class MatFileReader
             }
             
             //skip padding
-            if ( padding > 0 )
-            {
-                buf.position( buf.position() + padding );
-            }
+            mfis.skip( padding );
             return ac;
         }
     }

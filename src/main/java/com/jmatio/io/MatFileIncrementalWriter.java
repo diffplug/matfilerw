@@ -316,6 +316,20 @@ public class MatFileIncrementalWriter
                     tag.writeTo( dos );
                 }
                 break;
+            case MLArray.mxINT16_CLASS:
+                
+                tag = new OSArrayTag(MatDataTypes.miINT16, 
+                        ((MLNumericArray<?>)array).getRealByteBuffer() );
+                tag.writeTo( dos );
+                
+                //write real imaginary
+                if ( array.isComplex() )
+                {
+                    tag = new OSArrayTag(MatDataTypes.miINT16, 
+                            ((MLNumericArray<?>)array).getImaginaryByteBuffer() );
+                    tag.writeTo( dos );
+                }
+                break;
             case MLArray.mxINT64_CLASS:
                 
                 tag = new OSArrayTag(MatDataTypes.miINT64, 
@@ -470,7 +484,7 @@ public class MatFileIncrementalWriter
         {
             bufferDOS.writeInt(dims[i]);
         }
-        OSArrayTag tag = new OSArrayTag(MatDataTypes.miUINT32, buffer.toByteArray() );
+        OSArrayTag tag = new OSArrayTag(MatDataTypes.miINT32, buffer.toByteArray() );
         tag.writeTo( os );
         
     }
@@ -491,7 +505,7 @@ public class MatFileIncrementalWriter
         buffer = new ByteArrayOutputStream();
         bufferDOS = new DataOutputStream(buffer);
         bufferDOS.write( nameByteArray );
-        OSArrayTag tag = new OSArrayTag(16, buffer.toByteArray() );
+        OSArrayTag tag = new OSArrayTag(MatDataTypes.miINT8, buffer.toByteArray() );
         tag.writeTo( os );
     }
     

@@ -2,12 +2,8 @@ package com.jmatio.types;
 
 import java.nio.ByteBuffer;
 
-/**
- * Class represents Int64 (long) array (matrix)
- * 
- * @author Wojciech Gradkowski <wgradkowski@gmail.com>
- */
-public class MLInt64 extends MLNumericArray<Long>
+
+public class MLInt32 extends MLNumericArray<Integer>
 {
 
     /**
@@ -18,7 +14,7 @@ public class MLInt64 extends MLNumericArray<Long>
      * @param type - array type: here <code>mxDOUBLE_CLASS</code>
      * @param attributes - array flags
      */
-    public MLInt64( String name, int[] dims, int type, int attributes )
+    public MLInt32( String name, int[] dims, int type, int attributes )
     {
         super( name, dims, type, attributes );
     }
@@ -29,9 +25,9 @@ public class MLInt64 extends MLNumericArray<Long>
      * @param name - array name
      * @param dims - array dimensions
      */
-    public MLInt64(String name, int[] dims)
+    public MLInt32(String name, int[] dims)
     {
-        super(name, dims, MLArray.mxINT64_CLASS, 0);
+        super(name, dims, MLArray.mxINT32_CLASS, 0);
     }
     /**
      * <a href="http://math.nist.gov/javanumerics/jama/">Jama</a> [math.nist.gov] style: 
@@ -41,9 +37,9 @@ public class MLInt64 extends MLNumericArray<Long>
      * @param vals - One-dimensional array of doubles, packed by columns (ala Fortran).
      * @param m - Number of rows
      */
-    public MLInt64(String name, Long[] vals, int m )
+    public MLInt32(String name, Integer[] vals, int m )
     {
-        super(name, MLArray.mxINT64_CLASS, vals, m );
+        super(name, MLArray.mxINT32_CLASS, vals, m );
     }
     /**
      * <a href="http://math.nist.gov/javanumerics/jama/">Jama</a> [math.nist.gov] style: 
@@ -54,9 +50,9 @@ public class MLInt64 extends MLNumericArray<Long>
      * @param name - array name
      * @param vals - two-dimensional array of values
      */
-    public MLInt64( String name, long[][] vals )
+    public MLInt32( String name, int[][] vals )
     {
-        this( name, long2DToLong(vals), vals.length );
+        this( name, int2DToInteger(vals), vals.length );
     }
     /**
      * <a href="http://math.nist.gov/javanumerics/jama/">Jama</a> [math.nist.gov] style: 
@@ -66,29 +62,29 @@ public class MLInt64 extends MLNumericArray<Long>
      * @param vals - One-dimensional array of doubles, packed by columns (ala Fortran).
      * @param m - Number of rows
      */
-    public MLInt64(String name, long[] vals, int m)
+    public MLInt32(String name, int[] vals, int m)
     {
-        this(name, castToLong( vals ), m );
+        this(name, castToInteger( vals ), m );
     }
     /* (non-Javadoc)
      * @see com.jmatio.types.GenericArrayCreator#createArray(int, int)
      */
-    public Long[] createArray(int m, int n)
+    public Integer[] createArray(int m, int n)
     {
-        return new Long[m*n];
+        return new Integer[m*n];
     }
     /**
      * Gets two-dimensional real array.
      * 
      * @return - 2D real array
      */
-    public long[][] getArray()
+    public int[][] getArray()
     {
-        long[][] result = new long[getM()][];
+        int[][] result = new int[getM()][];
         
         for ( int m = 0; m < getM(); m++ )
         {
-           result[m] = new long[ getN() ];
+           result[m] = new int[ getN() ];
 
            for ( int n = 0; n < getN(); n++ )
            {               
@@ -103,12 +99,12 @@ public class MLInt64 extends MLNumericArray<Long>
      * @param - source <code>Long[]</code>
      * @return - result <code>long[]</code>
      */
-    private static Long[] castToLong( long[] d )
+    private static Integer[] castToInteger( int[] d )
     {
-        Long[] dest = new Long[d.length];
+        Integer[] dest = new Integer[d.length];
         for ( int i = 0; i < d.length; i++ )
         {
-            dest[i] = (long)d[i];
+            dest[i] = d[i];
         }
         return dest;
     }
@@ -118,9 +114,9 @@ public class MLInt64 extends MLNumericArray<Long>
      * @param dd
      * @return
      */
-    private static Long[] long2DToLong ( long[][] dd )
+    private static Integer[] int2DToInteger( int[][] dd )
     {
-        Long[] d = new Long[ dd.length*dd[0].length ];
+        Integer[] d = new Integer[ dd.length*dd[0].length ];
         for ( int n = 0; n < dd[0].length; n++ )
         {
             for ( int m = 0; m < dd.length; m++ )
@@ -130,7 +126,7 @@ public class MLInt64 extends MLNumericArray<Long>
         }
         return d;
     }
-    public Long buldFromBytes(byte[] bytes)
+    public Integer buldFromBytes(byte[] bytes)
     {
         if ( bytes.length != getBytesAllocated() )
         {
@@ -138,24 +134,23 @@ public class MLInt64 extends MLNumericArray<Long>
                         "To build from byte array I need array of size: " 
                                 + getBytesAllocated() );
         }
-        return ByteBuffer.wrap( bytes ).getLong();
+        return ByteBuffer.wrap( bytes ).getInt();
     }
     public int getBytesAllocated()
     {
-        return Long.SIZE >> 3;
+        return Integer.SIZE >> 3;
     }
     
-    public Class<Long> getStorageClazz()
+    public Class<Integer> getStorageClazz()
     {
-        return Long.class;
+        return Integer.class;
     }
-    public byte[] getByteArray(Long value)
+    public byte[] getByteArray(Integer value)
     {
         int byteAllocated = getBytesAllocated();
         ByteBuffer buff = ByteBuffer.allocate( byteAllocated );
-        buff.putLong( value );
+        buff.putInt( value );
         return buff.array();
     }
-    
 
 }

@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
 class OSArrayTag extends MatTag
 {
     private ByteBuffer data;
-    private int padding;
+
     /**
      * Creates TAG and stets its <code>size</code> as size of byte array
      * 
@@ -33,7 +33,6 @@ class OSArrayTag extends MatTag
         super( type, data.limit() );
         this.data = data;
         data.rewind();
-        this.padding = getPadding(data.limit(), false);
     }
 
     
@@ -45,8 +44,18 @@ class OSArrayTag extends MatTag
      */
     public void writeTo(DataOutputStream os) throws IOException
     {
-        os.writeInt(type);
-        os.writeInt(size);
+    
+    	int padding;
+		if (size<=4 && size>0) {
+			// Use small data element format (Page 1-10 in "MATLAB 7 MAT-File Format", September 2010 revision)
+    		os.writeShort(size);
+    		os.writeShort(type);
+            padding = getPadding(data.limit(), true);
+    	} else {
+    		os.writeInt(type);
+    		os.writeInt(size);
+            padding = getPadding(data.limit(), false);
+    	}
         
         int maxBuffSize = 1024;
         int writeBuffSize = data.remaining() < maxBuffSize ? data.remaining() : maxBuffSize;

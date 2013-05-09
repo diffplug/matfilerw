@@ -25,9 +25,11 @@ public class MatDataTypes
     public static final int miUTF16     = 17;
     public static final int miUTF32     = 18;
 
+    public static final int miSIZE_INT64    = 8;
     public static final int miSIZE_INT32    = 4;
     public static final int miSIZE_INT16    = 2;
     public static final int miSIZE_INT8     = 1;
+    public static final int miSIZE_UINT64   = 8;
     public static final int miSIZE_UINT32   = 4;
     public static final int miSIZE_UINT16   = 2;
     public static final int miSIZE_UINT8    = 1;
@@ -56,6 +58,10 @@ public class MatDataTypes
                 return miSIZE_INT32;
             case MatDataTypes.miUINT32:
                 return miSIZE_UINT32;
+            case MatDataTypes.miINT64:
+                return miSIZE_INT64;
+            case MatDataTypes.miUINT64:
+                return miSIZE_UINT64;
             case MatDataTypes.miDOUBLE:
                 return miSIZE_DOUBLE;
             default:

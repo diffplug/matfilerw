@@ -31,7 +31,7 @@ public class MLUInt64 extends MLNumericArray<Long>
      */
     public MLUInt64(String name, int[] dims)
     {
-        super(name, dims, MLArray.mxINT64_CLASS, 0);
+        super(name, dims, MLArray.mxUINT64_CLASS, 0);
     }
     /**
      * <a href="http://math.nist.gov/javanumerics/jama/">Jama</a> [math.nist.gov] style: 
@@ -43,7 +43,7 @@ public class MLUInt64 extends MLNumericArray<Long>
      */
     public MLUInt64(String name, Long[] vals, int m )
     {
-        super(name, MLArray.mxINT64_CLASS, vals, m );
+        super(name, MLArray.mxUINT64_CLASS, vals, m );
     }
     /**
      * <a href="http://math.nist.gov/javanumerics/jama/">Jama</a> [math.nist.gov] style: 

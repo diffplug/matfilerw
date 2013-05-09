@@ -84,7 +84,7 @@ public class MLChar extends MLArray implements GenericArrayCreator<Character>
     }
     public void setChar(char ch, int index)
     {
-        chars[index] = new Character(ch);
+        chars[index] = ch;
     }
     /**
      * Populates the {@link MLChar} with the {@link String} value.
@@ -107,13 +107,13 @@ public class MLChar extends MLArray implements GenericArrayCreator<Character>
      */
     public void set(String value, int idx)
     {
-        char[] cha = value.toCharArray();
         int rowOffset = getM();
         for ( int i = 0; i < getN(); i++ )
         {
         	if ( i < value.length())
         	{
-        		setChar(cha[i], idx + (rowOffset * i));
+
+        		setChar( value.charAt(i), idx + (rowOffset * i));
         	}
         	else 
         	{
