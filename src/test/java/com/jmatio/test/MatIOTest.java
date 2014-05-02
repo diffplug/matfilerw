@@ -1,6 +1,8 @@
 package com.jmatio.test;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedOutputStream;
@@ -1072,5 +1074,22 @@ public class MatIOTest
         assertEquals( expected[1], mlchar.getString(1) );
         assertEquals( expected[2], mlchar.getString(2) );
         assertEquals( expected[3], mlchar.getString(3) );
+    }
+
+    @Test
+    public void testMultipleEmptyNames() throws IOException
+    {
+        File f = fileFromStream("/emptyname.mat");
+        MatFileReader r = new MatFileReader(f);
+        Map<String, MLArray> content = r.getContent();
+
+        // There are 3 elements in that file, should have 4 in the array (the first value under @, and the three values under @*)
+        assertThat(content.size(), is(4));
+
+        // Check the three values came through alright.  Order is fixed as they are read in in file order.  Also check @.
+        assertThat(((MLDouble)content.get("@")).get(0), is(1.0));
+        assertThat(((MLDouble)content.get("@0")).get(0), is(1.0));
+        assertThat(((MLDouble)content.get("@1")).get(0), is(2.0));
+        assertThat(((MLDouble)content.get("@2")).get(0), is(3.0));
     }
 }

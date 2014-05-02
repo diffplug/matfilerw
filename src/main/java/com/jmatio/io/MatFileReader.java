@@ -617,12 +617,16 @@ public class MatFileReader
                 
                 MLArray element = readMatrix( buf, true );
        
-                if ( element != null && !data.containsKey( element.getName() ) )
-                {
-                    data.put( element.getName(), element );
-                }
-                else
-                {
+                if ( element != null ) {
+                    if ( !data.containsKey( element.getName() ) ) {
+                        data.put(element.getName(), element);
+                    }
+                    if ( element.getName() == "@" ) {
+                        int nextIndex = 0;
+                        for( ; data.containsKey("@" + nextIndex); nextIndex++ ) { }
+                        data.put( "@" + nextIndex, element );
+                    }
+                } else {
                     int red = buf.position() - pos;
                     int toread = tag.size - red;
                     buf.position( buf.position() + toread );
