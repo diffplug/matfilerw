@@ -72,7 +72,11 @@ public class MatFileReader
     public static final int MEMORY_MAPPED_FILE = 1;
     public static final int DIRECT_BYTE_BUFFER = 2;
     public static final int HEAP_BYTE_BUFFER   = 4;
-    
+
+    /**
+     * Type of matlab mat file.
+     */
+    private final MatFileType matType;
     /**
      * MAT-file header
      */
@@ -100,7 +104,7 @@ public class MatFileReader
      */
     public MatFileReader(String fileName) throws FileNotFoundException, IOException
     {
-        this ( new File(fileName), new MatFileFilter() );
+        this ( new File(fileName), new MatFileFilter(), MatFileType.Regular);
     }
     /**
      * Creates instance of <code>MatFileReader</code> and reads MAT-file 
@@ -115,10 +119,11 @@ public class MatFileReader
      */
     public MatFileReader(String fileName, MatFileFilter filter ) throws IOException
     {
-        this( new File(fileName), filter );
+        this( new File(fileName), filter, MatFileType.Regular);
     }
+
     /**
-     * Creates instance of <code>MatFileReader</code> and reads MAT-file 
+     * Creates instance of <code>MatFileReader</code> and reads MAT-file
      * from <code>file</code>. 
      * 
      * This method reads MAT-file without filtering.
@@ -128,9 +133,10 @@ public class MatFileReader
      */
     public MatFileReader(File file) throws IOException
     {
-        this ( file, new MatFileFilter() );
+        this ( file, new MatFileFilter(), MatFileType.Regular);
         
     }
+
     /**
      * Creates instance of <code>MatFileReader</code> and reads MAT-file from
      * <code>file</code>.
@@ -148,15 +154,16 @@ public class MatFileReader
      * @throws IOException
      *             when error occurred while processing the file.
      */
-    public MatFileReader(File file, MatFileFilter filter) throws IOException
+    public MatFileReader(File file, MatFileFilter filter, MatFileType matType) throws IOException
     {
-        this();
+        this(matType);
         
         read(file, filter, MEMORY_MAPPED_FILE);
     }
     
-    public MatFileReader()
+    public MatFileReader(MatFileType matType)
     {
+        this.matType = matType;
         filter  = new MatFileFilter();
         data    = new LinkedHashMap<String, MLArray>();
     }
@@ -172,9 +179,9 @@ public class MatFileReader
      * @throws IOException
      *             when error occurred while processing the file.
      */
-    public MatFileReader(InputStream stream) throws IOException
+    public MatFileReader(InputStream stream, MatFileType type) throws IOException
     {
-        this(stream, new MatFileFilter());
+        this(stream, new MatFileFilter(), type);
     }
 
     /**
@@ -196,9 +203,9 @@ public class MatFileReader
      * @throws IOException
      *             when error occurred while processing the file.
      */
-    public MatFileReader(InputStream stream, MatFileFilter filter) throws IOException
+    public MatFileReader(InputStream stream, MatFileFilter filter, MatFileType type) throws IOException
     {
-        this();
+        this(type);
 
         read(stream, filter);
     }
@@ -1126,20 +1133,24 @@ public class MatFileReader
         String description;
         int version;
         byte[] endianIndicator = new byte[2];
-        
-        //descriptive text 116 bytes
-        byte[] descriptionBuffer = new byte[116];
-        buf.get(descriptionBuffer);
-        
-        description = zeroEndByteArrayToString(descriptionBuffer);
-        
-        if ( !description.matches("MATLAB 5.0 MAT-file.*") )
-        {
-            throw new MatlabIOException("This is not a valid MATLAB 5.0 MAT-file.");
+
+        // This part of the header is missing if the file isn't a regular mat file.  So ignore.
+        if (matType == MatFileType.Regular) {
+            //descriptive text 116 bytes
+            byte[] descriptionBuffer = new byte[116];
+            buf.get(descriptionBuffer);
+
+            description = zeroEndByteArrayToString(descriptionBuffer);
+
+            if (!description.matches("MATLAB 5.0 MAT-file.*")) {
+                throw new MatlabIOException("This is not a valid MATLAB 5.0 MAT-file.");
+            }
+
+            //subsyst data offset 8 bytes
+            buf.position(buf.position() + 8);
+        } else {
+            description = "Simulink generated MATLAB 5.0 MAT-file"; // Default simulink description.
         }
-        
-        //subsyst data offset 8 bytes
-        buf.position( buf.position() + 8);
         
         byte[] bversion = new byte[2];
         //version 2 bytes
@@ -1164,6 +1175,10 @@ public class MatFileReader
         buf.order( byteOrder );
         
         matFileHeader = new MatFileHeader(description, version, endianIndicator);
+
+        // After the header, the next read must be aligned.  Thus force the alignment.  Only matters with reduced header data,
+        // but apply it regardless for safety.
+        buf.position((buf.position() + 7) & 0xfffffff8);
     }
     /**
      * TAG operator. Facilitates reading operations.

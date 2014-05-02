@@ -18,14 +18,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.jmatio.io.*;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.jmatio.io.MatFileFilter;
-import com.jmatio.io.MatFileIncrementalWriter;
-import com.jmatio.io.MatFileReader;
-import com.jmatio.io.MatFileWriter;
 import com.jmatio.types.MLArray;
 import com.jmatio.types.MLCell;
 import com.jmatio.types.MLChar;
@@ -964,7 +961,7 @@ public class MatIOTest
         MLArray array = null;
         
         //try to read it
-        MatFileReader reader = new MatFileReader();
+        MatFileReader reader = new MatFileReader(MatFileType.Regular);
         reader.read(f, MatFileReader.MEMORY_MAPPED_FILE );
         array = reader.getMLArray("m1");
         assertEquals("Test if is correct file", array, m1);
@@ -1022,7 +1019,7 @@ public class MatIOTest
     public void testBigSparseFile() throws IOException
     {
         //read array form file
-        MatFileReader mfr = new MatFileReader();
+        MatFileReader mfr = new MatFileReader(MatFileType.Regular);
         //reader crashes on reading this file
         //bug caused by sparse array allocation
         mfr.read( fileFromStream("/bigsparse.mat"), MatFileReader.DIRECT_BYTE_BUFFER );
@@ -1051,12 +1048,12 @@ public class MatIOTest
         writer.write( filename, Arrays.asList( (MLArray)single) );
         
         //Test reading the MLSingle
-        MatFileReader reader = new MatFileReader();
+        MatFileReader reader = new MatFileReader(MatFileType.Regular);
         MLSingle readSingle = (MLSingle) reader.read( new File(filename) ).get( "arr" );
         
         assertEquals( single, readSingle );
         
-        //Test reading the MLSingle generated natively by Matlab
+        //Test reading the MLSingle generated natively by Regular
         MLSingle readSingleMatlabGenerated = (MLSingle) reader.read( fileFromStream("/single.mat") ).get( "arr" );
         
         assertEquals( single, readSingleMatlabGenerated );
