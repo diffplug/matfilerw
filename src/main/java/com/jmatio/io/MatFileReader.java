@@ -94,6 +94,15 @@ public class MatFileReader
      */
     private MatFileFilter filter;
     /**
+     * Whether or not we have found an MCOS type variable.  Needed to know if further processing is needed.
+     */
+    private boolean haveMCOS = false;
+    /**
+     * Holds the likely candidate for the MCOS extra data at the end of a MAT file.
+     */
+    private MLUInt8 mcosData;
+
+    /**
      * Creates instance of <code>MatFileReader</code> and reads MAT-file 
      * from location given as <code>fileName</code>.
      * 
@@ -360,10 +369,22 @@ public class MatFileReader
             //read in file header
             readHeader(buf);
             
-            while ( buf.remaining() > 0 )
-            {
+            while ( buf.remaining() > 0 ) {
                 readData( buf );
             }
+            if ( haveMCOS ) {
+                parseMCOS(mcosData);
+                if ( data.get("@") == mcosData ) {
+                    data.remove("@");
+                }
+                for ( Map.Entry<String, MLArray> it : data.entrySet() ) {
+                    if ( it.getValue() == mcosData ) {
+                        data.remove(it.getKey());
+                        break;
+                    }
+                }
+            }
+            mcosData = null;
             
             return getContent();
         }
@@ -407,7 +428,26 @@ public class MatFileReader
         }
         
     }
-    
+
+    private void parseMCOS(MLUInt8 mcosData) throws IOException
+    {
+        // First, parse back out the mcosData.
+        ByteBuffer buffer = mcosData.getRealByteBuffer();
+        ByteBufferInputStream dataStream = new ByteBufferInputStream(buffer, buffer.limit());
+
+        Map<String, MLArray> mcosContent;
+
+        mcosContent = (new MatFileReader(dataStream, MatFileType.ReducedHeader)).getContent();
+        MLCell mcosInfo = (MLCell) ((MLStructure) mcosContent.get("@0")).getField("MCOS");
+
+        for (Map.Entry<String, MLArray> it : data.entrySet()) {
+            if ( it.getValue() instanceof MLObjectPlaceholder ) {
+                MLObjectPlaceholder obj = (MLObjectPlaceholder) it.getValue();
+                it.setValue(new MLObject(obj.name, obj.className, new MLStructure("", new int[]{1, 1})));
+            }
+        }
+    }
+
     /**
      * Read a mat file from a stream. Internally this will read the stream fully
      * into memory before parsing it.
@@ -804,6 +844,11 @@ public class MatFileReader
                             (MLNumericArray<?>) mlArray );
                 }
 
+                // This might be the MCOS extra data.  If there is no name, set it as the current set of data.
+                if ( name.equals("") ) {
+                    mcosData = (MLUInt8) mlArray;
+                }
+
                 break;
             case MLArray.mxINT8_CLASS:
                 mlArray = new MLInt8(name, dims, type, attributes);
@@ -964,32 +1009,41 @@ public class MatFileReader
                 // next tag should be miMatrix
                 ISMatTag contentTag = new ISMatTag(buf);
                 
-                if ( contentTag.type == MatDataTypes.miMATRIX )
-                {
-                    // should return UInt8
-                    MLUInt8 content = (MLUInt8) readMatrix( buf, false );
-                    
-                    // de-serialize object
-                    ObjectInputStream ois = new ObjectInputStream( 
-                            new ByteBufferInputStream( content.getRealByteBuffer(), 
-                                                       content.getRealByteBuffer().limit()  ) );
-                    try
-                    {
-                        Object  o = ois.readObject();                
-                        mlArray = new MLJavaObject( arrName, className, o );
-                    }
-                    catch (Exception e) 
-                    {
-                        throw new IOException( e );
-                    }
-                    finally
-                    {
-                        ois.close();
+                if ( contentTag.type == MatDataTypes.miMATRIX ) {
+                    if ( name.equals("java") ) {
+                        // should return UInt8
+                        MLUInt8 content = (MLUInt8) readMatrix(buf, false);
+
+                        // de-serialize object
+                        ObjectInputStream ois = new ObjectInputStream(
+                                new ByteBufferInputStream(content.getRealByteBuffer(),
+                                        content.getRealByteBuffer().limit())
+                        );
+                        try {
+                            Object o = ois.readObject();
+                            mlArray = new MLJavaObject(arrName, className, o);
+                        } catch (Exception e) {
+                            throw new IOException(e);
+                        } finally {
+                            ois.close();
+                        }
+                    } else if ( name.equals("MCOS") ) {
+                        // FileWrapper__ is a special MATLAB internal name.  Should never appear from users.
+                        if ( !className.equals("FileWrapper__") ) {
+                            MLUInt32 content = (MLUInt32) readMatrix(buf, false);
+                            int[][] t = content.getArray();
+                            mlArray = new MLObjectPlaceholder(arrName, className, t);
+                            haveMCOS = true;
+                        } else { // This is where we get the useful MCOS data.  Only used on FileWrapper__ classes.
+                            mlArray = readMatrix(buf, false);
+                        }
+                    } else {
+                        throw new IOException("Unknown object type (" + name + ") found.");
                     }
                 }
-                else
+               else
                 {
-                    throw new IOException("Unexpected java object content");
+                    throw new IOException("Unexpected object content");
                 }
                 break;
             case MLArray.mxOBJECT_CLASS:
