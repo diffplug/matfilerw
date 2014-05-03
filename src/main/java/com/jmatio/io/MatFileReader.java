@@ -1,8 +1,5 @@
 package com.jmatio.io;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -743,8 +740,8 @@ public class MatFileReader
             case MLArray.mxSTRUCT_CLASS:
                 
                 MLStructure struct = new MLStructure(name, dims, type, attributes);
-                
-                //field name lenght - this subelement always uses the compressed data element format
+
+                // field name length - this subelement always uses the compressed data element format
                 tag = new ISMatTag(buf);
                 int maxlen = buf.getInt(); //maximum field length
 
