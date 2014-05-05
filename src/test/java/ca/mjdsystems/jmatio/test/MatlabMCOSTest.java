@@ -46,6 +46,31 @@ public class MatlabMCOSTest {
         assertThat(obj.getObject().getAllFields().size(), is(0));
     }
 
+    @Test
+    public void testParsingMultipleSimpleEmptyMCOS() throws IOException
+    {
+        File file = fileFromStream("/mcos/simpleempty_multiple.mat");
+        MatFileReader reader = new MatFileReader(file);
+        Map<String, MLArray> content = reader.getContent();
+
+        assertThat(content.size(), is(2));
+
+        MLObject obj = (MLObject) content.get("obj1");
+        assertThat(obj, is(notNullValue()));
+
+        assertThat(obj.getName(), is("obj1"));
+        assertThat(obj.getClassName(), is("SimpleEmpty"));
+        assertThat(obj.getObject().getAllFields().size(), is(0));
+
+
+        obj = (MLObject) content.get("obj2");
+        assertThat(obj, is(notNullValue()));
+
+        assertThat(obj.getName(), is("obj2"));
+        assertThat(obj.getClassName(), is("SimpleEmpty"));
+        assertThat(obj.getObject().getAllFields().size(), is(0));
+    }
+
     private File fileFromStream(String location) throws IOException
     {
         String outname = location.replace("/", "_");
