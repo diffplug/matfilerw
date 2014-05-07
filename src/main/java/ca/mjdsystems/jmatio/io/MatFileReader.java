@@ -1225,7 +1225,7 @@ public class MatFileReader
         
         buf.order( byteOrder );
         
-        matFileHeader = new MatFileHeader(description, version, endianIndicator);
+        matFileHeader = new MatFileHeader(description, version, endianIndicator, byteOrder);
 
         // After the header, the next read must be aligned.  Thus force the alignment.  Only matters with reduced header data,
         // but apply it regardless for safety.

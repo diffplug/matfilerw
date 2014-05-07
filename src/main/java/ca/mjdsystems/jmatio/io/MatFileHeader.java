@@ -1,5 +1,6 @@
 package ca.mjdsystems.jmatio.io;
 
+import java.nio.ByteOrder;
 import java.util.Date;
 
 /**
@@ -17,7 +18,8 @@ public class MatFileHeader
                                                    + ", CREATED on: ";
     private static int DEFAULT_VERSION = 0x0100;
     private static byte[] DEFAULT_ENDIAN_INDICATOR = new byte[] {(byte)'M', (byte)'I'};
-    
+    private final ByteOrder byteOrder;
+
     private int version;
     private String description;
     private byte[] endianIndicator;
@@ -29,11 +31,12 @@ public class MatFileHeader
      * @param version - by default is set to 0x0100
      * @param endianIndicator - byte array size of 2 indicating byte-swapping requirement
      */
-    public MatFileHeader(String description, int version, byte[] endianIndicator)
+    public MatFileHeader(String description, int version, byte[] endianIndicator, ByteOrder byteOrder)
     {
         this.description = description;
         this.version = version;
         this.endianIndicator = endianIndicator;
+        this.byteOrder = byteOrder;
     }
     
     /**
@@ -80,7 +83,8 @@ public class MatFileHeader
     {
         return new MatFileHeader( DEFAULT_DESCRIPTIVE_TEXT + (new Date()).toString(), 
                                     DEFAULT_VERSION, 
-                                    DEFAULT_ENDIAN_INDICATOR);
+                                    DEFAULT_ENDIAN_INDICATOR,
+                                    ByteOrder.BIG_ENDIAN );
     }
     
     /* (non-Javadoc)
@@ -97,5 +101,10 @@ public class MatFileHeader
         
         return sb.toString();
     }
-    
+
+    public ByteOrder getByteOrder()
+    {
+        assert( (byteOrder != ByteOrder.LITTLE_ENDIAN || endianIndicator[0] == 'I') && (byteOrder != ByteOrder.BIG_ENDIAN || endianIndicator[0] == 'M') );
+        return byteOrder;
+    }
 }
