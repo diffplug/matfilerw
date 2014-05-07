@@ -1091,6 +1091,12 @@ public class MatFileReader
                         if ( !className.equals("FileWrapper__") ) {
                             MLUInt32 content = (MLUInt32) readMatrix(buf, false);
                             int[][] t = content.getArray();
+
+                            // Check that the first four numbers are the same, as expected.
+                            if (t[0][0] != 0xdd000000 || t[1][0] != 2 || t[2][0] != 1 || t[3][0] != 1) {
+                                throw new IOException("MCOS per-object header was different then expected!  Got: " + content.contentToString());
+                            }
+
                             mlArray = new MLObjectPlaceholder(arrName, className, t);
                             haveMCOS = true;
                         } else { // This is where we get the useful MCOS data.  Only used on FileWrapper__ classes.
