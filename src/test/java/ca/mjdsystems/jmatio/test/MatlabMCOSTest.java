@@ -5,6 +5,7 @@ package ca.mjdsystems.jmatio.test;
 
 import ca.mjdsystems.jmatio.io.MatFileReader;
 import ca.mjdsystems.jmatio.types.MLArray;
+import ca.mjdsystems.jmatio.types.MLChar;
 import ca.mjdsystems.jmatio.types.MLObject;
 import org.junit.Rule;
 import org.junit.Test;
@@ -13,6 +14,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.*;
+import java.util.Collection;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -69,6 +71,27 @@ public class MatlabMCOSTest {
         assertThat(obj.getName(), is("obj2"));
         assertThat(obj.getClassName(), is("SimpleEmpty"));
         assertThat(obj.getObject().getAllFields().size(), is(0));
+    }
+
+    @Test
+    public void testParsingSimpleSingleTextUnmodifiedMCOS() throws IOException
+    {
+        File file = fileFromStream("/mcos/simplesingletext_unmodified.mat");
+        MatFileReader reader = new MatFileReader(file);
+        Map<String, MLArray> content = reader.getContent();
+
+        assertThat(content.size(), is(1));
+
+        MLObject obj = (MLObject) content.get("obj");
+        assertThat(obj, is(notNullValue()));
+
+        assertThat(obj.getName(), is("obj"));
+        assertThat(obj.getClassName(), is("SimpleSingleText"));
+        Collection<MLArray> fields = obj.getObject().getAllFields();
+        assertThat(fields.size(), is(1));
+
+        MLChar field = (MLChar) fields.toArray()[0];
+        assertThat(field.getString(0), is("Default text"));
     }
 
     private File fileFromStream(String location) throws IOException

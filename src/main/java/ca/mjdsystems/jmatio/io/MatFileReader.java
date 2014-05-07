@@ -14,10 +14,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.InflaterInputStream;
 
 import ca.mjdsystems.jmatio.common.MatDataTypes;
@@ -499,10 +496,56 @@ public class MatFileReader
             throw new IllegalStateException("Data from the class section was not all read!");
         }
 
+        // @todo: Second segment, Object properties containing other properties.  Not used yet, thus ignored.
+        mcosDataBuf.position(segmentIndexes[2]);
+
+        // Third segment.  Contains all the useful per-object information.
+        Map<Integer, MatMCOSObjectInformation> objectInfoList = new HashMap<Integer, MatMCOSObjectInformation>();
+        // There are 16 unknown bytes.  Ensure they are 0.
+        if (mcosDataBuf.getLong() != 0 || mcosDataBuf.getLong() != 0 || mcosDataBuf.getLong() != 0) {
+            throw new IllegalStateException("MAT file's MCOS data has different byte values for unknown fields!  Aborting!");
+        }
+        while (mcosDataBuf.position() < segmentIndexes[3]) {
+            // First fetch the data.
+            int classIndex = mcosDataBuf.getInt();
+            if (mcosDataBuf.getLong() != 0) {
+                throw new IllegalStateException("MAT file's MCOS data has different byte values for unknown fields!  Aborting!");
+            }
+            int segment2Index = mcosDataBuf.getInt();
+            int segment4Index = mcosDataBuf.getInt();
+            int objectId = mcosDataBuf.getInt();
+            // Then parse it into the form needed for the object.
+
+            MatMCOSObjectInformation objHolder = objectInfoList.get(objectId - 1);
+            if (objHolder == null) {
+                objHolder = new MatMCOSObjectInformation(classNamesList.get(classIndex - 1), classIndex, objectId);
+                objectInfoList.put(objectId - 1, objHolder);
+            }
+
+        }
+
+        // Sanity check, position in the buffer should equal the start of the fourth segment!
+        if (mcosDataBuf.position() != segmentIndexes[3]) {
+            throw new IllegalStateException("Data from the object section was not all read!  At: " + mcosDataBuf.position() + ", wanted: " + segmentIndexes[3]);
+        }
+
+        // Finally, merge in attributes from the global grab bag.
+        MLCell attribBag = (MLCell) mcosInfo.get(mcosInfo.getSize() -1); // Get the grab bag.
+        for (MatMCOSObjectInformation it : objectInfoList.values()) {
+            Collection<MLArray> attributes = ((MLStructure) attribBag.get(it.classId)).getAllFields();
+            MLStructure objAttributes = it.structure;
+            for (MLArray attribute : attributes) {
+                if (objAttributes.getField(attribute.getName()) == null) {
+                    objAttributes.setField(attribute.getName(), attribute);
+                }
+            }
+        }
+
+
         for (Map.Entry<String, MLArray> it : data.entrySet()) {
             if ( it.getValue() instanceof MLObjectPlaceholder ) {
                 MLObjectPlaceholder obj = (MLObjectPlaceholder) it.getValue();
-                it.setValue(new MLObject(obj.name, classNamesList.get(obj.classId - 1), new MLStructure("", new int[]{1, 1})));
+                it.setValue(new MLObject(obj.name, classNamesList.get(obj.classId - 1), objectInfoList.get(obj.objectId - 1).structure));
             }
         }
     }
