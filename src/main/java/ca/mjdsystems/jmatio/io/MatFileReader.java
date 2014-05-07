@@ -16,6 +16,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.InflaterInputStream;
 
@@ -434,13 +435,74 @@ public class MatFileReader
 
         Map<String, MLArray> mcosContent;
 
-        mcosContent = (new MatFileReader(dataStream, MatFileType.ReducedHeader)).getContent();
+        MatFileReader matFile = new MatFileReader(dataStream, MatFileType.ReducedHeader);
+        mcosContent = matFile.getContent();
         MLCell mcosInfo = (MLCell) ((MLStructure) mcosContent.get("@0")).getField("MCOS");
+        ByteBuffer mcosDataBuf = ((MLUInt8) mcosInfo.get(0)).getRealByteBuffer();
+        // This bytebuffer needs to be read in the byte order of the MAT file order.  Thus fix.
+        mcosDataBuf.order(matFile.getMatFileHeader().getByteOrder());
+
+        // Parse out the data buffer.  First get version information.  Should always equal 2.
+        int version = mcosDataBuf.getInt();
+        if (version != 2) {
+            throw new IllegalStateException("MAT file's MCOS data has a different version(?).  Got: " + version + ", wanted 2.");
+        }
+
+        // Get the string count + define the string array.
+        int strCount = mcosDataBuf.getInt();
+        String[] strs = new String[strCount];
+
+        // Get the segment indexes.
+        int segmentIndexes[] = new int[6];
+        for (int i = 0; i < segmentIndexes.length; ++i) {
+            segmentIndexes[i] = mcosDataBuf.getInt();
+        }
+
+        // There should now be 8 0 bytes.  Make sure this is true to avoid object format changes.
+        if (mcosDataBuf.getLong() != 0) {
+            throw new IllegalStateException("MAT file's MCOS data has different byte values for unknown fields!  Aborting!");
+        }
+
+        // Finally, read in each string.  Java doesn't provide an easy way to do this in bulk, so just use a stupid formula for now.
+        for (int i = 0; i < strCount; ++i) {
+            StringBuilder sb = new StringBuilder();
+            for (char next = (char)mcosDataBuf.get(); next != '\0'; next = (char)mcosDataBuf.get()) {
+                sb.append(next);
+            }
+            strs[i] = sb.toString();
+        }
+
+        // Sanity check, next 8 byte aligned position in the buffer should equal the start of the first segment!
+        if (((mcosDataBuf.position() + 0x07) & ~0x07) != segmentIndexes[0]) {
+            throw new IllegalStateException("Data from the strings section was not all read!");
+        }
+
+        // First segment, class information.  Really just need the class names.
+        List<String> classNamesList = new ArrayList<String>();
+        mcosDataBuf.position(segmentIndexes[0]);
+        // There are 16 unknown bytes.  Ensure they are 0.
+        if (mcosDataBuf.getLong() != 0 || mcosDataBuf.getLong() != 0) {
+            throw new IllegalStateException("MAT file's MCOS data has different byte values for unknown fields!  Aborting!");
+        }
+        while (mcosDataBuf.position() < segmentIndexes[1]) {
+            int packageNameIndex = mcosDataBuf.getInt(); // Unused for now.
+            int classNameIndex = mcosDataBuf.getInt(); // Unused for now.
+            String className = strs[classNameIndex - 1];
+            classNamesList.add(className);
+            if (mcosDataBuf.getLong() != 0) {
+                throw new IllegalStateException("MAT file's MCOS data has different byte values for unknown fields!  Aborting!");
+            }
+        }
+
+        // Sanity check, position in the buffer should equal the start of the second segment!
+        if (mcosDataBuf.position() != segmentIndexes[1]) {
+            throw new IllegalStateException("Data from the class section was not all read!");
+        }
 
         for (Map.Entry<String, MLArray> it : data.entrySet()) {
             if ( it.getValue() instanceof MLObjectPlaceholder ) {
                 MLObjectPlaceholder obj = (MLObjectPlaceholder) it.getValue();
-                it.setValue(new MLObject(obj.name, obj.className, new MLStructure("", new int[]{1, 1})));
+                it.setValue(new MLObject(obj.name, classNamesList.get(obj.classId - 1), new MLStructure("", new int[]{1, 1})));
             }
         }
     }

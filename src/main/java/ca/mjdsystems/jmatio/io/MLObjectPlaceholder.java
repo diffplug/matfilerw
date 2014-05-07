@@ -15,8 +15,13 @@ class MLObjectPlaceholder extends MLArray {
         super( name, new int[] {1, 1}, -1, 0 );
         this.className = className;
         this.information = information;
+
+        this.objectId = information[4][0];
+        this.classId = information[5][0];
     }
 
     final String className;
     final int[][] information;
+    final int objectId;
+    final int classId;
 }
