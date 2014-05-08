@@ -518,7 +518,7 @@ public class MatFileReader
 
             MatMCOSObjectInformation objHolder = objectInfoList.get(objectId - 1);
             if (objHolder == null) {
-                objHolder = new MatMCOSObjectInformation(classNamesList.get(classIndex - 1), classIndex, objectId);
+                objHolder = new MatMCOSObjectInformation(classNamesList.get(classIndex - 1), classIndex, objectId, segment4Index);
                 objectInfoList.put(objectId - 1, objHolder);
             }
 
@@ -527,6 +527,54 @@ public class MatFileReader
         // Sanity check, position in the buffer should equal the start of the fourth segment!
         if (mcosDataBuf.position() != segmentIndexes[3]) {
             throw new IllegalStateException("Data from the object section was not all read!  At: " + mcosDataBuf.position() + ", wanted: " + segmentIndexes[3]);
+        }
+
+        // Fourth segment.  Contains the regular properties for objects.
+        // There are 8 unknown bytes.  Ensure they are 0.
+        if (mcosDataBuf.getLong() != 0) {
+            throw new IllegalStateException("MAT file's MCOS data has different byte values for unknown fields!  Aborting!");
+        }
+        List<Map<String, MLArray>> segment4Properties = new ArrayList<Map<String, MLArray>>();
+        int propertiesIndex = 0;
+        while (mcosDataBuf.position() < segmentIndexes[4]) {
+            Map<String, MLArray> properties = new HashMap<String, MLArray>();
+            int propertiesCount = mcosDataBuf.getInt();
+            for (int i = 0; i < propertiesCount; ++i) {
+                int nameIndex = mcosDataBuf.getInt();
+                int flag = mcosDataBuf.getInt();
+                int heapIndex = mcosDataBuf.getInt();
+
+                String propertyName = strs[nameIndex - 1];
+                switch (flag) {
+                    case 0:
+                        properties.put(propertyName, new MLChar(propertyName, strs[heapIndex-1]));
+                        break;
+                    case 1:
+                        properties.put(propertyName, mcosInfo.get(heapIndex+2));
+                        break;
+                    case 2:
+                        // @todo: Handle a boolean.
+                        throw new UnsupportedOperationException("Mat file parsing does not yet support booleans!");
+                }
+            }
+            segment4Properties.add(properties);
+            mcosDataBuf.position((mcosDataBuf.position() + 0x07) & ~0x07);
+        }
+
+
+        // Sanity check, position in the buffer should equal the start of the fourth segment!
+        if (mcosDataBuf.position() != segmentIndexes[4]) {
+            throw new IllegalStateException("Data from the properties section (2) was not all read!  At: " + mcosDataBuf.position() + ", wanted: " + segmentIndexes[4]);
+        }
+
+        // Now merge in the properties from segment 4 into object.
+        for (MatMCOSObjectInformation it : objectInfoList.values()) {
+            MLStructure objAttributes = it.structure;
+            if (it.segment4PropertiesIndex > 0) {
+                for (Map.Entry<String, MLArray> attribute : segment4Properties.get(it.segment4PropertiesIndex - 1).entrySet()) {
+                    objAttributes.setField(attribute.getKey(), attribute.getValue());
+                }
+            }
         }
 
         // Finally, merge in attributes from the global grab bag.

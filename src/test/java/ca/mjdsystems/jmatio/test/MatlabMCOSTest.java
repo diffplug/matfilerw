@@ -96,6 +96,57 @@ public class MatlabMCOSTest {
         assertThat(obj.getObject().getFieldNames().iterator().next(), is("test_text"));
     }
 
+    @Test
+    public void testParsingSimpleSingleTextMultipleMCOS() throws IOException
+    {
+        File file = fileFromStream("/mcos/simplesingletext_multiple.mat");
+        MatFileReader reader = new MatFileReader(file);
+        Map<String, MLArray> content = reader.getContent();
+
+        assertThat(content.size(), is(3));
+
+        MLObject obj = (MLObject) content.get("obj1");
+        assertThat(obj, is(notNullValue()));
+
+        assertThat(obj.getName(), is("obj1"));
+        assertThat(obj.getClassName(), is("SimpleSingleText"));
+        Collection<MLArray> fields = obj.getObject().getAllFields();
+        assertThat(fields.size(), is(1));
+
+        MLChar field = (MLChar) fields.toArray()[0];
+        assertThat(field.getString(0), is("other text 1"));
+
+        assertThat(obj.getObject().getFieldNames().iterator().next(), is("test_text"));
+
+
+        obj = (MLObject) content.get("obj2");
+        assertThat(obj, is(notNullValue()));
+
+        assertThat(obj.getName(), is("obj2"));
+        assertThat(obj.getClassName(), is("SimpleSingleText"));
+        fields = obj.getObject().getAllFields();
+        assertThat(fields.size(), is(1));
+
+        field = (MLChar) fields.toArray()[0];
+        assertThat(field.getString(0), is("Default text"));
+
+        assertThat(obj.getObject().getFieldNames().iterator().next(), is("test_text"));
+
+
+        obj = (MLObject) content.get("obj3");
+        assertThat(obj, is(notNullValue()));
+
+        assertThat(obj.getName(), is("obj3"));
+        assertThat(obj.getClassName(), is("SimpleSingleText"));
+        fields = obj.getObject().getAllFields();
+        assertThat(fields.size(), is(1));
+
+        field = (MLChar) fields.toArray()[0];
+        assertThat(field.getString(0), is("other text 3"));
+
+        assertThat(obj.getObject().getFieldNames().iterator().next(), is("test_text"));
+    }
+
     private File fileFromStream(String location) throws IOException
     {
         String outname = location.replace("/", "_");
