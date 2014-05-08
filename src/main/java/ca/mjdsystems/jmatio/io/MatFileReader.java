@@ -501,7 +501,7 @@ public class MatFileReader
 
         // Third segment.  Contains all the useful per-object information.
         Map<Integer, MatMCOSObjectInformation> objectInfoList = new HashMap<Integer, MatMCOSObjectInformation>();
-        // There are 16 unknown bytes.  Ensure they are 0.
+        // There are 24 unknown bytes.  Ensure they are 0.
         if (mcosDataBuf.getLong() != 0 || mcosDataBuf.getLong() != 0 || mcosDataBuf.getLong() != 0) {
             throw new IllegalStateException("MAT file's MCOS data has different byte values for unknown fields!  Aborting!");
         }
