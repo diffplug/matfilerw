@@ -532,11 +532,12 @@ public class MatFileReader
         // Finally, merge in attributes from the global grab bag.
         MLCell attribBag = (MLCell) mcosInfo.get(mcosInfo.getSize() -1); // Get the grab bag.
         for (MatMCOSObjectInformation it : objectInfoList.values()) {
-            Collection<MLArray> attributes = ((MLStructure) attribBag.get(it.classId)).getAllFields();
+            MLStructure attributes = (MLStructure) attribBag.get(it.classId);
+            Collection<String> attributeNames = attributes.getFieldNames();
             MLStructure objAttributes = it.structure;
-            for (MLArray attribute : attributes) {
-                if (objAttributes.getField(attribute.getName()) == null) {
-                    objAttributes.setField(attribute.getName(), attribute);
+            for (String attributeName : attributeNames) {
+                if (objAttributes.getField(attributeName) == null) {
+                    objAttributes.setField(attributeName, attributes.getField(attributeName));
                 }
             }
         }

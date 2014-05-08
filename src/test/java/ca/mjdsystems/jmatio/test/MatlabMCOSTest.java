@@ -92,6 +92,8 @@ public class MatlabMCOSTest {
 
         MLChar field = (MLChar) fields.toArray()[0];
         assertThat(field.getString(0), is("Default text"));
+
+        assertThat(obj.getObject().getFieldNames().iterator().next(), is("test_text"));
     }
 
     private File fileFromStream(String location) throws IOException
