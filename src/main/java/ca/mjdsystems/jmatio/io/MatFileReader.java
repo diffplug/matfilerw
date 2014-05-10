@@ -519,13 +519,7 @@ public class MatFileReader
                                         // and use the index into this segment as the id instead.
 
             // Then parse it into the form needed for the object.
-
-            MatMCOSObjectInformation objHolder = objectInfoList.get(objectId - 1);
-            if (objHolder == null) {
-                objHolder = new MatMCOSObjectInformation(classNamesList.get(classIndex - 1), classIndex, objectId, segment4Index);
-                objectInfoList.put(objectId - 1, objHolder);
-            }
-
+            objectInfoList.put(objectId - 1, new MatMCOSObjectInformation(classNamesList.get(classIndex - 1), classIndex, objectId, segment2Index, segment4Index));
         }
 
         // Sanity check, position in the buffer should equal the start of the fourth segment!
@@ -539,7 +533,6 @@ public class MatFileReader
             throw new IllegalStateException("MAT file's MCOS data has different byte values for unknown fields!  Aborting!");
         }
         List<Map<String, MLArray>> segment4Properties = new ArrayList<Map<String, MLArray>>();
-        int propertiesIndex = 0;
         while (mcosDataBuf.position() < segmentIndexes[4]) {
             Map<String, MLArray> properties = new HashMap<String, MLArray>();
             int propertiesCount = mcosDataBuf.getInt();
@@ -566,7 +559,7 @@ public class MatFileReader
         }
 
 
-        // Sanity check, position in the buffer should equal the start of the fourth segment!
+        // Sanity check, position in the buffer should equal the start of the fifth segment!
         if (mcosDataBuf.position() != segmentIndexes[4]) {
             throw new IllegalStateException("Data from the properties section (2) was not all read!  At: " + mcosDataBuf.position() + ", wanted: " + segmentIndexes[4]);
         }
@@ -578,6 +571,8 @@ public class MatFileReader
                 for (Map.Entry<String, MLArray> attribute : segment4Properties.get(it.segment4PropertiesIndex - 1).entrySet()) {
                     objAttributes.setField(attribute.getKey(), attribute.getValue());
                 }
+            } else {
+                throw new IllegalStateException("Properties are not found!  Not sure where to look ...");
             }
         }
 
@@ -598,7 +593,8 @@ public class MatFileReader
         for (Map.Entry<String, MLArray> it : data.entrySet()) {
             if ( it.getValue() instanceof MLObjectPlaceholder ) {
                 MLObjectPlaceholder obj = (MLObjectPlaceholder) it.getValue();
-                it.setValue(new MLObject(obj.name, classNamesList.get(obj.classId - 1), objectInfoList.get(obj.objectId - 1).structure));
+                MatMCOSObjectInformation objectInformation = objectInfoList.get(obj.objectId - 1);
+                it.setValue(new MLObject(obj.name, classNamesList.get(objectInformation.classId - 1), objectInformation.structure));
             }
         }
     }
