@@ -7,6 +7,7 @@ import ca.mjdsystems.jmatio.io.MatFileFilter;
 import ca.mjdsystems.jmatio.io.MatFileReader;
 import ca.mjdsystems.jmatio.io.MatFileType;
 import ca.mjdsystems.jmatio.io.SimulinkDecoder;
+import ca.mjdsystems.jmatio.types.MLObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -16,6 +17,7 @@ import org.junit.runners.JUnit4;
 import java.io.*;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 /** This test verifies that ReducedHeader generated mat files work correctly.
@@ -33,6 +35,11 @@ public class SimulinkMatTest
     {
         File file = fileFromStream("/simulink_tet_out.mat");
         MatFileReader reader = new MatFileReader(file, new MatFileFilter(), MatFileType.ReducedHeader);
+        MLObject data = (MLObject)reader.getContent().get("@");
+
+        // First check that the root element is correct.
+        assertThat(data, is(notNullValue()));
+        assertThat(data.getClassName(), is("Data"));
     }
 
     // This just ensures the SimulinkDecoder actually decodes correctly.

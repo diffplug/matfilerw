@@ -505,6 +505,7 @@ public class MatFileReader
         if (mcosDataBuf.getLong() != 0 || mcosDataBuf.getLong() != 0 || mcosDataBuf.getLong() != 0) {
             throw new IllegalStateException("MAT file's MCOS data has different byte values for unknown fields!  Aborting!");
         }
+        int objectCount = 1;
         while (mcosDataBuf.position() < segmentIndexes[3]) {
             // First fetch the data.
             int classIndex = mcosDataBuf.getInt();
@@ -513,7 +514,10 @@ public class MatFileReader
             }
             int segment2Index = mcosDataBuf.getInt();
             int segment4Index = mcosDataBuf.getInt();
-            int objectId = mcosDataBuf.getInt();
+            mcosDataBuf.getInt(); // This value is random.  But we need to move the buffer forward, so read it without a check.
+            int objectId = objectCount++;   // It would appear that the "objectId" is in fact some other MATLAB value.  Thus ignore,
+                                        // and use the index into this segment as the id instead.
+
             // Then parse it into the form needed for the object.
 
             MatMCOSObjectInformation objHolder = objectInfoList.get(objectId - 1);
