@@ -7,7 +7,10 @@ import ca.mjdsystems.jmatio.io.MatFileFilter;
 import ca.mjdsystems.jmatio.io.MatFileReader;
 import ca.mjdsystems.jmatio.io.MatFileType;
 import ca.mjdsystems.jmatio.io.SimulinkDecoder;
+import ca.mjdsystems.jmatio.types.MLChar;
+import ca.mjdsystems.jmatio.types.MLDouble;
 import ca.mjdsystems.jmatio.types.MLObject;
+import ca.mjdsystems.jmatio.types.MLStructure;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -40,6 +43,32 @@ public class SimulinkMatTest
         // First check that the root element is correct.
         assertThat(data, is(notNullValue()));
         assertThat(data.getClassName(), is("Data"));
+        MLStructure dataO = data.getObject();
+        assertThat(dataO.getAllFields().size(), is(10));
+        assertThat(((MLChar) dataO.getField("function_name")).getString(0), is("quad_fcn_subtype"));
+        assertThat(((MLChar) dataO.getField("function_inputs")).getString(0), is("c,a,b:{x:real|(a=0 => x /= 0) AND (a /= 0 => (x^2) - 4*a*c >= 0)}"));
+        assertThat(((MLDouble) dataO.getField("open")).get(0), is(1.0));
+        assertThat(((MLDouble) dataO.getField("fig")).get(0), is(notNullValue())); // This can be anything, just not null!
+        assertThat(((MLDouble) dataO.getField("multi_mode")).get(0), is(1.0));
+        assertThat(((MLDouble) dataO.getField("checked")).get(0), is(0.0));
+
+        // Next, make sure the settings structure came out right.  Not super important, but a good test.
+        MLStructure settings = (MLStructure) dataO.getField("settings");
+        assertThat(settings.getAllFields().size(), is(5));
+        assertThat(((MLDouble) settings.getField("set")).get(0), is(1.0));
+        assertThat(((MLDouble) settings.getField("inputs")), is(notNullValue()));
+        assertThat(((MLDouble) settings.getField("count")).get(0), is(1000.0));
+        assertThat(((MLDouble) settings.getField("range")).get(0), is(100.0));
+        assertThat(((MLDouble) settings.getField("except")).get(0), is(0.0));
+
+        // Next, verify Grid2, as it is easiest.
+        MLObject Grid2 = (MLObject) dataO.getField("Grid2");
+        assertThat(Grid2.getClassName(), is("Grid"));
+
+        System.out.println(Grid2.getObject().getField("cells").contentToString());
+        System.out.println(Grid2.getObject().contentToString());
+
+
     }
 
     // This just ensures the SimulinkDecoder actually decodes correctly.

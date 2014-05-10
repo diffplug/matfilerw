@@ -542,17 +542,28 @@ public class MatFileReader
                 int heapIndex = mcosDataBuf.getInt();
 
                 String propertyName = strs[nameIndex - 1];
+                MLArray property;
                 switch (flag) {
                     case 0:
-                        properties.put(propertyName, new MLChar(propertyName, strs[heapIndex-1]));
+                        property = new MLChar(propertyName, strs[heapIndex-1]);
                         break;
                     case 1:
-                        properties.put(propertyName, mcosInfo.get(heapIndex+2));
+                        property = mcosInfo.get(heapIndex+2);
                         break;
                     case 2:
                         // @todo: Handle a boolean.
                         throw new UnsupportedOperationException("Mat file parsing does not yet support booleans!");
+                    default:
+                        throw new UnsupportedOperationException("Don't yet support parameter type: " + flag + "!");
                 }
+                if (property instanceof MLUInt32) {
+                    int[][] data = ((MLUInt32) property).getArray();
+                    if (data[0][0] == 0xdd000000 && data[1][0] == 0x02 && data[2][0] == 0x01 && data[3][0] == 0x01) {
+                        MatMCOSObjectInformation objectInformation = objectInfoList.get(data[4][0] - 1);
+                        property = new MLObject(propertyName, classNamesList.get(objectInformation.classId - 1), objectInformation.structure);
+                    }
+                }
+                properties.put(propertyName, property);
             }
             segment4Properties.add(properties);
             mcosDataBuf.position((mcosDataBuf.position() + 0x07) & ~0x07);
