@@ -47,7 +47,7 @@ public class MatlabMCOSTest {
 
         assertThat(obj.getName(), is("obj"));
         assertThat(obj.getClassName(), is("SimpleEmpty"));
-        assertThat(obj.getObject().getAllFields().size(), is(0));
+        assertThat(obj.getFields(0).size(), is(0));
     }
 
     @Test
@@ -64,7 +64,7 @@ public class MatlabMCOSTest {
 
         assertThat(obj.getName(), is("obj1"));
         assertThat(obj.getClassName(), is("SimpleEmpty"));
-        assertThat(obj.getObject().getAllFields().size(), is(0));
+        assertThat(obj.getFields(0).size(), is(0));
 
 
         obj = (MLObject) content.get("obj2");
@@ -72,7 +72,7 @@ public class MatlabMCOSTest {
 
         assertThat(obj.getName(), is("obj2"));
         assertThat(obj.getClassName(), is("SimpleEmpty"));
-        assertThat(obj.getObject().getAllFields().size(), is(0));
+        assertThat(obj.getFields(0).size(), is(0));
     }
 
     @Test
@@ -89,13 +89,11 @@ public class MatlabMCOSTest {
 
         assertThat(obj.getName(), is("obj"));
         assertThat(obj.getClassName(), is("SimpleSingleText"));
-        Collection<MLArray> fields = obj.getObject().getAllFields();
+        Map<String, MLArray> fields = obj.getFields(0);
         assertThat(fields.size(), is(1));
 
-        MLChar field = (MLChar) fields.toArray()[0];
+        MLChar field = (MLChar) fields.get("test_text");
         assertThat(field.getString(0), is("Default text"));
-
-        assertThat(obj.getObject().getFieldNames().iterator().next(), is("test_text"));
     }
 
     @Test
@@ -112,13 +110,11 @@ public class MatlabMCOSTest {
 
         assertThat(obj.getName(), is("obj1"));
         assertThat(obj.getClassName(), is("SimpleSingleText"));
-        Collection<MLArray> fields = obj.getObject().getAllFields();
+        Map<String, MLArray> fields = obj.getFields(0);
         assertThat(fields.size(), is(1));
 
-        MLChar field = (MLChar) fields.toArray()[0];
+        MLChar field = (MLChar) fields.get("test_text");
         assertThat(field.getString(0), is("other text 1"));
-
-        assertThat(obj.getObject().getFieldNames().iterator().next(), is("test_text"));
 
 
         obj = (MLObject) content.get("obj2");
@@ -126,13 +122,11 @@ public class MatlabMCOSTest {
 
         assertThat(obj.getName(), is("obj2"));
         assertThat(obj.getClassName(), is("SimpleSingleText"));
-        fields = obj.getObject().getAllFields();
+        fields = obj.getFields(0);
         assertThat(fields.size(), is(1));
 
-        field = (MLChar) fields.toArray()[0];
+        field = (MLChar) fields.get("test_text");
         assertThat(field.getString(0), is("Default text"));
-
-        assertThat(obj.getObject().getFieldNames().iterator().next(), is("test_text"));
 
 
         obj = (MLObject) content.get("obj3");
@@ -140,13 +134,11 @@ public class MatlabMCOSTest {
 
         assertThat(obj.getName(), is("obj3"));
         assertThat(obj.getClassName(), is("SimpleSingleText"));
-        fields = obj.getObject().getAllFields();
+        fields = obj.getFields(0);
         assertThat(fields.size(), is(1));
 
-        field = (MLChar) fields.toArray()[0];
+        field = (MLChar) fields.get("test_text");
         assertThat(field.getString(0), is("other text 3"));
-
-        assertThat(obj.getObject().getFieldNames().iterator().next(), is("test_text"));
     }
 
     @Test
@@ -163,15 +155,13 @@ public class MatlabMCOSTest {
 
         assertThat(obj.getName(), is("obj1"));
         assertThat(obj.getClassName(), is("HandleSingle"));
-        assertThat(((MLObject) content.get("obj3")).getObject(), is(sameInstance(obj.getObject())));
-        Collection<MLArray> fields = obj.getObject().getAllFields();
+        assertThat(((MLObject) content.get("obj3")).getFields(0), is(sameInstance(obj.getFields(0))));
+        Map<String, MLArray> fields = obj.getFields(0);
         assertThat(fields.size(), is(1));
 
-        MLInt8 intField = (MLInt8) fields.toArray()[0];
+        MLInt8 intField = (MLInt8) fields.get("myelement");
         assertThat(intField.getSize(), is(1));
         assertThat(intField.get(0).byteValue(), is((byte)25));
-
-        assertThat(obj.getObject().getFieldNames().iterator().next(), is("myelement"));
 
 
         obj = (MLObject) content.get("obj3");
@@ -179,17 +169,13 @@ public class MatlabMCOSTest {
 
         assertThat(obj.getName(), is("obj3"));
         assertThat(obj.getClassName(), is("HandleSingle"));
-        assertThat(((MLObject) content.get("obj1")).getObject(), is(sameInstance(obj.getObject())));
-        fields = obj.getObject().getAllFields();
+        assertThat(((MLObject) content.get("obj1")).getFields(0), is(sameInstance(obj.getFields(0))));
+        fields = obj.getFields(0);
         assertThat(fields.size(), is(1));
 
-        intField = (MLInt8) fields.toArray()[0];
+        intField = (MLInt8) fields.get("myelement");
         assertThat(intField.getSize(), is(1));
         assertThat(intField.get(0).byteValue(), is((byte)25));
-
-        assertThat(obj.getObject().getFieldNames().iterator().next(), is("myelement"));
-
-
 
 
         obj = (MLObject) content.get("obj2");
@@ -197,14 +183,12 @@ public class MatlabMCOSTest {
 
         assertThat(obj.getName(), is("obj2"));
         assertThat(obj.getClassName(), is("HandleSingle"));
-        assertThat(((MLObject) content.get("obj4")).getObject(), is(sameInstance(obj.getObject())));
-        fields = obj.getObject().getAllFields();
+        assertThat(((MLObject) content.get("obj4")).getFields(0), is(sameInstance(obj.getFields(0))));
+        fields = obj.getFields(0);
         assertThat(fields.size(), is(1));
 
-        MLChar charField = (MLChar) fields.toArray()[0];
+        MLChar charField = (MLChar) fields.get("myelement");
         assertThat(charField.getString(0), is("testing"));
-
-        assertThat(obj.getObject().getFieldNames().iterator().next(), is("myelement"));
 
 
         obj = (MLObject) content.get("obj4");
@@ -212,14 +196,12 @@ public class MatlabMCOSTest {
 
         assertThat(obj.getName(), is("obj4"));
         assertThat(obj.getClassName(), is("HandleSingle"));
-        assertThat(((MLObject) content.get("obj2")).getObject(), is(sameInstance(obj.getObject())));
-        fields = obj.getObject().getAllFields();
+        assertThat(((MLObject) content.get("obj2")).getFields(0), is(sameInstance(obj.getFields(0))));
+        fields = obj.getFields(0);
         assertThat(fields.size(), is(1));
 
-        charField = (MLChar) fields.toArray()[0];
+        charField = (MLChar) fields.get("myelement");
         assertThat(charField.getString(0), is("testing"));
-
-        assertThat(obj.getObject().getFieldNames().iterator().next(), is("myelement"));
     }
 
     private File fileFromStream(String location) throws IOException

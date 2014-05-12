@@ -560,7 +560,8 @@ public class MatFileReader
                     int[][] data = ((MLUInt32) property).getArray();
                     if (data[0][0] == 0xdd000000 && data[1][0] == 0x02 && data[2][0] == 0x01 && data[3][0] == 0x01) {
                         MatMCOSObjectInformation objectInformation = objectInfoList.get(data[4][0] - 1);
-                        property = new MLObject(propertyName, classNamesList.get(objectInformation.classId - 1), objectInformation.structure);
+                        property = new MLObject(propertyName, classNamesList.get(objectInformation.classId - 1), new int[]{1, 1}, 0)
+                                .setFields(0, objectInformation.structure);
                     }
                 }
                 properties.put(propertyName, property);
@@ -577,10 +578,10 @@ public class MatFileReader
 
         // Now merge in the properties from segment 4 into object.
         for (MatMCOSObjectInformation it : objectInfoList.values()) {
-            MLStructure objAttributes = it.structure;
+            Map<String, MLArray> objAttributes = it.structure;
             if (it.segment4PropertiesIndex > 0) {
                 for (Map.Entry<String, MLArray> attribute : segment4Properties.get(it.segment4PropertiesIndex - 1).entrySet()) {
-                    objAttributes.setField(attribute.getKey(), attribute.getValue());
+                    objAttributes.put(attribute.getKey(), attribute.getValue());
                 }
             } else {
                 throw new IllegalStateException("Properties are not found!  Not sure where to look ...");
@@ -592,10 +593,10 @@ public class MatFileReader
         for (MatMCOSObjectInformation it : objectInfoList.values()) {
             MLStructure attributes = (MLStructure) attribBag.get(it.classId);
             Collection<String> attributeNames = attributes.getFieldNames();
-            MLStructure objAttributes = it.structure;
+            Map<String, MLArray> objAttributes = it.structure;
             for (String attributeName : attributeNames) {
-                if (objAttributes.getField(attributeName) == null) {
-                    objAttributes.setField(attributeName, attributes.getField(attributeName));
+                if (objAttributes.get(attributeName) == null) {
+                    objAttributes.put(attributeName, attributes.getField(attributeName));
                 }
             }
         }
@@ -605,7 +606,7 @@ public class MatFileReader
             if ( it.getValue() instanceof MLObjectPlaceholder ) {
                 MLObjectPlaceholder obj = (MLObjectPlaceholder) it.getValue();
                 MatMCOSObjectInformation objectInformation = objectInfoList.get(obj.objectId - 1);
-                it.setValue(new MLObject(obj.name, classNamesList.get(objectInformation.classId - 1), objectInformation.structure));
+                it.setValue(new MLObject(obj.name, classNamesList.get(objectInformation.classId - 1), new int[]{1, 1}, 0).setFields(0, objectInformation.structure));
             }
         }
     }
@@ -1222,8 +1223,8 @@ public class MatFileReader
                 className = tag.readToString();
                 
                 // TODO: currently copy pasted from structure
-                
-                struct = new MLStructure(name, dims, type, attributes);
+
+                mlArray = new MLObject( name, className, dims, attributes );
                 
                 //field name lenght - this subelement always uses the compressed data element format
                 tag = new ISMatTag(buf);
@@ -1246,6 +1247,7 @@ public class MatFileReader
                 //read fields
                 for ( int index = 0; index < 1; index++ )
                 {
+                    Map<String, MLArray> fields = new HashMap<String, MLArray>();
                     for ( int i = 0; i < numOfFields; i++ )
                     {
                         //read matrix recursively
@@ -1254,16 +1256,15 @@ public class MatFileReader
                         if ( tag.size > 0 )
                         {
                             MLArray fieldValue = readMatrix( buf, false);
-                            struct.setField( fieldNames[i], fieldValue, index );
+                            fields.put(fieldNames[i], fieldValue);
                         }
                         else
                         {
-                            struct.setField(fieldNames[i], new MLEmptyArray(), index);
+                            fields.put(fieldNames[i], new MLEmptyArray());
                         }
                     }
+                    ((MLObject) mlArray).setFields(index, fields);
                 }
-                
-                mlArray = new MLObject( name, className, struct );
                 break;
             default:
                 throw new MatlabIOException("Incorrect matlab array class: " + MLArray.typeToString(type) );

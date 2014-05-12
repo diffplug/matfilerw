@@ -7,10 +7,7 @@ import ca.mjdsystems.jmatio.io.MatFileFilter;
 import ca.mjdsystems.jmatio.io.MatFileReader;
 import ca.mjdsystems.jmatio.io.MatFileType;
 import ca.mjdsystems.jmatio.io.SimulinkDecoder;
-import ca.mjdsystems.jmatio.types.MLChar;
-import ca.mjdsystems.jmatio.types.MLDouble;
-import ca.mjdsystems.jmatio.types.MLObject;
-import ca.mjdsystems.jmatio.types.MLStructure;
+import ca.mjdsystems.jmatio.types.*;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -18,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.*;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -43,17 +41,17 @@ public class SimulinkMatTest
         // First check that the root element is correct.
         assertThat(data, is(notNullValue()));
         assertThat(data.getClassName(), is("Data"));
-        MLStructure dataO = data.getObject();
-        assertThat(dataO.getAllFields().size(), is(10));
-        assertThat(((MLChar) dataO.getField("function_name")).getString(0), is("quad_fcn_subtype"));
-        assertThat(((MLChar) dataO.getField("function_inputs")).getString(0), is("c,a,b:{x:real|(a=0 => x /= 0) AND (a /= 0 => (x^2) - 4*a*c >= 0)}"));
-        assertThat(((MLDouble) dataO.getField("open")).get(0), is(1.0));
-        assertThat(((MLDouble) dataO.getField("fig")).get(0), is(notNullValue())); // This can be anything, just not null!
-        assertThat(((MLDouble) dataO.getField("multi_mode")).get(0), is(1.0));
-        assertThat(((MLDouble) dataO.getField("checked")).get(0), is(0.0));
+        Map<String, MLArray> dataO = data.getFields(0);
+        assertThat(dataO.size(), is(10));
+        assertThat(((MLChar) dataO.get("function_name")).getString(0), is("quad_fcn_subtype"));
+        assertThat(((MLChar) dataO.get("function_inputs")).getString(0), is("c,a,b:{x:real|(a=0 => x /= 0) AND (a /= 0 => (x^2) - 4*a*c >= 0)}"));
+        assertThat(((MLDouble) dataO.get("open")).get(0), is(1.0));
+        assertThat(((MLDouble) dataO.get("fig")).get(0), is(notNullValue())); // This can be anything, just not null!
+        assertThat(((MLDouble) dataO.get("multi_mode")).get(0), is(1.0));
+        assertThat(((MLDouble) dataO.get("checked")).get(0), is(0.0));
 
         // Next, make sure the settings structure came out right.  Not super important, but a good test.
-        MLStructure settings = (MLStructure) dataO.getField("settings");
+        MLStructure settings = (MLStructure) dataO.get("settings");
         assertThat(settings.getAllFields().size(), is(5));
         assertThat(((MLDouble) settings.getField("set")).get(0), is(1.0));
         assertThat(((MLDouble) settings.getField("inputs")), is(notNullValue()));
@@ -62,11 +60,11 @@ public class SimulinkMatTest
         assertThat(((MLDouble) settings.getField("except")).get(0), is(0.0));
 
         // Next, verify Grid2, as it is easiest.
-        MLObject Grid2 = (MLObject) dataO.getField("Grid2");
+        MLObject Grid2 = (MLObject) dataO.get("Grid2");
         assertThat(Grid2.getClassName(), is("Grid"));
 
-        System.out.println(Grid2.getObject().getField("cells").contentToString());
-        System.out.println(Grid2.getObject().contentToString());
+        System.out.println(Grid2.getFields(0).get("cells").contentToString());
+        System.out.println(Grid2.getFields(0));
 
 
     }

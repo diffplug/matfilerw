@@ -3,7 +3,11 @@
  */
 package ca.mjdsystems.jmatio.io;
 
+import ca.mjdsystems.jmatio.types.MLArray;
 import ca.mjdsystems.jmatio.types.MLStructure;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -26,5 +30,5 @@ class MatMCOSObjectInformation {
     final int classId;
     final int segment2PropertiesIndex;
     final int segment4PropertiesIndex;
-    final MLStructure structure = new MLStructure("", new int[]{1,1});
+    final Map<String, MLArray> structure = new HashMap<String, MLArray>();
 }
