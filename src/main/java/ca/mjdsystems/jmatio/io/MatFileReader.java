@@ -604,9 +604,17 @@ public class MatFileReader
 
         for (Map.Entry<String, MLArray> it : data.entrySet()) {
             if ( it.getValue() instanceof MLObjectPlaceholder ) {
-                MLObjectPlaceholder obj = (MLObjectPlaceholder) it.getValue();
-                MatMCOSObjectInformation objectInformation = objectInfoList.get(obj.objectId - 1);
-                it.setValue(new MLObject(obj.name, classNamesList.get(objectInformation.classId - 1), new int[]{1, 1}, 0).setFields(0, objectInformation.structure));
+                MLObjectPlaceholder objHolder = (MLObjectPlaceholder) it.getValue();
+                int classId = objHolder.classId;
+                MLObject obj = new MLObject(objHolder.name, classNamesList.get(classId - 1), objHolder.getDimensions(), 0);
+                it.setValue(obj);
+                for (int i = 0; i < obj.getSize(); ++i) {
+                    MatMCOSObjectInformation objectInformation = objectInfoList.get(objHolder.objectIds[i] - 1);
+                    if (classId != objectInformation.classId) {
+                        throw new IllegalStateException("Found an object in array with a different class id! Actual: " + objectInformation.classId + ", expected: " + classId + "!");
+                    }
+                    obj.setFields(i, objectInformation.structure);
+                }
             }
         }
     }
@@ -1197,11 +1205,11 @@ public class MatFileReader
                             int[][] t = content.getArray();
 
                             // Check that the first four numbers are the same, as expected.
-                            if (t[0][0] != 0xdd000000 || t[1][0] != 2 || t[2][0] != 1 || t[3][0] != 1) {
+                            if (t[0][0] != 0xdd000000 || t[1][0] != 2) {
                                 throw new IOException("MCOS per-object header was different then expected!  Got: " + content.contentToString());
                             }
 
-                            mlArray = new MLObjectPlaceholder(arrName, className, t);
+                            mlArray = new MLObjectPlaceholder(arrName, className, new int[]{t[2][0], t[3][0]}, t);
                             haveMCOS = true;
                         } else { // This is where we get the useful MCOS data.  Only used on FileWrapper__ classes.
                             mlArray = readMatrix(buf, false);

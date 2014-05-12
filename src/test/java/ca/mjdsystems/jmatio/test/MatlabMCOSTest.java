@@ -4,10 +4,7 @@
 package ca.mjdsystems.jmatio.test;
 
 import ca.mjdsystems.jmatio.io.MatFileReader;
-import ca.mjdsystems.jmatio.types.MLArray;
-import ca.mjdsystems.jmatio.types.MLChar;
-import ca.mjdsystems.jmatio.types.MLInt8;
-import ca.mjdsystems.jmatio.types.MLObject;
+import ca.mjdsystems.jmatio.types.*;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -202,6 +199,26 @@ public class MatlabMCOSTest {
 
         charField = (MLChar) fields.get("myelement");
         assertThat(charField.getString(0), is("testing"));
+    }
+
+    @Test
+    public void testMultipleMCOSInArray() throws IOException
+    {
+        File file = fileFromStream("/mcos/simplesingletext_multiplearray.mat");
+        MatFileReader reader = new MatFileReader(file);
+        Map<String, MLArray> content = reader.getContent();
+
+        assertThat(content.size(), is(1));
+
+        MLObject obj = (MLObject) content.get("a");
+        assertThat(obj, is(notNullValue()));
+
+        assertThat(obj.getName(), is("a"));
+        assertThat(obj.getClassName(), is("SimpleSingleText"));
+        assertThat(((MLDouble) obj.getFields(0).get("test_text")).get(0), is(1.0));
+        assertThat(((MLDouble) obj.getFields(1).get("test_text")).get(0), is(2.0));
+        assertThat(((MLDouble) obj.getFields(2).get("test_text")).get(0), is(3.0));
+        assertThat(((MLDouble) obj.getFields(3).get("test_text")).get(0), is(4.0));
     }
 
     private File fileFromStream(String location) throws IOException
