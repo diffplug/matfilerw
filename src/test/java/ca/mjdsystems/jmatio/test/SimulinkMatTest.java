@@ -17,6 +17,7 @@ import org.junit.runners.JUnit4;
 import java.io.*;
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -41,6 +42,7 @@ public class SimulinkMatTest
         // First check that the root element is correct.
         assertThat(data, is(notNullValue()));
         assertThat(data.getClassName(), is("Data"));
+        assertThat(data.getSize(), is(1));
         Map<String, MLArray> dataO = data.getFields(0);
         assertThat(dataO.size(), is(10));
         assertThat(((MLChar) dataO.get("function_name")).getString(0), is("quad_fcn_subtype"));
@@ -54,7 +56,7 @@ public class SimulinkMatTest
         MLStructure settings = (MLStructure) dataO.get("settings");
         assertThat(settings.getAllFields().size(), is(5));
         assertThat(((MLDouble) settings.getField("set")).get(0), is(1.0));
-        assertThat(((MLDouble) settings.getField("inputs")), is(notNullValue()));
+        assertThat((settings.getField("inputs")), is(instanceOf(MLDouble.class)));
         assertThat(((MLDouble) settings.getField("count")).get(0), is(1000.0));
         assertThat(((MLDouble) settings.getField("range")).get(0), is(100.0));
         assertThat(((MLDouble) settings.getField("except")).get(0), is(0.0));
