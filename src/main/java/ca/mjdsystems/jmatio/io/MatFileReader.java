@@ -558,10 +558,9 @@ public class MatFileReader
                 }
                 if (property instanceof MLUInt32) {
                     int[][] data = ((MLUInt32) property).getArray();
-                    if (data[0][0] == 0xdd000000 && data[1][0] == 0x02 && data[2][0] == 0x01 && data[3][0] == 0x01) {
-                        MatMCOSObjectInformation objectInformation = objectInfoList.get(data[4][0] - 1);
-                        property = new MLObject(propertyName, classNamesList.get(objectInformation.classId - 1), new int[]{1, 1}, 0)
-                                .setFields(0, objectInformation.structure);
+                    if (data[0][0] == 0xdd000000 && data[1][0] == 0x02) {
+                        MLObjectPlaceholder objHolder = new MLObjectPlaceholder(propertyName, "", data);
+                        property = processMCOS(objHolder, classNamesList, objectInfoList);
                     }
                 }
                 properties.put(propertyName, property);
@@ -605,18 +604,23 @@ public class MatFileReader
         for (Map.Entry<String, MLArray> it : data.entrySet()) {
             if ( it.getValue() instanceof MLObjectPlaceholder ) {
                 MLObjectPlaceholder objHolder = (MLObjectPlaceholder) it.getValue();
-                int classId = objHolder.classId;
-                MLObject obj = new MLObject(objHolder.name, classNamesList.get(classId - 1), objHolder.getDimensions(), 0);
-                it.setValue(obj);
-                for (int i = 0; i < obj.getSize(); ++i) {
-                    MatMCOSObjectInformation objectInformation = objectInfoList.get(objHolder.objectIds[i] - 1);
-                    if (classId != objectInformation.classId) {
-                        throw new IllegalStateException("Found an object in array with a different class id! Actual: " + objectInformation.classId + ", expected: " + classId + "!");
-                    }
-                    obj.setFields(i, objectInformation.structure);
-                }
+                it.setValue(processMCOS(objHolder, classNamesList, objectInfoList));
             }
         }
+    }
+
+    private MLObject processMCOS(MLObjectPlaceholder objHolder, List<String> classNamesList, Map<Integer, MatMCOSObjectInformation> objectInfoList)
+    {
+        int classId = objHolder.classId;
+        MLObject obj = new MLObject(objHolder.name, classNamesList.get(classId - 1), objHolder.getDimensions(), 0);
+        for (int i = 0; i < obj.getSize(); ++i) {
+            MatMCOSObjectInformation objectInformation = objectInfoList.get(objHolder.objectIds[i] - 1);
+            if (classId != objectInformation.classId) {
+                throw new IllegalStateException("Found an object in array with a different class id! Actual: " + objectInformation.classId + ", expected: " + classId + "!");
+            }
+            obj.setFields(i, objectInformation.structure);
+        }
+        return obj;
     }
 
     /**
@@ -1209,7 +1213,7 @@ public class MatFileReader
                                 throw new IOException("MCOS per-object header was different then expected!  Got: " + content.contentToString());
                             }
 
-                            mlArray = new MLObjectPlaceholder(arrName, className, new int[]{t[2][0], t[3][0]}, t);
+                            mlArray = new MLObjectPlaceholder(arrName, className, t);
                             haveMCOS = true;
                         } else { // This is where we get the useful MCOS data.  Only used on FileWrapper__ classes.
                             mlArray = readMatrix(buf, false);

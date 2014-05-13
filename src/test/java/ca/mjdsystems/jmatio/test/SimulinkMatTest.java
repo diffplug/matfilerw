@@ -62,11 +62,13 @@ public class SimulinkMatTest
         // Next, verify Grid2, as it is easiest.
         MLObject Grid2 = (MLObject) dataO.get("Grid2");
         assertThat(Grid2.getClassName(), is("Grid"));
+        assertThat(Grid2.getSize(), is(1));
+        Map<String, MLArray> gridO = Grid2.getFields(0);
 
-        System.out.println(Grid2.getFields(0).get("cells").contentToString());
-        System.out.println(Grid2.getFields(0));
+        assertThat(((MLDouble) gridO.get("num_cells")).get(0), is(2.0));
 
-
+        MLObject cells = (MLObject) gridO.get("cells");
+        assertThat(cells.getSize(), is(2));
     }
 
     // This just ensures the SimulinkDecoder actually decodes correctly.

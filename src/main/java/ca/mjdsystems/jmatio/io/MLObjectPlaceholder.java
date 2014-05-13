@@ -12,9 +12,9 @@ import java.util.Arrays;
  * @author Matthew Dawson <matthew@mjdsystems.ca>
  */
 class MLObjectPlaceholder extends MLArray {
-    MLObjectPlaceholder(String name, String className, int[] dims, int[][] information)
+    MLObjectPlaceholder(String name, String className, int[][] information)
     {
-        super( name, dims, -1, 0 );
+        super( name, new int[]{information[2][0], information[3][0]}, -1, 0 );
         this.className = className;
         this.information = information;
 
