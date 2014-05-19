@@ -94,6 +94,15 @@ public class SimulinkMatTest
         }
         assertThat(atEnd, is(true));
 
+        // Double check that EOF will be re-thrown on each extra call to read.
+        atEnd = false;
+        try {
+            decoder.read();
+        } catch (EOFException ex) {
+            atEnd = true;
+        }
+        assertThat(atEnd, is(true));
+
         byte[] expectedBuf = new byte[20144];
         SimulinkMatTest.class.getResourceAsStream("/simulink_tet_out.mat").read(expectedBuf);
 
