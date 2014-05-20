@@ -51,7 +51,7 @@ public class SimulinkDecoder extends InputStream
                     break;
                 }
                 case -1: { // We need to explicitly deal with the -1 case, as -1 % 4 in Java is -1.
-                    throw new EOFException("No more bytes!");
+                    return -1;
                 }
                 default:
                     throw new RuntimeException("Case " + (pos % 4));
@@ -60,7 +60,7 @@ public class SimulinkDecoder extends InputStream
             return ret;
         } catch (ArrayIndexOutOfBoundsException ex) {
             pos = -1; // Ensure that the exception will be re-thrown, avoiding a buffer overflow.
-            throw new EOFException("No more bytes!");
+            return -1;
         }
     }
 
