@@ -21,7 +21,6 @@ public class SimulinkDecoder extends InputStream
         for (byte i = 0; i < 64; ++i) {
             decoderRing.put((byte)(i + ' '), i);
         }
-        System.out.println("S " + input.length() + " B " + this.input.length);
     }
 
     @Override
