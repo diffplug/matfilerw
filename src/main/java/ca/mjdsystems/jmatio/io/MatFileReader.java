@@ -361,26 +361,9 @@ public class MatFileReader
                 default:
                     throw new IllegalArgumentException("Unknown file allocation policy");
             }
-            //read in file header
-            readHeader(buf);
-            
-            while ( buf.remaining() > 0 ) {
-                readData( buf );
-            }
-            if ( haveMCOS ) {
-                parseMCOS(mcosData);
-                if ( data.get("@") == mcosData ) {
-                    data.remove("@");
-                }
-                for ( Map.Entry<String, MLArray> it : data.entrySet() ) {
-                    if ( it.getValue() == mcosData ) {
-                        data.remove(it.getKey());
-                        break;
-                    }
-                }
-            }
-            mcosData = null;
-            
+            // Do the actual work.
+            parseData(buf);
+
             return getContent();
         }
         catch ( IOException e )
@@ -422,6 +405,28 @@ public class MatFileReader
             }
         }
         
+    }
+
+    private void parseData(ByteBuffer buf) throws IOException {
+        //read in file header
+        readHeader(buf);
+
+        while ( buf.remaining() > 0 ) {
+            readData( buf );
+        }
+        if ( haveMCOS ) {
+            parseMCOS(mcosData);
+            if ( data.get("@") == mcosData ) {
+                data.remove("@");
+            }
+            for ( Map.Entry<String, MLArray> it : data.entrySet() ) {
+                if ( it.getValue() == mcosData ) {
+                    data.remove(it.getKey());
+                    break;
+                }
+            }
+        }
+        mcosData = null;
     }
 
     private void parseMCOS(MLUInt8 mcosData) throws IOException
@@ -649,13 +654,8 @@ public class MatFileReader
         copy(stream, baos);
         buf = ByteBuffer.wrap(baos.getBuf(), 0, baos.getCount());
 
-        // read in file header
-        readHeader(buf);
-
-        while (buf.remaining() > 0)
-        {
-            readData(buf);
-        }
+        // Do the actual work
+        parseData(buf);
 
         return getContent();
     }
