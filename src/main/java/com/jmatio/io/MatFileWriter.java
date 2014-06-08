@@ -364,6 +364,18 @@ public class MatFileWriter
                     tag.writeTo( dos );
                 }
                 break;
+	    case MLArray.mxINT32_CLASS:
+		tag = new OSArrayTag(MatDataTypes.miINT32,
+			((MLNumericArray<?>)array).getRealByteBuffer() );
+		tag.writeTo( dos );
+
+		if ( array.isComplex() )
+		{
+		    tag = new OSArrayTag(MatDataTypes.miINT32,
+		         ((MLNumericArray<?>)array).getImaginaryByteBuffer() );
+		    tag.writeTo( dos );
+		}
+		break;
             case MLArray.mxINT64_CLASS:
 
                 tag = new OSArrayTag(MatDataTypes.miINT64,
