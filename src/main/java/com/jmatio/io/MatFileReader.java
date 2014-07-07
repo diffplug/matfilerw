@@ -6,6 +6,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.EOFException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.RandomAccessFile;
@@ -477,6 +478,10 @@ public class MatFileReader
                         dos.write(result, 0, len);
                     }
                     while ( i > 0 );
+                }
+                catch (EOFException eofe)
+                {
+                    System.out.println("EOFException detected!");
                 }
                 catch ( IOException e )
                 {
