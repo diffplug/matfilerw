@@ -1,0 +1,36 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.imaginglaboratory</groupId>
+  <artifactId>jmatio</artifactId>
+  <version>1.1</version>
+  <name>JMatIO</name>
+  <description>Matlab's MAT-file I/O API in JAVA. Supports Matlab 5 MAT-flie format reading and writing. Written in pure JAVA.</description>
+  <url>https://github.com/gradusnikov/jmatio</url>
+  <scm>
+  	<url>https://github.com/gradusnikov/jmatio</url>
+  	<connection>scm:svn:https://github.com/gradusnikov/jmatio</connection>
+  </scm>
+  
+  <dependencies>
+    <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.11</version>
+        <scope>test</scope>
+    </dependency>
+  </dependencies>
+  
+  <build>
+    <plugins>
+        <plugin>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <source>1.7</source>
+              <target>1.7</target>
+            </configuration>
+          </plugin>
+    </plugins>
+  </build>
+  
+</project>
