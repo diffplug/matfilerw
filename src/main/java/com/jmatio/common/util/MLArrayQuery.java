@@ -10,9 +10,17 @@ import com.jmatio.types.MLNumericArray;
 import com.jmatio.types.MLObject;
 import com.jmatio.types.MLStructure;
 
+/**
+ * The JMatIO query parser. Allows to use Matlab-like syntax to access {@link MLArray} objects. 
+ * <p>
+ * 
+ * @author wgradkowski
+ *
+ */
 public class MLArrayQuery
 {
     private String queryString;
+    
     private static final String regexp = "([a-zA-Z0-9]+)(\\(([0-9]+|:)(,([0-9:]+|:))?\\))?\\.?";
     private static final Pattern pat = Pattern.compile( regexp );
     
@@ -26,6 +34,13 @@ public class MLArrayQuery
         this.queryString = queryString;
     }
     
+    /**
+     * 
+     * 
+     * @param array
+     * @param query
+     * @return
+     */
     public static Object q( MLArray array, String query )
     {
         MLArrayQuery q = new MLArrayQuery( query );
@@ -33,6 +48,13 @@ public class MLArrayQuery
         return q.query( array );
     }
     
+    /**
+     * Parses the query string and returns the object it refers to.
+     * 
+     * @param array
+     *            source {@link MLArray}
+     * @return query result
+     */
     public Object query( MLArray array )
     {
         Matcher mat = pat.matcher( queryString );
@@ -44,7 +66,7 @@ public class MLArrayQuery
         
         while ( mat.find() )
         {
-            String name = mat.group( 1 );
+            String name   = mat.group( 1 );
             String rangeM = mat.group( 3 );
             String rangeN = mat.group( 5 );
             
@@ -57,7 +79,7 @@ public class MLArrayQuery
                 
                 if ( !current.getName().equals( name ) && !current.getName().equals( "@" ) )
                 {
-                    throw new RuntimeException();
+                    throw new RuntimeException("No such array or field <" + name + "> in <" + (current != null ? current.getName() : "/") + ">" );
                 }
                 
                 prevM = m;
@@ -122,7 +144,20 @@ public class MLArrayQuery
         
         return getContent(current, prevM, prevN );
     }
-    
+
+    /**
+     * Returns the content of the field/cell/object.
+     * 
+     * @param array
+     *            the parent structure/cell
+     * @param m
+     *            column or -1
+     * @param n
+     *            row or -1
+     * @return if both m and n are -1, returns {@link MLArray}, if n is -1, returns
+     *         content under index m, if both m and n are not-negative, returns
+     *         content of (m,n)
+     */
     public Object getContent( MLArray array, int m, int n )
     {
         int type = array.getType();
@@ -190,7 +225,8 @@ public class MLArrayQuery
         }
         
         return result;
-        
     }
+    
+
     
 }
