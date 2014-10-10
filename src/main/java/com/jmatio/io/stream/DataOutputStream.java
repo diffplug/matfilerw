@@ -1,4 +1,4 @@
-package com.jmatio.io;
+package com.jmatio.io.stream;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -21,7 +21,7 @@ interface DataOutputStream
      * @return the {@link ByteBuffer}
      * @throws IOException
      */
-    public abstract ByteBuffer getByteBuffer() throws IOException;
+    public abstract ByteBuffer buffer() throws IOException;
 
     /**
      * Writes a sequence of bytes to this stream from the given buffer.

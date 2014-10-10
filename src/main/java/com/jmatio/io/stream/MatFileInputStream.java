@@ -1,4 +1,4 @@
-package com.jmatio.io;
+package com.jmatio.io.stream;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -11,7 +11,7 @@ import com.jmatio.types.ByteStorageSupport;
  * 
  * @author Wojciech Gradkowski <wgradkowski@gmail.com>
  */
-class MatFileInputStream
+public class MatFileInputStream
 {
     private final int type;
     private final ByteBuffer buf;

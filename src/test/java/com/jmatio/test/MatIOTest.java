@@ -3,10 +3,8 @@ package com.jmatio.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,11 +14,10 @@ import java.util.Map;
 
 import junit.framework.JUnit4TestAdapter;
 
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import sun.org.mozilla.javascript.internal.UintMap;
 
 import com.jmatio.io.MatFileFilter;
 import com.jmatio.io.MatFileIncrementalWriter;
@@ -52,6 +49,12 @@ public class MatIOTest
     
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();
+    
+    @After
+    public void tearDown()
+    {
+        System.gc();
+    }
     
     
     public static junit.framework.Test suite()

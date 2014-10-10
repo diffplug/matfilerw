@@ -1,19 +1,19 @@
 /**
  * 
  */
-package com.jmatio.io;
+package com.jmatio.io.stream;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-class ByteBufferInputStream extends InputStream
+public class ByteBufferInputStream extends InputStream
 {
     private ByteBuffer buf;
 
-    private int limit;
+    private long limit;
 
-    public ByteBufferInputStream(final ByteBuffer buf, final int limit)
+    public ByteBufferInputStream(final ByteBuffer buf, final long limit)
     {
         this.buf = buf;
         this.limit = limit;
@@ -38,7 +38,7 @@ class ByteBufferInputStream extends InputStream
         {
             return -1;
         }
-        len = Math.min(len, limit);
+        len = (int) Math.min(len, limit);
         // Read only what's left
         buf.get(bytes, off, len);
         limit -= len;

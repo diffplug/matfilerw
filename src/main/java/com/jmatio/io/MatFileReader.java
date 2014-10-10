@@ -1,12 +1,8 @@
 package com.jmatio.io;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
@@ -18,12 +14,16 @@ import java.nio.channels.FileChannel;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.zip.InflaterInputStream;
 
 import com.jmatio.common.MatDataTypes;
+import com.jmatio.io.stream.BufferedOutputStream;
+import com.jmatio.io.stream.ByteBufferInputStream;
+import com.jmatio.io.stream.ByteBufferedOutputStream;
+import com.jmatio.io.stream.FileBufferedOutputStream;
+import com.jmatio.io.stream.MatFileInputStream;
 import com.jmatio.types.ByteStorageSupport;
 import com.jmatio.types.MLArray;
 import com.jmatio.types.MLCell;
@@ -453,7 +453,7 @@ public class MatFileReader
         switch ( tag.type )
         {
             case MatDataTypes.miCOMPRESSED:
-                int numOfBytes = tag.size;
+                long numOfBytes = tag.size;
                 //inflate and recur
                 if ( buf.remaining() < numOfBytes )
                 {
@@ -466,7 +466,9 @@ public class MatFileReader
                 //process data decompression
                 byte[] result = new byte[1024];
                 
-                HeapBufferDataOutputStream dos = new HeapBufferDataOutputStream();
+                // use direct buffer allocation
+//                BufferedOutputStream dos = new FileBufferedOutputStream();
+                BufferedOutputStream dos = new ByteBufferedOutputStream( tag.size, false );
                 int i;
                 try
                 {
@@ -488,7 +490,8 @@ public class MatFileReader
                     dos.flush();
                 }
                 //create a ByteBuffer from the deflated data
-                ByteBuffer out = dos.getByteBuffer();
+                ByteBuffer out = dos.buffer();
+                out.rewind();
                 
                 //with proper byte ordering
                 out.order( byteOrder );

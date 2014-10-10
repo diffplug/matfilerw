@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.jmatio.io;
+package com.jmatio.io.stream;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,15 +20,15 @@ import com.jmatio.types.MLArray;
  *         href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
  * 
  */
-class FileBufferedDataOutputStream extends OutputStream implements DataOutputStream 
+public class FileBufferedOutputStream extends BufferedOutputStream
 {
     private static final int BUFFER_SIZE = 1024;
     private ByteBuffer buf;
-    private final FileChannel rwChannel;
-    private final RandomAccessFile raFile;
+    private FileChannel rwChannel;
+    private RandomAccessFile raFile;
     private final File file;
     
-    public FileBufferedDataOutputStream() throws IOException
+    public FileBufferedOutputStream() throws IOException
     {
         file = File.createTempFile( "jmatio-", null );
         file.deleteOnExit();
@@ -37,7 +37,7 @@ class FileBufferedDataOutputStream extends OutputStream implements DataOutputStr
         buf = ByteBuffer.allocate( BUFFER_SIZE );
     }
     
-    public FileBufferedDataOutputStream( MLArray array ) throws IOException
+    public FileBufferedOutputStream( MLArray array ) throws IOException
     {
         file = File.createTempFile( "jmatio-" + array.getName() + "-", null );
         file.deleteOnExit();
@@ -108,6 +108,8 @@ class FileBufferedDataOutputStream extends OutputStream implements DataOutputStr
         }
         
         raFile.close();
+        rwChannel = null;
+        raFile = null;
     }
 
     /* (non-Javadoc)
@@ -127,7 +129,7 @@ class FileBufferedDataOutputStream extends OutputStream implements DataOutputStr
     /* (non-Javadoc)
      * @see com.jmatio.io.DataOutputStream#size()
      */
-    public int size() throws IOException
+    public long size() throws IOException
     {
         flush();
         
@@ -137,7 +139,8 @@ class FileBufferedDataOutputStream extends OutputStream implements DataOutputStr
     /* (non-Javadoc)
      * @see com.jmatio.io.DataOutputStream#getByteBuffer()
      */
-    public ByteBuffer getByteBuffer() throws IOException
+    @Override
+    public ByteBuffer buffer() throws IOException
     {
         return rwChannel.map( FileChannel.MapMode.READ_ONLY, 0, file.length() );
     }
