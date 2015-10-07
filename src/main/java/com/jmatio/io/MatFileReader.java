@@ -43,7 +43,6 @@ import com.jmatio.common.MatDataTypes;
 import com.jmatio.io.stream.BufferedOutputStream;
 import com.jmatio.io.stream.ByteBufferInputStream;
 import com.jmatio.io.stream.ByteBufferedOutputStream;
-import com.jmatio.io.stream.FileBufferedOutputStream;
 import com.jmatio.io.stream.MatFileInputStream;
 import com.jmatio.types.ByteStorageSupport;
 import com.jmatio.types.MLArray;
@@ -1075,20 +1074,6 @@ public class MatFileReader {
 
 			return new String(bytes, "UTF-8");
 
-		}
-
-		public char[] readToCharArray() throws IOException {
-			//allocate memory for array elements
-			int elements = size / sizeOf();
-			char[] ac = new char[elements];
-
-			for (int i = 0; i < elements; i++) {
-				ac[i] = mfis.readChar();
-			}
-
-			//skip padding
-			mfis.skip(padding);
-			return ac;
 		}
 	}
 }

@@ -99,6 +99,7 @@ public class MatFileWriter {
 	 * @throws IOException
 	 * @throws DataFormatException
 	 */
+	@SuppressWarnings("resource") // the channel is closed after writing
 	public MatFileWriter(File file, Collection<MLArray> data) throws IOException {
 		this((new FileOutputStream(file)).getChannel(), data);
 	}
