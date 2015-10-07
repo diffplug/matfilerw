@@ -92,7 +92,7 @@ public class MLArrayQuery {
 				current = array;
 
 				if (!current.getName().equals(name) && !current.getName().equals("@")) {
-					throw new RuntimeException("No such array or field <" + name + "> in <" + (current != null ? current.getName() : "/") + ">");
+					throw new RuntimeException("No such array or field <" + name + "> in <" + current.getName() + ">");
 				}
 
 				prevM = m;
