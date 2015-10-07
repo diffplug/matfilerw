@@ -282,7 +282,7 @@ public class MatFileReader {
 				int numberOfBlocks = filesize / DIRECT_BUFFER_LIMIT + ((filesize % DIRECT_BUFFER_LIMIT) > 0 ? 1 : 0);
 				if (numberOfBlocks > 1) {
 					ByteBuffer tempByteBuffer = ByteBuffer.allocateDirect(DIRECT_BUFFER_LIMIT);
-					for (int block = 0; block < numberOfBlocks; block++) {
+					for (long block = 0; block < numberOfBlocks; block++) {
 						tempByteBuffer.clear();
 						roChannel.read(tempByteBuffer, block * DIRECT_BUFFER_LIMIT);
 						tempByteBuffer.flip();
