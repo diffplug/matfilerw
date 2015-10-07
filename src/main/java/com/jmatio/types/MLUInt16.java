@@ -21,41 +21,25 @@
  */
 package com.jmatio.types;
 
-import java.io.ObjectInputStream;
-import java.nio.ByteBuffer;
+public class MLUInt16 extends MLInt16 {
 
-import com.jmatio.io.stream.ByteBufferInputStream;
-
-@SuppressWarnings("rawtypes")
-public class MLJavaObject extends MLArray {
-
-	private final String className;
-	private final MLNumericArray content;
-
-	public MLJavaObject(String name, String className, MLNumericArray content) {
-		super(name, new int[]{1, 1}, MLArray.mxOPAQUE_CLASS, 0);
-
-		this.className = className;
-		this.content = content;
+	public MLUInt16(String name, int[] dims, int type, int attributes) {
+		super(name, dims, type, attributes);
 	}
 
-	public String getClassName() {
-		return className;
+	public MLUInt16(String name, Short[] vals, int m) {
+		super(name, vals, m);
 	}
 
-	public ByteBuffer getContent() {
-		return content.getRealByteBuffer();
+	public MLUInt16(String name, int[] dims) {
+		super(name, dims);
 	}
 
-	/** Attempts to instantiate the Java Object, and all kinds of stuff can go wrong. */
-	public Object instantiateObject() throws Exception {
-		// de-serialize object
-		ObjectInputStream ois = new ObjectInputStream(
-				new ByteBufferInputStream(content.getRealByteBuffer(), content.getRealByteBuffer().limit()));
-		try {
-			return ois.readObject();
-		} finally {
-			ois.close();
-		}
+	public MLUInt16(String name, short[][] vals) {
+		super(name, vals);
+	}
+
+	public MLUInt16(String name, short[] vals, int m) {
+		super(name, vals, m);
 	}
 }
