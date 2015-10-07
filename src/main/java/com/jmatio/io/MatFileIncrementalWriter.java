@@ -1,5 +1,25 @@
+/*
+ * Copyright (c) 2006, Wojciech Gradkowski
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
+ *  - Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ *    disclaimer.
+ *  - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+ *    following disclaimer in the documentation and/or other materials provided with the distribution.
+ *  - Neither the name of JMatIO nor the names of its contributors may be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package com.jmatio.io;
-
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -62,451 +82,407 @@ import com.jmatio.types.MLStructure;
  * 
  * @author 
  */
-public class MatFileIncrementalWriter
-{
-//    private static final Logger logger = Logger.getLogger(MatFileWriter.class);
-    private WritableByteChannel channel = null;
-    
-    private boolean headerWritten = false;
-    private boolean isStillValid = false;
-    private Set<String> varNames = new TreeSet<String>();
+public class MatFileIncrementalWriter {
+	//    private static final Logger logger = Logger.getLogger(MatFileWriter.class);
+	private WritableByteChannel channel = null;
+
+	private boolean headerWritten = false;
+	private boolean isStillValid = false;
+	private Set<String> varNames = new TreeSet<String>();
+
 	/**
-     * Creates a writer to a file given the filename.
-     * 
-     * @param fileName - name of ouput file
-     * @throws IOException
-     * @throws DataFormatException
-     */
-    public MatFileIncrementalWriter(String fileName) throws IOException
-    {
-        this( new File(fileName) );
-    }
-    /**
-     * Creats a writer to a file given the File object.
-     * 
-     * @param file - an output <code>File</code>
-     * @throws IOException
-     * @throws DataFormatException
-     */
-    public MatFileIncrementalWriter(File file) throws IOException
-    {
-        this( (new FileOutputStream(file)).getChannel());
-    }
-    /**
-     * Creates a writer for a file, given an output channel to the file..
-     * 
-     * Writes MAT-file header and compressed data (<code>miCOMPRESSED</code>).
-     * 
-     * @param chan - <code>WritableByteChannel</code>
-     * @param data - <code>Collection</code> of <code>MLArray</code> elements
-     * @throws IOException
-     */
-    public MatFileIncrementalWriter(WritableByteChannel chan) throws IOException
-    {
-    	this.channel = chan;
-    	isStillValid = true;
-    }
-    
-    public synchronized void write(MLArray data)
-      throws IOException
-    {
-        String vName = data.getName();
-        if (varNames.contains(vName))
-        {
-        	throw new IllegalArgumentException("Error: variable " + vName + " specified more than once for file input.");
-        }
-        try
-        {
-            //write the header, but only once.
-        	if (!headerWritten)
-        	{
-        		writeHeader(channel);
-        	}
-            
-            //prepare buffer for MATRIX data
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            DataOutputStream dos = new DataOutputStream( baos );
-            //write MATRIX bytes into buffer
-            writeMatrix( dos, data );
-            
-            //compress data to save storage
-            Deflater compresser = new Deflater();
-            
-            byte[] input = baos.toByteArray();
-            
-            ByteArrayOutputStream compressed = new ByteArrayOutputStream();
-            DataOutputStream dout = new DataOutputStream(new DeflaterOutputStream(compressed, compresser));
-            
-            dout.write(input);
-            
-            dout.close();
-            compressed.close();
-            
-            //write COMPRESSED tag and compressed data into output channel
-            byte[] compressedBytes = compressed.toByteArray();
-            ByteBuffer buf = ByteBuffer.allocateDirect(2 * 4 /* Int size */ + compressedBytes.length);
-            buf.putInt( MatDataTypes.miCOMPRESSED );
-            buf.putInt( compressedBytes.length );
-            buf.put( compressedBytes );
-            
-            buf.flip();
-            channel.write( buf );
-        }
-        catch ( IOException e )
-        {
-            throw e;
-        }
-        finally
-        {
-        }
-    }
-    
-    /**
-     * Writes <code>MLArrays</code> into <code>WritableByteChannel</code>.
-     * 
-     * @param channel
-     *            the channel to write to
-     * @param data
-     *            the collection of <code>{@link MLArray}</code> objects
-     * @throws IOException
-     *             if writing fails
-     */
-    public synchronized void write( Collection<MLArray> data) throws IOException
-    {
-        try
-        {
-           
-            //write data
-            for ( MLArray matrix : data )
-            {
-            	write(matrix);
-            }
-        }
-        catch ( IllegalArgumentException iae)
-        {
-        	isStillValid = false;
-        	throw iae;
-        }
-        catch ( IOException e )
-        {
-            throw e;
-        }
-    }
-    
-    public synchronized void close() throws IOException
-    {
-    	channel.close();
-    }
-    
-    /**
-     * Writes MAT-file header into <code>OutputStream</code>
-     * @param os <code>OutputStream</code>
-     * @throws IOException
-     */
-    private void writeHeader(WritableByteChannel channel) throws IOException
-    {
-        //write descriptive text
-        MatFileHeader header = MatFileHeader.createHeader();
-        char[] dest = new char[116];
-        char[] src = header.getDescription().toCharArray();
-        System.arraycopy(src, 0, dest, 0, src.length);
-        
-        byte[] endianIndicator = header.getEndianIndicator();
-        
-        ByteBuffer buf = ByteBuffer.allocateDirect(dest.length * 2 /* Char size */ + 2 + endianIndicator.length);
-        
-        for ( int i = 0; i < dest.length; i++ )
-        {
-            buf.put( (byte)dest[i] );
-        }
-        //write subsyst data offset
-        buf.position( buf.position() + 8);
-        
-        //write version
-        int version = header.getVersion();
-        buf.put( (byte)(version >> 8) );
-        buf.put( (byte)version );
-        
-        buf.put( endianIndicator );
-        
-        buf.flip();
-        channel.write(buf);
-        
-        headerWritten = true;
-    }
-    
-    /**
-     * Writes MATRIX into <code>OutputStream</code>.
-     * 
-     * @param os - <code>OutputStream</code>
-     * @param array - a <code>MLArray</code>
-     * @throws IOException
-     */
-    private void writeMatrix(DataOutputStream output, MLArray array) throws IOException
-    {   
-        OSArrayTag tag;
-        ByteArrayOutputStream buffer;         
-        DataOutputStream bufferDOS;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
-        
-        //flags
-        writeFlags(dos, array);
+	 * Creates a writer to a file given the filename.
+	 * 
+	 * @param fileName - name of ouput file
+	 * @throws IOException
+	 * @throws DataFormatException
+	 */
+	public MatFileIncrementalWriter(String fileName) throws IOException {
+		this(new File(fileName));
+	}
 
-        //dimensions
-        writeDimensions(dos, array);
-        
-        //array name
-        writeName(dos, array);
-        
-        switch ( array.getType() )
-        {
-            case MLArray.mxCHAR_CLASS:
-                //write char data
-                buffer = new ByteArrayOutputStream();
-                bufferDOS = new DataOutputStream(buffer);
-                Character[] ac = ((MLChar)array).exportChar();
-                for ( int i = 0; i < ac.length; i++ )
-                {
-                    bufferDOS.writeByte( (byte)ac[i].charValue() );
-                }
-                tag = new OSArrayTag(MatDataTypes.miUTF8, buffer.toByteArray() );
-                tag.writeTo( dos );
-                
-                break;
-            case MLArray.mxDOUBLE_CLASS:
-                
-                tag = new OSArrayTag(MatDataTypes.miDOUBLE, 
-                                ((MLNumericArray<?>)array).getRealByteBuffer() );
-                tag.writeTo( dos );
-                
-                //write real imaginary
-                if ( array.isComplex() )
-                {
-                    tag = new OSArrayTag(MatDataTypes.miDOUBLE, 
-                            ((MLNumericArray<?>)array).getImaginaryByteBuffer() );
-                    tag.writeTo( dos );
-                }
-                break;
-            case MLArray.mxUINT8_CLASS:
-                
-                tag = new OSArrayTag(MatDataTypes.miUINT8, 
-                        ((MLNumericArray<?>)array).getRealByteBuffer() );
-                tag.writeTo( dos );
-                
-                //write real imaginary
-                if ( array.isComplex() )
-                {
-                    tag = new OSArrayTag(MatDataTypes.miUINT8, 
-                            ((MLNumericArray<?>)array).getImaginaryByteBuffer() );
-                    tag.writeTo( dos );
-                }
-                break;
-            case MLArray.mxINT8_CLASS:
-                
-                tag = new OSArrayTag(MatDataTypes.miINT8, 
-                        ((MLNumericArray<?>)array).getRealByteBuffer() );
-                tag.writeTo( dos );
-                
-                //write real imaginary
-                if ( array.isComplex() )
-                {
-                    tag = new OSArrayTag(MatDataTypes.miINT8, 
-                            ((MLNumericArray<?>)array).getImaginaryByteBuffer() );
-                    tag.writeTo( dos );
-                }
-                break;
-            case MLArray.mxINT16_CLASS:
-                
-                tag = new OSArrayTag(MatDataTypes.miINT16, 
-                        ((MLNumericArray<?>)array).getRealByteBuffer() );
-                tag.writeTo( dos );
-                
-                //write real imaginary
-                if ( array.isComplex() )
-                {
-                    tag = new OSArrayTag(MatDataTypes.miINT16, 
-                            ((MLNumericArray<?>)array).getImaginaryByteBuffer() );
-                    tag.writeTo( dos );
-                }
-                break;
-            case MLArray.mxINT64_CLASS:
-                
-                tag = new OSArrayTag(MatDataTypes.miINT64, 
-                        ((MLNumericArray<?>)array).getRealByteBuffer() );
-                tag.writeTo( dos );
-                
-                //write real imaginary
-                if ( array.isComplex() )
-                {
-                    tag = new OSArrayTag(MatDataTypes.miINT64, 
-                            ((MLNumericArray<?>)array).getImaginaryByteBuffer() );
-                    tag.writeTo( dos );
-                }
-                break;
-            case MLArray.mxUINT64_CLASS:
-                
-                tag = new OSArrayTag(MatDataTypes.miUINT64, 
-                        ((MLNumericArray<?>)array).getRealByteBuffer() );
-                tag.writeTo( dos );
-                
-                //write real imaginary
-                if ( array.isComplex() )
-                {
-                    tag = new OSArrayTag(MatDataTypes.miUINT64, 
-                            ((MLNumericArray<?>)array).getImaginaryByteBuffer() );
-                    tag.writeTo( dos );
-                }
-                break;
-            case MLArray.mxSTRUCT_CLASS:
-                //field name length
-                int itag = 4 << 16 | MatDataTypes.miINT32 & 0xffff;
-                dos.writeInt( itag );
-                dos.writeInt( ((MLStructure)array).getMaxFieldLenth() );
-                
-                //get field names
-                tag = new OSArrayTag(MatDataTypes.miINT8, ((MLStructure)array).getKeySetToByteArray() );
-                tag.writeTo( dos );
+	/**
+	 * Creats a writer to a file given the File object.
+	 * 
+	 * @param file - an output <code>File</code>
+	 * @throws IOException
+	 * @throws DataFormatException
+	 */
+	public MatFileIncrementalWriter(File file) throws IOException {
+		this((new FileOutputStream(file)).getChannel());
+	}
 
-                for ( MLArray a : ((MLStructure)array).getAllFields() )
-                {
-                    writeMatrix(dos, a);
-                }
-                break;
-            case MLArray.mxCELL_CLASS:
-                for ( MLArray a : ((MLCell)array).cells() )
-                {
-                    writeMatrix(dos, a);
-                }
-                break;
-            case MLArray.mxSPARSE_CLASS:
-                int[] ai;
-                //write ir
-                buffer = new ByteArrayOutputStream();
-                bufferDOS = new DataOutputStream(buffer);
-                ai = ((MLSparse)array).getIR();
-                for ( int i : ai )
-                {
-                        bufferDOS.writeInt( i );
-                }
-                tag = new OSArrayTag(MatDataTypes.miINT32, buffer.toByteArray() );
-                tag.writeTo( dos );
-                //write jc
-                buffer = new ByteArrayOutputStream();
-                bufferDOS = new DataOutputStream(buffer);
-                ai = ((MLSparse)array).getJC();
-                for ( int i : ai )
-                {
-                        bufferDOS.writeInt( i );
-                }
-                tag = new OSArrayTag(MatDataTypes.miINT32, buffer.toByteArray() );
-                tag.writeTo( dos );
-                //write real
-                buffer = new ByteArrayOutputStream();
-                bufferDOS = new DataOutputStream(buffer);
-                
-                Double[] ad = ((MLSparse)array).exportReal();
-                
-                for ( int i = 0; i < ad.length; i++ )
-                {
-                    bufferDOS.writeDouble( ad[i].doubleValue() );
-                }
-                
-                tag = new OSArrayTag(MatDataTypes.miDOUBLE, buffer.toByteArray() );
-                tag.writeTo( dos );
-                //write real imaginary
-                if ( array.isComplex() )
-                {
-                    buffer = new ByteArrayOutputStream();
-                    bufferDOS = new DataOutputStream(buffer);
-                    ad = ((MLSparse)array).exportImaginary();
-                    for ( int i = 0; i < ad.length; i++ )
-                    {
-                        bufferDOS.writeDouble( ad[i].doubleValue() );
-                    }
-                    tag = new OSArrayTag(MatDataTypes.miDOUBLE, buffer.toByteArray() );
-                    tag.writeTo( dos );
-                }
-                break;
-            default:
-                throw new MatlabIOException("Cannot write matrix of type: " + MLArray.typeToString( array.getType() ));
-                
-        }
-        
-        
-        //write matrix
-        output.writeInt(MatDataTypes.miMATRIX); //matrix tag
-        output.writeInt( baos.size() ); //size of matrix
-        output.write( baos.toByteArray() ); //matrix data
-    }
-    
-    /**
-     * Writes MATRIX flags into <code>OutputStream</code>.
-     * 
-     * @param os - <code>OutputStream</code>
-     * @param array - a <code>MLArray</code>
-     * @throws IOException
-     */
-    private void writeFlags(DataOutputStream os, MLArray array) throws IOException
-    {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        DataOutputStream bufferDOS = new DataOutputStream(buffer);
+	/**
+	 * Creates a writer for a file, given an output channel to the file..
+	 * 
+	 * Writes MAT-file header and compressed data (<code>miCOMPRESSED</code>).
+	 * 
+	 * @param chan - <code>WritableByteChannel</code>
+	 * @param data - <code>Collection</code> of <code>MLArray</code> elements
+	 * @throws IOException
+	 */
+	public MatFileIncrementalWriter(WritableByteChannel chan) throws IOException {
+		this.channel = chan;
+		isStillValid = true;
+	}
 
-        bufferDOS.writeInt( array.getFlags() );
-        
-        if ( array.isSparse() )
-        {
-            bufferDOS.writeInt( ((MLSparse)array).getMaxNZ() );
-        }
-        else
-        {
-            bufferDOS.writeInt( 0 );
-        }
-        OSArrayTag tag = new OSArrayTag(MatDataTypes.miUINT32, buffer.toByteArray() );
-        tag.writeTo( os );
-        
-    }
-    
-    /**
-     * Writes MATRIX dimensions into <code>OutputStream</code>.
-     * 
-     * @param os - <code>OutputStream</code>
-     * @param array - a <code>MLArray</code>
-     * @throws IOException
-     */
-    private void writeDimensions(DataOutputStream os, MLArray array) throws IOException
-    {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        DataOutputStream bufferDOS = new DataOutputStream(buffer);
-        
-        int[] dims = array.getDimensions();
-        for ( int i = 0; i < dims.length; i++ )
-        {
-            bufferDOS.writeInt(dims[i]);
-        }
-        OSArrayTag tag = new OSArrayTag(MatDataTypes.miINT32, buffer.toByteArray() );
-        tag.writeTo( os );
-        
-    }
-    
-    /**
-     * Writes MATRIX name into <code>OutputStream</code>.
-     * 
-     * @param os - <code>OutputStream</code>
-     * @param array - a <code>MLArray</code>
-     * @throws IOException
-     */
-    private void writeName(DataOutputStream os, MLArray array) throws IOException
-    {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        DataOutputStream bufferDOS = new DataOutputStream(buffer);
+	public synchronized void write(MLArray data)
+			throws IOException {
+		String vName = data.getName();
+		if (varNames.contains(vName)) {
+			throw new IllegalArgumentException("Error: variable " + vName + " specified more than once for file input.");
+		}
+		try {
+			//write the header, but only once.
+			if (!headerWritten) {
+				writeHeader(channel);
+			}
 
-        byte[] nameByteArray = array.getNameToByteArray();
-        buffer = new ByteArrayOutputStream();
-        bufferDOS = new DataOutputStream(buffer);
-        bufferDOS.write( nameByteArray );
-        OSArrayTag tag = new OSArrayTag(MatDataTypes.miINT8, buffer.toByteArray() );
-        tag.writeTo( os );
-    }
-    
+			//prepare buffer for MATRIX data
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			DataOutputStream dos = new DataOutputStream(baos);
+			//write MATRIX bytes into buffer
+			writeMatrix(dos, data);
+
+			//compress data to save storage
+			Deflater compresser = new Deflater();
+
+			byte[] input = baos.toByteArray();
+
+			ByteArrayOutputStream compressed = new ByteArrayOutputStream();
+			DataOutputStream dout = new DataOutputStream(new DeflaterOutputStream(compressed, compresser));
+
+			dout.write(input);
+
+			dout.close();
+			compressed.close();
+
+			//write COMPRESSED tag and compressed data into output channel
+			byte[] compressedBytes = compressed.toByteArray();
+			ByteBuffer buf = ByteBuffer.allocateDirect(2 * 4 /* Int size */ + compressedBytes.length);
+			buf.putInt(MatDataTypes.miCOMPRESSED);
+			buf.putInt(compressedBytes.length);
+			buf.put(compressedBytes);
+
+			buf.flip();
+			channel.write(buf);
+		} catch (IOException e) {
+			throw e;
+		} finally {}
+	}
+
+	/**
+	 * Writes <code>MLArrays</code> into <code>WritableByteChannel</code>.
+	 * 
+	 * @param channel
+	 *            the channel to write to
+	 * @param data
+	 *            the collection of <code>{@link MLArray}</code> objects
+	 * @throws IOException
+	 *             if writing fails
+	 */
+	public synchronized void write(Collection<MLArray> data) throws IOException {
+		try {
+
+			//write data
+			for (MLArray matrix : data) {
+				write(matrix);
+			}
+		} catch (IllegalArgumentException iae) {
+			isStillValid = false;
+			throw iae;
+		} catch (IOException e) {
+			throw e;
+		}
+	}
+
+	public synchronized void close() throws IOException {
+		channel.close();
+	}
+
+	/**
+	 * Writes MAT-file header into <code>OutputStream</code>
+	 * @param os <code>OutputStream</code>
+	 * @throws IOException
+	 */
+	private void writeHeader(WritableByteChannel channel) throws IOException {
+		//write descriptive text
+		MatFileHeader header = MatFileHeader.createHeader();
+		char[] dest = new char[116];
+		char[] src = header.getDescription().toCharArray();
+		System.arraycopy(src, 0, dest, 0, src.length);
+
+		byte[] endianIndicator = header.getEndianIndicator();
+
+		ByteBuffer buf = ByteBuffer.allocateDirect(dest.length * 2 /* Char size */ + 2 + endianIndicator.length);
+
+		for (int i = 0; i < dest.length; i++) {
+			buf.put((byte) dest[i]);
+		}
+		//write subsyst data offset
+		buf.position(buf.position() + 8);
+
+		//write version
+		int version = header.getVersion();
+		buf.put((byte) (version >> 8));
+		buf.put((byte) version);
+
+		buf.put(endianIndicator);
+
+		buf.flip();
+		channel.write(buf);
+
+		headerWritten = true;
+	}
+
+	/**
+	 * Writes MATRIX into <code>OutputStream</code>.
+	 * 
+	 * @param os - <code>OutputStream</code>
+	 * @param array - a <code>MLArray</code>
+	 * @throws IOException
+	 */
+	private void writeMatrix(DataOutputStream output, MLArray array) throws IOException {
+		OSArrayTag tag;
+		ByteArrayOutputStream buffer;
+		DataOutputStream bufferDOS;
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(baos);
+
+		//flags
+		writeFlags(dos, array);
+
+		//dimensions
+		writeDimensions(dos, array);
+
+		//array name
+		writeName(dos, array);
+
+		switch (array.getType()) {
+		case MLArray.mxCHAR_CLASS:
+			//write char data
+			buffer = new ByteArrayOutputStream();
+			bufferDOS = new DataOutputStream(buffer);
+			Character[] ac = ((MLChar) array).exportChar();
+			for (int i = 0; i < ac.length; i++) {
+				bufferDOS.writeByte((byte) ac[i].charValue());
+			}
+			tag = new OSArrayTag(MatDataTypes.miUTF8, buffer.toByteArray());
+			tag.writeTo(dos);
+
+			break;
+		case MLArray.mxDOUBLE_CLASS:
+
+			tag = new OSArrayTag(MatDataTypes.miDOUBLE,
+					((MLNumericArray<?>) array).getRealByteBuffer());
+			tag.writeTo(dos);
+
+			//write real imaginary
+			if (array.isComplex()) {
+				tag = new OSArrayTag(MatDataTypes.miDOUBLE,
+						((MLNumericArray<?>) array).getImaginaryByteBuffer());
+				tag.writeTo(dos);
+			}
+			break;
+		case MLArray.mxUINT8_CLASS:
+
+			tag = new OSArrayTag(MatDataTypes.miUINT8,
+					((MLNumericArray<?>) array).getRealByteBuffer());
+			tag.writeTo(dos);
+
+			//write real imaginary
+			if (array.isComplex()) {
+				tag = new OSArrayTag(MatDataTypes.miUINT8,
+						((MLNumericArray<?>) array).getImaginaryByteBuffer());
+				tag.writeTo(dos);
+			}
+			break;
+		case MLArray.mxINT8_CLASS:
+
+			tag = new OSArrayTag(MatDataTypes.miINT8,
+					((MLNumericArray<?>) array).getRealByteBuffer());
+			tag.writeTo(dos);
+
+			//write real imaginary
+			if (array.isComplex()) {
+				tag = new OSArrayTag(MatDataTypes.miINT8,
+						((MLNumericArray<?>) array).getImaginaryByteBuffer());
+				tag.writeTo(dos);
+			}
+			break;
+		case MLArray.mxINT16_CLASS:
+
+			tag = new OSArrayTag(MatDataTypes.miINT16,
+					((MLNumericArray<?>) array).getRealByteBuffer());
+			tag.writeTo(dos);
+
+			//write real imaginary
+			if (array.isComplex()) {
+				tag = new OSArrayTag(MatDataTypes.miINT16,
+						((MLNumericArray<?>) array).getImaginaryByteBuffer());
+				tag.writeTo(dos);
+			}
+			break;
+		case MLArray.mxINT64_CLASS:
+
+			tag = new OSArrayTag(MatDataTypes.miINT64,
+					((MLNumericArray<?>) array).getRealByteBuffer());
+			tag.writeTo(dos);
+
+			//write real imaginary
+			if (array.isComplex()) {
+				tag = new OSArrayTag(MatDataTypes.miINT64,
+						((MLNumericArray<?>) array).getImaginaryByteBuffer());
+				tag.writeTo(dos);
+			}
+			break;
+		case MLArray.mxUINT64_CLASS:
+
+			tag = new OSArrayTag(MatDataTypes.miUINT64,
+					((MLNumericArray<?>) array).getRealByteBuffer());
+			tag.writeTo(dos);
+
+			//write real imaginary
+			if (array.isComplex()) {
+				tag = new OSArrayTag(MatDataTypes.miUINT64,
+						((MLNumericArray<?>) array).getImaginaryByteBuffer());
+				tag.writeTo(dos);
+			}
+			break;
+		case MLArray.mxSTRUCT_CLASS:
+			//field name length
+			int itag = 4 << 16 | MatDataTypes.miINT32 & 0xffff;
+			dos.writeInt(itag);
+			dos.writeInt(((MLStructure) array).getMaxFieldLenth());
+
+			//get field names
+			tag = new OSArrayTag(MatDataTypes.miINT8, ((MLStructure) array).getKeySetToByteArray());
+			tag.writeTo(dos);
+
+			for (MLArray a : ((MLStructure) array).getAllFields()) {
+				writeMatrix(dos, a);
+			}
+			break;
+		case MLArray.mxCELL_CLASS:
+			for (MLArray a : ((MLCell) array).cells()) {
+				writeMatrix(dos, a);
+			}
+			break;
+		case MLArray.mxSPARSE_CLASS:
+			int[] ai;
+			//write ir
+			buffer = new ByteArrayOutputStream();
+			bufferDOS = new DataOutputStream(buffer);
+			ai = ((MLSparse) array).getIR();
+			for (int i : ai) {
+				bufferDOS.writeInt(i);
+			}
+			tag = new OSArrayTag(MatDataTypes.miINT32, buffer.toByteArray());
+			tag.writeTo(dos);
+			//write jc
+			buffer = new ByteArrayOutputStream();
+			bufferDOS = new DataOutputStream(buffer);
+			ai = ((MLSparse) array).getJC();
+			for (int i : ai) {
+				bufferDOS.writeInt(i);
+			}
+			tag = new OSArrayTag(MatDataTypes.miINT32, buffer.toByteArray());
+			tag.writeTo(dos);
+			//write real
+			buffer = new ByteArrayOutputStream();
+			bufferDOS = new DataOutputStream(buffer);
+
+			Double[] ad = ((MLSparse) array).exportReal();
+
+			for (int i = 0; i < ad.length; i++) {
+				bufferDOS.writeDouble(ad[i].doubleValue());
+			}
+
+			tag = new OSArrayTag(MatDataTypes.miDOUBLE, buffer.toByteArray());
+			tag.writeTo(dos);
+			//write real imaginary
+			if (array.isComplex()) {
+				buffer = new ByteArrayOutputStream();
+				bufferDOS = new DataOutputStream(buffer);
+				ad = ((MLSparse) array).exportImaginary();
+				for (int i = 0; i < ad.length; i++) {
+					bufferDOS.writeDouble(ad[i].doubleValue());
+				}
+				tag = new OSArrayTag(MatDataTypes.miDOUBLE, buffer.toByteArray());
+				tag.writeTo(dos);
+			}
+			break;
+		default:
+			throw new MatlabIOException("Cannot write matrix of type: " + MLArray.typeToString(array.getType()));
+
+		}
+
+		//write matrix
+		output.writeInt(MatDataTypes.miMATRIX); //matrix tag
+		output.writeInt(baos.size()); //size of matrix
+		output.write(baos.toByteArray()); //matrix data
+	}
+
+	/**
+	 * Writes MATRIX flags into <code>OutputStream</code>.
+	 * 
+	 * @param os - <code>OutputStream</code>
+	 * @param array - a <code>MLArray</code>
+	 * @throws IOException
+	 */
+	private void writeFlags(DataOutputStream os, MLArray array) throws IOException {
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		DataOutputStream bufferDOS = new DataOutputStream(buffer);
+
+		bufferDOS.writeInt(array.getFlags());
+
+		if (array.isSparse()) {
+			bufferDOS.writeInt(((MLSparse) array).getMaxNZ());
+		} else {
+			bufferDOS.writeInt(0);
+		}
+		OSArrayTag tag = new OSArrayTag(MatDataTypes.miUINT32, buffer.toByteArray());
+		tag.writeTo(os);
+
+	}
+
+	/**
+	 * Writes MATRIX dimensions into <code>OutputStream</code>.
+	 * 
+	 * @param os - <code>OutputStream</code>
+	 * @param array - a <code>MLArray</code>
+	 * @throws IOException
+	 */
+	private void writeDimensions(DataOutputStream os, MLArray array) throws IOException {
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		DataOutputStream bufferDOS = new DataOutputStream(buffer);
+
+		int[] dims = array.getDimensions();
+		for (int i = 0; i < dims.length; i++) {
+			bufferDOS.writeInt(dims[i]);
+		}
+		OSArrayTag tag = new OSArrayTag(MatDataTypes.miINT32, buffer.toByteArray());
+		tag.writeTo(os);
+
+	}
+
+	/**
+	 * Writes MATRIX name into <code>OutputStream</code>.
+	 * 
+	 * @param os - <code>OutputStream</code>
+	 * @param array - a <code>MLArray</code>
+	 * @throws IOException
+	 */
+	private void writeName(DataOutputStream os, MLArray array) throws IOException {
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		DataOutputStream bufferDOS = new DataOutputStream(buffer);
+
+		byte[] nameByteArray = array.getNameToByteArray();
+		buffer = new ByteArrayOutputStream();
+		bufferDOS = new DataOutputStream(buffer);
+		bufferDOS.write(nameByteArray);
+		OSArrayTag tag = new OSArrayTag(MatDataTypes.miINT8, buffer.toByteArray());
+		tag.writeTo(os);
+	}
+
 }
