@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.util.Collection;
+import java.util.List;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
@@ -271,9 +272,9 @@ public class MatFileWriter {
 			//write char data
 			buffer = new ByteArrayOutputStream();
 			bufferDOS = new DataOutputStream(buffer);
-			Character[] ac = ((MLChar) array).exportChar();
-			for (int i = 0; i < ac.length; i++) {
-				String temp = new StringBuffer().append(ac[i].charValue()).toString();
+			List<Character> ac = ((MLChar) array).exportChar();
+			for (int i = 0; i < ac.size(); i++) {
+				String temp = new StringBuffer().append(ac.get(i).charValue()).toString();
 				bufferDOS.write(temp.getBytes("UTF-8"));
 			}
 			tag = new OSArrayTag(MatDataTypes.miUTF8, buffer.toByteArray());

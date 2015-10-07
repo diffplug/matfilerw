@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.zip.DataFormatException;
@@ -261,9 +262,9 @@ public class MatFileIncrementalWriter {
 			//write char data
 			buffer = new ByteArrayOutputStream();
 			bufferDOS = new DataOutputStream(buffer);
-			Character[] ac = ((MLChar) array).exportChar();
-			for (int i = 0; i < ac.length; i++) {
-				bufferDOS.writeByte((byte) ac[i].charValue());
+			List<Character> ac = ((MLChar) array).exportChar();
+			for (int i = 0; i < ac.size(); i++) {
+				bufferDOS.writeByte((byte) ac.get(i).charValue());
 			}
 			tag = new OSArrayTag(MatDataTypes.miUTF8, buffer.toByteArray());
 			tag.writeTo(dos);

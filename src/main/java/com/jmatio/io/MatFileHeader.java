@@ -39,7 +39,6 @@ public class MatFileHeader {
 			+ System.getProperty("os.name")
 			+ ", CREATED on: ";
 	public static final int DEFAULT_VERSION = 0x0100;
-	private static final byte[] DEFAULT_ENDIAN_INDICATOR = new byte[]{(byte) 'M', (byte) 'I'};
 
 	private int version;
 	private String description;
@@ -55,7 +54,8 @@ public class MatFileHeader {
 	public MatFileHeader(String description, int version, byte[] endianIndicator) {
 		this.description = description;
 		this.version = version;
-		this.endianIndicator = endianIndicator;
+		this.endianIndicator = new byte[endianIndicator.length];
+		System.arraycopy(endianIndicator, 0, this.endianIndicator, 0, endianIndicator.length);
 	}
 
 	/**
@@ -73,7 +73,7 @@ public class MatFileHeader {
 	 * 
 	 * @return - a byte array size of 2
 	 */
-	public byte[] getEndianIndicator() {
+	byte[] getEndianIndicator() {
 		return endianIndicator;
 	}
 
@@ -100,7 +100,12 @@ public class MatFileHeader {
 	public static MatFileHeader createHeader() {
 		return new MatFileHeader(DEFAULT_DESCRIPTIVE_TEXT + (new Date()).toString(),
 				DEFAULT_VERSION,
-				DEFAULT_ENDIAN_INDICATOR);
+				DEFAULT_ENDIAN_INDICATOR());
+	}
+
+	/** Returns the default endianness indicator. */
+	private static final byte[] DEFAULT_ENDIAN_INDICATOR() {
+		return new byte[]{(byte) 'M', (byte) 'I'};
 	}
 
 	/* (non-Javadoc)

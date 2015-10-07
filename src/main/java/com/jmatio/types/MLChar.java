@@ -22,6 +22,7 @@
 package com.jmatio.types;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class MLChar extends MLArray {
 	Character[] chars;
@@ -131,8 +132,8 @@ public class MLChar extends MLArray {
 		return chars[getIndex(m, n)];
 	}
 
-	public Character[] exportChar() {
-		return chars;
+	public List<Character> exportChar() {
+		return Arrays.asList(chars);
 	}
 
 	@Override
