@@ -35,7 +35,7 @@ public class MatFileHeader {
 	private static String DEFAULT_DESCRIPTIVE_TEXT = "MATLAB 5.0 MAT-file, Platform: "
 			+ System.getProperty("os.name")
 			+ ", CREATED on: ";
-	private static int DEFAULT_VERSION = 0x0100;
+	public static int DEFAULT_VERSION = 0x0100;
 	private static byte[] DEFAULT_ENDIAN_INDICATOR = new byte[]{(byte) 'M', (byte) 'I'};
 
 	private int version;
