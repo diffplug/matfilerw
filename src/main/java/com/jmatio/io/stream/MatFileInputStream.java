@@ -66,7 +66,7 @@ public class MatFileInputStream {
 		case MatDataTypes.miINT16:
 			return (int) buf.getShort();
 		case MatDataTypes.miUINT32:
-			return (int) (buf.getInt() & 0xFFFFFFFF);
+			return (int) buf.getInt();
 		case MatDataTypes.miINT32:
 			return (int) buf.getInt();
 		case MatDataTypes.miUINT64:
@@ -98,7 +98,7 @@ public class MatFileInputStream {
 		case MatDataTypes.miINT16:
 			return (char) buf.getShort();
 		case MatDataTypes.miUINT32:
-			return (char) (buf.getInt() & 0xFFFFFFFF);
+			return (char) buf.getInt();
 		case MatDataTypes.miINT32:
 			return (char) buf.getInt();
 		case MatDataTypes.miDOUBLE:
@@ -128,7 +128,7 @@ public class MatFileInputStream {
 		case MatDataTypes.miINT16:
 			return (double) buf.getShort();
 		case MatDataTypes.miUINT32:
-			return (double) (buf.getInt() & 0xFFFFFFFF);
+			return (double) buf.getInt();
 		case MatDataTypes.miINT32:
 			return (double) buf.getInt();
 		case MatDataTypes.miDOUBLE:
@@ -149,7 +149,7 @@ public class MatFileInputStream {
 		case MatDataTypes.miINT16:
 			return (byte) buf.getShort();
 		case MatDataTypes.miUINT32:
-			return (byte) (buf.getInt() & 0xFFFFFFFF);
+			return (byte) buf.getInt();
 		case MatDataTypes.miINT32:
 			return (byte) buf.getInt();
 		case MatDataTypes.miDOUBLE:
@@ -233,7 +233,7 @@ public class MatFileInputStream {
 		case MatDataTypes.miINT16:
 			return (float) buf.getShort();
 		case MatDataTypes.miUINT32:
-			return (float) (buf.getInt() & 0xFFFFFFFF);
+			return (float) buf.getInt();
 		case MatDataTypes.miINT32:
 			return (float) buf.getInt();
 		case MatDataTypes.miSINGLE:
@@ -256,7 +256,7 @@ public class MatFileInputStream {
 		case MatDataTypes.miINT16:
 			return (short) buf.getShort();
 		case MatDataTypes.miUINT32:
-			return (short) (buf.getInt() & 0xFFFFFFFF);
+			return (short) buf.getInt();
 		case MatDataTypes.miINT32:
 			return (short) buf.getInt();
 		case MatDataTypes.miUINT64:
@@ -281,7 +281,7 @@ public class MatFileInputStream {
 		case MatDataTypes.miINT16:
 			return (long) buf.getShort();
 		case MatDataTypes.miUINT32:
-			return (long) (buf.getInt() & 0xFFFFFFFF);
+			return (long) buf.getInt();
 		case MatDataTypes.miINT32:
 			return (long) buf.getInt();
 		case MatDataTypes.miUINT64:
