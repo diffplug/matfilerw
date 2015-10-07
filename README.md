@@ -1,73 +1,29 @@
-jmatio
-======
+# <img align="left" src="jmatio.png"> JMatIO: Read and write .mat files
 
-JMatIO - Matlab's MAT-file I/O in JAVA
+<!---freshmark shields
+output = [
+	link(shield('Maven artifact', 'mavenCentral', '{{group}}:{{name}}', 'blue'), 'https://bintray.com/{{org}}/opensource/{{name}}/view'),
+	link(shield('Latest version', 'latest', '{{stable}}', 'blue'), 'https://github.com/{{org}}/{{name}}/releases/latest'),
+	link(shield('Javadoc', 'javadoc', 'OK', 'blue'), 'https://{{org}}.github.io/{{name}}/javadoc/{{stable}}/'),
+	link(shield('License Apache', 'license', 'BSD', 'blue'), 'https://tldrlegal.com/license/bsd-3-clause-license-(revised)'),
+	'',
+	link(shield('Changelog', 'changelog', '{{version}}', 'brightgreen'), 'CHANGES.md'),
+	link(image('Travis CI', 'https://travis-ci.org/{{org}}/{{name}}.svg?branch=master'), 'https://travis-ci.org/{{org}}/{{name}}')
+	].join('\n');
+-->
+[![Maven artifact](https://img.shields.io/badge/mavenCentral-com.diffplug.matsim%3Ajmatio-blue.svg)](https://bintray.com/diffplug/opensource/jmatio/view)
+[![Latest version](https://img.shields.io/badge/latest-3.2.0-blue.svg)](https://github.com/diffplug/jmatio/releases/latest)
+[![Javadoc](https://img.shields.io/badge/javadoc-OK-blue.svg)](https://diffplug.github.io/jmatio/javadoc/3.2.0/)
+[![License Apache](https://img.shields.io/badge/license-BSD-blue.svg)](https://tldrlegal.com/license/bsd-3-clause-license-(revised))
 
+[![Changelog](https://img.shields.io/badge/changelog-3.3.0--SNAPSHOT-brightgreen.svg)](CHANGES.md)
+[![Travis CI](https://travis-ci.org/diffplug/jmatio.svg?branch=master)](https://travis-ci.org/diffplug/jmatio)
+<!---freshmark /shields -->
 
+JMatIO is a library which allows reading and writing MAT files.  Have a look at [MatIOTest.java](src/test/java/com/jmatio/test/MatIOTest.java?ts=4) to see each part in use.
 
-JMatIO is a JAVA library to read/write/manipulate with Matlab binary
-MAT-files.
+## Acknowledgements
 
-If you would like to comment, improve, critisize the project please 
-email me: wgradkowski@gmail.com 
+This has been forked from the project originally maintained on [SourceForge](http://sourceforge.net/projects/jmatio/), now maintained by the original author on [GitHub](https://github.com/gradusnikov/jmatio).
 
-or visit JMatIO project page at Sourceforge:
-http://www.sourceforge.net/projects/jmatio
-
-Subversion Access
-
-This project's SourceForge.net Subversion repository can be checked out through 
-SVN with the following instruction set:
-
-svn co https://jmatio.svn.sourceforge.net/svnroot/jmatio/trunk jmatio 
-
-Have fun :)
-
-Wojciech Gradkowski
-
-CHANGE LOG:
-
-[09-10-2014]
-+ Changing to maven nature
-+ Adding query parsing
-
-[2012-12-03]
-+ Adding supprot for Java objects and Objects
-+ Performance optimization
-
-[05.10.2007]
-+ Sparse matrix bugfixes by Jonas Pettersson (LU/EAB)
-+ MatFileReader performance enhancements by Eugene Rudoy
-+ new MatFileReader methods added
-
-[02.03.2007]
-+ Regression bug fixed: Double arrays created natively in Matlab are read 
-  incorrectly (reversed byte ordering)
-
-[22.02.2007]
-+ Added support:UInt8 array 
-+ MAJOR reading performance enhancement - reading is as fast as in Matlab now
-+ Removed Log4j references
-
-TODO:
-- Other array types (serialized objects (OPAQUE) is done partially)
-- Writer performance enhancement
-- Documentation and examples
-- Organize JUnit tests
-- Refactor exceptions
-- Make structures and cell arrays more user friendly
-
-NOTE:
-Numerical arrays (MLDouble, MLUint8) are now backed by direct ByteBuffers. For 
-really BIG arrays the maximum heap size for direct buffers may be modified by 
--XX:MaxDirectMemorySize=<size>
-
-
-[some.time.2006]
-Currently supproted data types are:
-+ Double array
-+ Char array
-+ Structure
-+ Cell array
-+ Sparase array
-
+We have made some improvements (see the [changelog](CHANGES.md)), and will maintain this library into the future.  Although this fork is in no way associated with or endorsed by any authors of the original project, we very much appreciate their work!
