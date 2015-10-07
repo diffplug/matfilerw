@@ -82,10 +82,6 @@ import com.jmatio.types.MLUInt8;
  * @see com.jmatio.io.MatFileFilter
  * @author Wojciech Gradkowski (<a href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
  */
-/**
- * @author Wojciech Gradkowski (<a href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
- *
- */
 public class MatFileReader {
 	public static final int MEMORY_MAPPED_FILE = 1;
 	public static final int DIRECT_BYTE_BUFFER = 2;
@@ -94,15 +90,15 @@ public class MatFileReader {
 	/**
 	 * MAT-file header
 	 */
-	private MatFileHeader matFileHeader;
+	MatFileHeader matFileHeader;
 	/**
 	 * Container for red <code>MLArray</code>s
 	 */
-	private Map<String, MLArray> data;
+	Map<String, MLArray> data;
 	/**
 	 * Tells how bytes are organized in the buffer.
 	 */
-	private ByteOrder byteOrder;
+	ByteOrder byteOrder;
 	/**
 	 * Array name filter
 	 */
@@ -242,10 +238,12 @@ public class MatFileReader {
 	 * @throws IOException
 	 *             if error occurs during file processing
 	 */
-	private static final int DIRECT_BUFFER_LIMIT = 1 << 25;
 
-	public synchronized Map<String, MLArray> read(File file, MatFileFilter filter,
-			int policy) throws IOException {
+	public synchronized Map<String, MLArray> read(File file, MatFileFilter filter, int policy) throws IOException {
+		return read(new RandomAccessFile(file, "r"), filter, policy);
+	}
+
+	public synchronized Map<String, MLArray> read(RandomAccessFile raFile, MatFileFilter filter, int policy) throws IOException {
 		this.filter = filter;
 
 		//clear the results
@@ -254,12 +252,10 @@ public class MatFileReader {
 		}
 
 		FileChannel roChannel = null;
-		RandomAccessFile raFile = null;
 		ByteBuffer buf = null;
 		WeakReference<MappedByteBuffer> bufferWeakRef = null;
 		try {
 			//Create a read-only memory-mapped file
-			raFile = new RandomAccessFile(file, "r");
 			roChannel = raFile.getChannel();
 			// until java bug #4715154 is fixed I am not using memory mapped files
 			// The bug disables re-opening the memory mapped files for writing
@@ -340,8 +336,9 @@ public class MatFileReader {
 				}
 			}
 		}
-
 	}
+
+	private static final int DIRECT_BUFFER_LIMIT = 1 << 25;
 
 	/**
 	 * Workaround taken from bug <a
@@ -438,7 +435,7 @@ public class MatFileReader {
 	 *            input byte buffer
 	 * @throws IOException when error occurs while reading the buffer.
 	 */
-	private void readData(ByteBuffer buf) throws IOException {
+	void readData(ByteBuffer buf) throws IOException {
 		//read data
 		ISMatTag tag = new ISMatTag(buf);
 		switch (tag.type) {
@@ -947,7 +944,7 @@ public class MatFileReader {
 	 *             if reading from buffer fails or if this is not a valid
 	 *             MAT-file
 	 */
-	private void readHeader(ByteBuffer buf) throws IOException {
+	void readHeader(ByteBuffer buf) throws IOException {
 		//header values
 		String description;
 		int version;
