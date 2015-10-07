@@ -108,7 +108,7 @@ public class MLSparse extends MLNumericArray<Double> {
 		if (real.containsKey(i)) {
 			return real.get(i);
 		}
-		return new Double(0);
+		return 0.0;
 	}
 
 	/* (non-Javadoc)
@@ -167,7 +167,7 @@ public class MLSparse extends MLNumericArray<Double> {
 		if (imaginary.containsKey(i)) {
 			return imaginary.get(i);
 		}
-		return new Double(0);
+		return 0.0;
 	}
 
 	/* (non-Javadoc)
