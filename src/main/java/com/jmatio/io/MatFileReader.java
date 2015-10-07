@@ -31,7 +31,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -87,8 +86,6 @@ public class MatFileReader {
 	public static final int MEMORY_MAPPED_FILE = 1;
 	public static final int DIRECT_BYTE_BUFFER = 2;
 	public static final int HEAP_BYTE_BUFFER = 4;
-
-	private static final Charset CHARSET_ARRAY_NAME = Charset.forName("UTF-8");
 
 	/**
 	 * MAT-file header
@@ -796,7 +793,7 @@ public class MatFileReader {
 			for (int i = 0; i < dims.length; i++) {
 				nn[i] = (byte) dims[i];
 			}
-			String arrName = new String(nn, CHARSET_ARRAY_NAME);
+			String arrName = new String(nn, MatDataTypes.CHARSET);
 			//System.out.println( "Array name: " + arrName );
 
 			// next tag should be miMatrix
@@ -900,7 +897,7 @@ public class MatFileReader {
 		for (i = 0; i < bytes.length && bytes[i] != 0; i++)
 			;
 
-		return new String(bytes, 0, i);
+		return new String(bytes, 0, i, MatDataTypes.CHARSET);
 
 	}
 

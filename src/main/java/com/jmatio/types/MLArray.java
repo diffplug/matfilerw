@@ -21,6 +21,10 @@
  */
 package com.jmatio.types;
 
+import java.io.UnsupportedEncodingException;
+
+import com.jmatio.common.MatDataTypes;
+
 public class MLArray {
 
 	/* Matlab Array Types (Classes) */
@@ -83,7 +87,11 @@ public class MLArray {
 	}
 
 	public byte[] getNameToByteArray() {
-		return name.getBytes();
+		try {
+			return name.getBytes(MatDataTypes.CHARSET);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public int[] getDimensions() {
