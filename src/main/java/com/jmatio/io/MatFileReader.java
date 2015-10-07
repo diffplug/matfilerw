@@ -455,29 +455,26 @@ public class MatFileReader {
 			// use direct buffer allocation
 			//                BufferedOutputStream dos = new FileBufferedOutputStream();
 			BufferedOutputStream dos = new ByteBufferedOutputStream(tag.size, false);
-			int i;
 			try {
-				do {
-					i = iis.read(result, 0, result.length);
-					int len = Math.max(0, i);
-					dos.write(result, 0, len);
-				} while (i > 0);
-			} catch (IOException e) {
-				throw new MatlabIOException("Could not decompress data: " + e);
-			} finally {
-				iis.close();
-				dos.flush();
-			}
-			//create a ByteBuffer from the deflated data
-			ByteBuffer out = dos.buffer();
-			out.rewind();
-
-			//with proper byte ordering
-			out.order(byteOrder);
-
-			try {
+				int i;
+				try {
+					do {
+						i = iis.read(result, 0, result.length);
+						int len = Math.max(0, i);
+						dos.write(result, 0, len);
+					} while (i > 0);
+				} catch (IOException e) {
+					throw new MatlabIOException("Could not decompress data: " + e);
+				} finally {
+					iis.close();
+					dos.flush();
+				}
+				//create a ByteBuffer from the deflated data
+				ByteBuffer out = dos.buffer();
+				out.rewind();
+				//with proper byte ordering
+				out.order(byteOrder);
 				readData(out);
-
 			} catch (IOException e) {
 				throw e;
 			} finally {
