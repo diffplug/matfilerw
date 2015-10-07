@@ -1,4 +1,4 @@
-# <img align="left" src="jmatio.png"> JMatIO: Read and write .mat files
+# <img align="left" src="jmatio.png"> JMatIO: Read and write MATLAB MAT-files from Java
 
 <!---freshmark shields
 output = [
@@ -21,6 +21,14 @@ output = [
 <!---freshmark /shields -->
 
 JMatIO is a library which allows reading and writing MAT files.  Have a look at [MatIOTest.java](src/test/java/com/jmatio/test/MatIOTest.java?ts=4) to see each part in use.
+
+As far as compatibility, the TL;DR is that it will work with any MAT-File with default savings.  The dirty details are that this library works with `v6` and `v7`, but not `v4` or `v7.3`.
+
+* v4 is the default format before R8
+* v6 is the default format from R8 to R13
+* v7 is the default format from R14 to present (every R20XXX release)
+* MATLAB does not export to v7.3 by default.
+* The [Mathworks website](http://www.mathworks.com/help/matlab/import_export/mat-file-versions.html?refresh=true) has more details.
 
 ## Acknowledgements
 
