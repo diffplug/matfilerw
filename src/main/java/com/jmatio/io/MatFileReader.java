@@ -558,7 +558,7 @@ public class MatFileReader {
 			MLStructure struct = new MLStructure(name, dims, type, attributes);
 
 			//field name lenght - this subelement always uses the compressed data element format
-			tag = new ISMatTag(buf);
+			new ISMatTag(buf);
 			int maxlen = buf.getInt(); //maximum field length
 
 			//////  read fields data as Int8
@@ -839,7 +839,7 @@ public class MatFileReader {
 			struct = new MLStructure(name, dims, type, attributes);
 
 			//field name lenght - this subelement always uses the compressed data element format
-			tag = new ISMatTag(buf);
+			new ISMatTag(buf);
 			maxlen = buf.getInt(); //maximum field length
 
 			//////  read fields data as Int8
