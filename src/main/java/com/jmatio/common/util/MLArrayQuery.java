@@ -105,10 +105,8 @@ public class MLArrayQuery {
 
 			switch (type) {
 			case MLArray.mxOBJECT_CLASS: {
-				MLObject object = (MLObject) current;
-
+				MLObject object = cast(current, MLObject.class);
 				MLArray field = object.getObject().getField(name, prevM, prevN);
-
 				if (field == null) {
 					throw new RuntimeException("no such field: " + name);
 				}
@@ -116,10 +114,8 @@ public class MLArrayQuery {
 			}
 				break;
 			case MLArray.mxSTRUCT_CLASS: {
-				MLStructure struct = (MLStructure) current;
-
+				MLStructure struct = cast(current, MLStructure.class);
 				MLArray field = struct.getField(name, prevM > 0 ? prevM : 0, prevN > 0 ? prevN : 0);
-
 				if (field == null) {
 					throw new RuntimeException("no such field: " + name);
 				}
@@ -127,7 +123,7 @@ public class MLArrayQuery {
 			}
 				break;
 			case MLArray.mxCELL_CLASS: {
-				MLCell mlcell = (MLCell) current;
+				MLCell mlcell = cast(current, MLCell.class);
 				if (m > -1 && n > -1) {
 					current = mlcell.get(m, n);
 				} else if (m > -1) {
@@ -139,7 +135,6 @@ public class MLArrayQuery {
 				break;
 			default:
 			}
-
 			prevM = m;
 			prevN = n;
 		}
@@ -176,7 +171,7 @@ public class MLArrayQuery {
 		case MLArray.mxUINT64_CLASS:
 		case MLArray.mxSINGLE_CLASS:
 		case MLArray.mxDOUBLE_CLASS:
-			MLNumericArray<?> numeric = (MLNumericArray<?>) array;
+			MLNumericArray<?> numeric = cast(array, MLNumericArray.class);
 			if (m > -1 && n > -1) {
 				result = numeric.get(m, n);
 			} else if (m > -1) {
@@ -186,7 +181,7 @@ public class MLArrayQuery {
 			}
 			break;
 		case MLArray.mxCHAR_CLASS:
-			MLChar mlchar = (MLChar) array;
+			MLChar mlchar = cast(array, MLChar.class);
 			if (m > -1 && n > -1) {
 				result = mlchar.getChar(m, n);
 			} else if (m > -1) {
@@ -196,7 +191,7 @@ public class MLArrayQuery {
 			}
 			break;
 		case MLArray.mxCELL_CLASS:
-			MLCell mlcell = (MLCell) array;
+			MLCell mlcell = cast(array, MLCell.class);
 			if (m > -1 && n > -1) {
 				result = getContent(mlcell.get(m, n), 0, -1);
 			} else if (m > -1) {
@@ -208,8 +203,16 @@ public class MLArrayQuery {
 		default:
 			result = array;
 		}
-
 		return result;
 	}
 
+	/** Performs a checked cast to keep FindBugs happy. */
+	@SuppressWarnings("unchecked")
+	private static <T> T cast(Object o, Class<T> clazz) {
+		if (o.getClass().isAssignableFrom(clazz)) {
+			return (T) o;
+		} else {
+			throw new ClassCastException(o.getClass().toString());
+		}
+	}
 }
