@@ -475,13 +475,9 @@ public class MatFileIncrementalWriter {
 	private void writeName(DataOutputStream os, MLArray array) throws IOException {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		DataOutputStream bufferDOS = new DataOutputStream(buffer);
-
 		byte[] nameByteArray = array.getNameToByteArray();
-		buffer = new ByteArrayOutputStream();
-		bufferDOS = new DataOutputStream(buffer);
 		bufferDOS.write(nameByteArray);
 		OSArrayTag tag = new OSArrayTag(MatDataTypes.miINT8, buffer.toByteArray());
 		tag.writeTo(os);
 	}
-
 }
