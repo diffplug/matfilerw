@@ -1,12 +1,13 @@
-*.class
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+# mac stuff
+*.DS_Store
 
-# Package Files #
-*.jar
-*.war
-*.ear
+# gradle stuff
+.gradle/
+build/
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+# Eclipse stuff
+.project
+.classpath
+.settings/
+bin/

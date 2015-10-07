@@ -1,0 +1,220 @@
+plugins {
+	// code formatting
+	id "com.diffplug.gradle.spotless" version "1.3.0"
+	// bintray uploading
+	id "com.jfrog.bintray" version "1.3.1"
+}
+
+repositories {
+	mavenCentral()
+}
+
+//////////
+// JAVA //
+//////////
+apply plugin: 'java'
+
+sourceCompatibility = VER_JAVA
+targetCompatibility = VER_JAVA
+
+dependencies {
+	testCompile "junit:junit:${VER_JUNIT}"
+}
+
+/////////////
+// ECLIPSE //
+/////////////
+apply plugin: 'eclipse'
+eclipse {
+	project {
+		natures 'org.eclipse.pde.PluginNature'
+		natures 'org.eclipse.jdt.core.javanature'
+
+		buildCommand 'org.eclipse.jdt.core.javabuilder'
+		buildCommand 'org.eclipse.pde.ManifestBuilder'
+		buildCommand 'org.eclipse.pde.SchemaBuilder'
+	}
+	classpath {
+		downloadSources true
+		downloadJavadoc true
+	}
+	jdt {
+		sourceCompatibility VER_JAVA
+		targetCompatibility VER_JAVA
+	}
+}
+// always create fresh projects
+tasks.eclipse.dependsOn(cleanEclipse)
+
+////////////
+// FORMAT //
+////////////
+apply plugin: 'com.diffplug.gradle.spotless'
+spotless {
+	java {
+		licenseHeaderFile	'spotless.license.java'			// License header file
+		importOrderFile		'spotless.importorder'			// An import ordering file, exported from Eclipse
+		eclipseFormatFile	'spotless.eclipseformat.xml'	// XML file dumped out by the Eclipse formatter
+		// Eclipse formatter puts excess whitespace after lambda blocks
+		//    funcThatTakesLambdas(x -> {} , y -> {} )	// what Eclipse does
+		//    funcThatTakesLambdas(x -> {}, y -> {})	// what I wish Eclipse did
+		custom 'Lambda fix', { it.replace('} )', '})').replace('} ,', '},') }
+	}
+	format 'misc', {
+		target '**/.gitignore', '**/*.gradle', '**/*.md', '**/*.sh'
+		indentWithTabs()
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
+	freshmark {}
+}
+
+//////////////
+// FINDBUGS //
+//////////////
+apply plugin: 'findbugs'
+findbugs {
+	toolVersion = VER_FINDBUGS
+	sourceSets = [sourceSets.main]	// don't check the test code
+	ignoreFailures = false 	// bug free or it doesn't ship!
+	reportsDir = file('build/findbugs')
+	effort = 'max'			// min|default|max
+	reportLevel = 'low'		// low|medium|high (low = sensitive to even minor mistakes)
+	omitVisitors = []		// bugs that we want to ignore
+}
+// HTML instead of XML
+tasks.withType(FindBugs) {
+	reports {
+		xml.enabled = false
+		html.enabled = true
+	}
+}
+// we'll want the findbugs annotations (they don't have a 3.0.1 version)
+dependencies {
+	compile 'com.google.code.findbugs:annotations:3.0.0'
+	compile 'com.google.code.findbugs:jsr305:3.0.0'
+}
+
+///////////
+// MAVEN //
+///////////
+apply plugin: 'maven-publish'
+
+task sourcesJar(type: Jar) {
+	classifier = 'sources'
+	from sourceSets.main.allJava
+}
+
+// Where it's possible to name parameters and methods clearly enough
+// that javadoc is not necessary, why make the code bigger?
+//
+// Thus, no javadoc warnings.
+def makeLink = { url, text -> "<a href=\"${url}\" style=\"text-transform: none;\">${text}</a>" }
+def javadocInfo = '<h2>' + makeLink("https://github.com/${org}/${name}", "${group}:${name}:${version}") +
+' by ' + makeLink('http://www.diffplug.com', 'DiffPlug') + '</h2>'
+javadoc {
+	options.addStringOption('Xdoclint:none', '-quiet')
+	options.header javadocInfo
+	options.footer javadocInfo
+	options.links('https://docs.oracle.com/javase/8/docs/api/')
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+	classifier = 'javadoc'
+	from javadoc.destinationDir
+}
+
+////////////////
+// PUBLISHING //
+////////////////
+def isSnapshot = project.version.endsWith('-SNAPSHOT')
+// pulls the credentials from either the environment variable or gradle.properties
+def cred = {
+	if (System.env[it] != null) {
+		return System.env[it]
+	} else if (project.hasProperty(it)) {
+		return project[it]
+	} else {
+		return 'unknown_' + it
+	}
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+			artifact sourcesJar
+			artifact javadocJar
+			pom.withXml {
+				// findbugs annotations should have scope "provided"
+				asNode().dependencies.'*'.findAll() { it.groupId.text() == 'com.google.code.findbugs' }.each() { it.scope*.value = 'provided' }
+				// add MavenCentral requirements to the POM
+				asNode().children().last() + {
+					resolveStrategy = Closure.DELEGATE_FIRST
+					name project.name
+					description project.description
+					url "https://github.com/${project.org}/${project.name}"
+					scm {
+						url "https://github.com/${project.org}/${project.name}"
+						connection "scm:git:git://github.com/${project.org}/${project.name}"
+						developerConnection "scm:git:ssh:git@github.com/${project.org}/${project.name}"
+					}
+					licenses {
+						license {
+							name 'The Apache Software License, Version 2.0'
+							url 'http://www.apache.org/license/LICENSE-2.0.txt'
+							distribution 'repo'
+						}
+					}
+					developers {
+						developer {
+							id 'nedtwigg'
+							name 'Ned Twigg'
+							email 'ned.twigg@diffplug.com'
+						}
+					}
+				}
+			}
+		}
+	}
+	if (isSnapshot) {
+		// upload snapshots to oss.sonatype.org
+		repositories { maven {
+			url = 'https://oss.sonatype.org/content/repositories/snapshots'
+			credentials {
+				username = cred('nexus_user')
+				password = cred('nexus_pass')
+			}
+		} }
+	}
+}
+
+if (!isSnapshot) {
+	// upload releases to bintray and then mavenCentral
+	bintray {
+		user = cred('bintray_user')
+		key = cred('bintray_pass')
+		publications = ['mavenJava']
+		publish = true
+		pkg {
+			repo = 'opensource'
+			name = project.name
+			userOrg = project.org
+			version {
+				name = project.version
+				mavenCentralSync {
+					user = cred('nexus_user')
+					password = cred('nexus_pass')
+				}
+			}
+		}
+	}
+
+	publish.dependsOn(bintrayUpload)
+	bintrayUpload.dependsOn(['generatePomFileForMavenJavaPublication', jar, sourcesJar, javadocJar])
+}
+
+// helps external scripts detect version
+task printVersion << {
+	println version
+}
