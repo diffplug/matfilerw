@@ -22,6 +22,7 @@
 package com.jmatio.types;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -254,6 +255,7 @@ public class MLSparse extends MLNumericArray<Double> {
 		/* (non-Javadoc)
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
+		@Override
 		public int compareTo(IndexMN anOtherIndex) {
 			return getIndex(m, n) - getIndex(anOtherIndex.m, anOtherIndex.n);
 		}
@@ -261,6 +263,7 @@ public class MLSparse extends MLNumericArray<Double> {
 		/* (non-Javadoc)
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
+		@Override
 		public boolean equals(Object o) {
 			if (o instanceof IndexMN) {
 				return m == ((IndexMN) o).m && n == ((IndexMN) o).n;
@@ -268,9 +271,15 @@ public class MLSparse extends MLNumericArray<Double> {
 			return super.equals(o);
 		}
 
+		@Override
+		public int hashCode() {
+			return Arrays.hashCode(new int[]{m, n});
+		}
+
 		/* (non-Javadoc)
 		 * @see java.lang.Object#toString()
 		 */
+		@Override
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
 			sb.append("{");

@@ -139,8 +139,14 @@ public class MLChar extends MLArray {
 	public boolean equals(Object o) {
 		if (o instanceof MLChar) {
 			return Arrays.equals(chars, ((MLChar) o).chars);
+		} else {
+			return false;
 		}
-		return super.equals(o);
+	}
+
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(chars);
 	}
 
 	/**

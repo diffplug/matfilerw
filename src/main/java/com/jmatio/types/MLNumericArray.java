@@ -335,6 +335,15 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 		return super.equals(o);
 	}
 
+	@Override
+	public int hashCode() {
+		if (isComplex()) {
+			return Arrays.hashCode(new Object[]{real, dims, imaginary});
+		} else {
+			return Arrays.hashCode(new Object[]{real, dims});
+		}
+	}
+
 	/**
 	 * Equals implementation for direct <code>ByteBuffer</code>
 	 * 
