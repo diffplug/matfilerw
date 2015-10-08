@@ -3,6 +3,8 @@ plugins {
 	id "com.diffplug.gradle.spotless" version "1.3.0"
 	// bintray uploading
 	id "com.jfrog.bintray" version "1.3.1"
+	// for downloading JRE6
+	id "de.undercouch.download" version "2.0.0"
 }
 
 repositories {
@@ -20,6 +22,52 @@ targetCompatibility = VER_JAVA
 dependencies {
 	testCompile "junit:junit:${VER_JUNIT}"
 }
+
+////////////
+// JAVA 6 //
+////////////
+
+// matlabcontrol requires at least Java 1.6,
+// but older MATLABs run on even older versions
+
+// URL for downloading the JRE6
+// others available here, OS doesn't matter: https://github.com/alexkasko/openjdk-unofficial-builds#openjdk-6-build-30
+def JDK6_URL = 'https://bitbucket.org/alexkasko/openjdk-unofficial-builds/downloads/openjdk-1.6.0-unofficial-b30-windows-i586-image.zip'
+def JDK6_SHA_256 = '8a119a8c9b2ecc48e8457738f57b251e6265b2c0fb232de0ff6fddce0f127045'
+// place where the JRE6 will end up
+def JDK6_DIR = "${buildDir}/jdk"
+def JDK6_DST = "${JDK6_DIR}/jdk.zip"
+def JRE6_HOME = "${buildDir}/jdk/openjdk-1.6.0-unofficial-b30-windows-i586-image/jre"
+
+import de.undercouch.gradle.tasks.download.Download;
+import de.undercouch.gradle.tasks.download.Verify;
+
+task downloadJRE6(type: Download) {
+	src JDK6_URL
+	dest JDK6_DST
+	overwrite false
+}
+
+task verifyJRE6(dependsOn: downloadJRE6, type: Verify) {
+	src downloadJRE6.dest
+	algorithm 'SHA-256'
+	checksum JDK6_SHA_256
+}
+
+task unzipJRE6(dependsOn: verifyJRE6, type: Copy) {
+	from zipTree(downloadJRE6.dest)
+	into JDK6_DIR
+}
+
+// Best bet is to stay at 1.6
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+def sep = System.getProperty('path.separator')
+def bootClasspathStr = "${JRE6_HOME}/lib/rt.jar${sep}${JRE6_HOME}/lib/jsse.jar"
+project.tasks.withType(AbstractCompile, { AbstractCompile ac ->
+	ac.options.bootClasspath = bootClasspathStr // options is always there but not defined on AbstractCompile so going to hit it anyway
+	ac.dependsOn(unzipJRE6)
+})
 
 /////////////
 // ECLIPSE //

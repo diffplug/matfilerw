@@ -8,6 +8,7 @@ cache:
   directories:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
+  - "build/jdk"
 env:
   global:
   - secure: SD7xMO7DV2AIcyAWHmuy2PaCbbV65H9D3CDvmf8H922LFUdttgnxAEWPDFa9t/4IfXmINMKeO5xvKjOVn5Ho/uXiyv6XIooQfx8is6N9snwwSAradkBhT59901lPE9Sxfj3uHjJ6rRdDnnvtlfCiYqwtXu2MXsHcaeYqZciVUjae66Bqqt1JsrAxvSkW0VHfoFAMhT+qfMyHhageX4AV5RSgFYe8CuVPJ+h6pg1sEETRGOxKDBUYdC22PawwryuShnenn2krHUp7qJWKQiMiwmyPCZLZlTn4bK5z/Ffsh1Tf3J12BdGQNxFnHNaHREiGwu46RcQX0IBVmWY3ZmHzsVYKWED+oKTatYW8SenALsOMHDNfhFX5kjQm5poojtWFN0XEYYsGccERRuY/UeMEo5z/qIh7l4XBoxORxxhLPdpM+KouQEzILM9fvrkt90NMg5U4hkvmefaxX8poqxCqaMJGXpS78gC0QRdaFXVJP83A0VYufDepHgNzf7bpytxWVkgTVejMoFYAUCBpFYmTgNTBj+VlNn8y5NkOxNO19eLzmXhSpl2jQmdVECMIXSSOUTmVfVwooa7KjrXiAjcJGdAJSoK/EhcUhpUtY5W0wa8hRbDMmCoPizFnj8B4fSferu0l6ZmeJrS0k+V1+hvdeD/ix1f6kp8P/6Bg9rLYxck=
