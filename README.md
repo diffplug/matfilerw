@@ -12,11 +12,11 @@ output = [
 	].join('\n');
 -->
 [![Maven artifact](https://img.shields.io/badge/mavenCentral-com.diffplug.matsim%3Ajmatio-blue.svg)](https://bintray.com/diffplug/opensource/jmatio/view)
-[![Latest version](https://img.shields.io/badge/latest-3.2.0-blue.svg)](https://github.com/diffplug/jmatio/releases/latest)
-[![Javadoc](https://img.shields.io/badge/javadoc-OK-blue.svg)](https://diffplug.github.io/jmatio/javadoc/3.2.0/)
+[![Latest version](https://img.shields.io/badge/latest-1.2.0-blue.svg)](https://github.com/diffplug/jmatio/releases/latest)
+[![Javadoc](https://img.shields.io/badge/javadoc-OK-blue.svg)](https://diffplug.github.io/jmatio/javadoc/1.2.0/)
 [![License Apache](https://img.shields.io/badge/license-BSD-blue.svg)](https://tldrlegal.com/license/bsd-3-clause-license-(revised))
 
-[![Changelog](https://img.shields.io/badge/changelog-3.3.0--SNAPSHOT-brightgreen.svg)](CHANGES.md)
+[![Changelog](https://img.shields.io/badge/changelog-1.2.0--SNAPSHOT-brightgreen.svg)](CHANGES.md)
 [![Travis CI](https://travis-ci.org/diffplug/jmatio.svg?branch=master)](https://travis-ci.org/diffplug/jmatio)
 <!---freshmark /shields -->
 
