@@ -1,16 +1,15 @@
 Manifest-Version: 1.0
 Bundle-Description: jmatio - Read and write .mat files
 Bundle-DocURL: https://github.com/diffplug/jmatio
-Bundle-License: https://github.com/diffplug/jmatio/blob/v3.3.0-SNAPSHOT/
+Bundle-License: https://github.com/diffplug/jmatio/blob/v1.2.0-SNAPSHOT/
  LICENSE
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: com.diffplug.matsim.jmatio
 Bundle-Vendor: DiffPlug
-Bundle-Version: 3.3.0.SNAPSHOT
-Export-Package: com.jmatio.common;version="3.3.0",com.jmatio.common.util
- ;uses:="com.jmatio.types";version="3.3.0",com.jmatio.io;uses:="com.jmat
- io.types";version="3.3.0",com.jmatio.io.stream;uses:="com.jmatio.types"
- ;version="3.3.0",com.jmatio.types;version="3.3.0"
-Import-Package: com.jmatio.common,com.jmatio.io.stream,com.jmatio.types,
- sun.misc
+Bundle-Version: 1.2.0.SNAPSHOT
+Export-Package: com.jmatio.common;version="1.2.0",com.jmatio.common.util
+ ;uses:="com.jmatio.types";version="1.2.0",com.jmatio.io;uses:="com.jmat
+ io.types";version="1.2.0",com.jmatio.io.stream;uses:="com.jmatio.types"
+ ;version="1.2.0",com.jmatio.types;version="1.2.0"
+Import-Package: sun.misc
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.6))"

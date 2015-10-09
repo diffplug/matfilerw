@@ -29,23 +29,30 @@ dependencies {
 // OSGI //
 //////////
 
+// delete the old manifest to ensure there's no caching or merging going on
+jar.doFirst {
+	project.file('META-INF/MANIFEST.MF').delete()
+}
+
 jar.manifest {
 	attributes (
-		'Export-Package': 'com.jmatio.*',
+		'Export-Package': 'com.jmatio.*;-noimport:=true',
 		'Bundle-SymbolicName': "${project.group}.${project.name}",
 		'Bundle-Vendor': 'DiffPlug',
 		'Bundle-DocURL': "https://github.com/${project.org}/${project.name}",
 		'Bundle-License': "https://github.com/${project.org}/${project.name}/blob/v${project.version}/LICENSE",
 		'-removeheaders': 'Bnd-LastModified,Bundle-Name,Created-By,Tool',
+		'-savemanifest': project.file('META-INF/MANIFEST.MF'),
 	)
 }
 
-// copy the manifest into the WC
-jar << {
-	def jarContent = java.nio.file.FileSystems.newFileSystem(jar.archivePath.toPath(), null);
-	def outputFile = project.file('META-INF/MANIFEST.MF')
-	def source = jarContent.getPath('META-INF/MANIFEST.MF')
-	java.nio.file.Files.copy(source, outputFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+// manifests are only generated when the java files change - not if manifest properties change
+// this task forces the manifests to regenerate
+task refreshManifest(dependsOn: jar)
+gradle.taskGraph.whenReady { taskGraph ->
+	if (taskGraph.hasTask(refreshManifest)) {
+		jar.outputs.upToDateWhen { false }
+	}
 }
 
 ////////////
