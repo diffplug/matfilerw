@@ -1,6 +1,8 @@
 # JMatIO releases
 
-### Version 1.2.0 - TBD ([javadoc](http://diffplug.github.io/jmatio/javadoc/snapshot/))
+### Version 1.3.0 - TBD ([javadoc](http://diffplug.github.io/jmatio/javadoc/snapshot/))
+
+### Version 1.2.0 - October 12th 2015 ([javadoc](http://diffplug.github.io/jmatio/javadoc/1.2.0/), [jcenter](https://bintray.com/diffplug/opensource/jmatio/1.2.0/view))
 
 * Now available on Maven Central!
 * Added a sanity check to `MLNumericArray.contentToString()`.
