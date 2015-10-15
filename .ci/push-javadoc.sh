@@ -13,7 +13,7 @@ cd $HOME
 git config --global user.email "travis@travis-ci.org"
 git config --global user.name "travis-ci"
 rm -rf $HOME/gh-pages
-git clone --quiet --branch=gh-pages https://${gh_token}@github.com/diffplug/jmatio gh-pages > /dev/null
+git clone --quiet --branch=gh-pages https://${gh_token}@github.com/diffplug/matfilerw gh-pages > /dev/null
 
 # copy the javadoc into the build
 cd gh-pages

@@ -3,7 +3,7 @@
 # Do the Gradle build
 ./gradlew build || exit 1
 
-if [ "$TRAVIS_REPO_SLUG" == "diffplug/jmatio" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_BRANCH" == "master" ]; then
+if [ "$TRAVIS_REPO_SLUG" == "diffplug/matfilerw" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_BRANCH" == "master" ]; then
 	# Publish the artifacts
 	./gradlew publish || exit 1
 	# Push the javadoc
