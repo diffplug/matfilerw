@@ -2,6 +2,10 @@
 
 ### Version 1.4.0-SNAPSHOT - TBD ([javadoc](http://diffplug.github.io/matfilerw/javadoc/snapshot/), [jcenter](https://oss.sonatype.org/content/repositories/snapshots/com/diffplug/matsim/matfilerw/))
 
+### Version 1.3.1 - October 16th 2015 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/1.3.1/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/1.3.1/view))
+
+- Corrected the license in the maven metadata.
+
 ### Version 1.3.0 - October 16th 2015 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/1.3.0/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/1.3.0/view))
 
 * OSGi header now imports its own packages, as recommended by OSGi gurus.
