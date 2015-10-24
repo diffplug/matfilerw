@@ -6,9 +6,10 @@
 package com.jmatio.types;
 
 import java.util.Arrays;
-import java.util.List;
 
-public class MLChar extends MLArray {
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+public class MLChar extends MLArray implements GenericArrayCreator<Character> {
 	Character[] chars;
 
 	/**
@@ -75,7 +76,7 @@ public class MLChar extends MLArray {
 		chars = createArray(getM(), getN());
 	}
 
-	protected Character[] createArray(int m, int n) {
+	public Character[] createArray(int m, int n) {
 		return new Character[m * n];
 	}
 
@@ -102,9 +103,9 @@ public class MLChar extends MLArray {
 	 */
 	public void set(String value, int idx) {
 		int rowOffset = getM();
-
 		for (int i = 0; i < getN(); i++) {
 			if (i < value.length()) {
+
 				setChar(value.charAt(i), idx + (rowOffset * i));
 			} else {
 				setChar(' ', idx + (rowOffset * i));
@@ -116,8 +117,9 @@ public class MLChar extends MLArray {
 		return chars[getIndex(m, n)];
 	}
 
-	public List<Character> exportChar() {
-		return Arrays.asList(chars);
+	@SuppressFBWarnings(value = {"EI_EXPOSE_REP"}, justification = "This code is unlikely to be used in a security-sensitive environment.")
+	public Character[] exportChar() {
+		return chars;
 	}
 
 	@Override

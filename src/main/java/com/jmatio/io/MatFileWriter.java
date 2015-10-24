@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.util.Collection;
-import java.util.List;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
@@ -28,33 +27,62 @@ import com.jmatio.types.MLStructure;
 
 /**
  * MAT-file writer.
- * 
+ *
  * Usage:
- * <pre><code>
+ *
+ * <pre>
+ * <code>
  * //1. First create example arrays
  * double[] src = new double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 };
  * MLDouble mlDouble = new MLDouble( "double_arr", src, 3 );
  * MLChar mlChar = new MLChar( "char_arr", "I am dummy" );
- *         
+ *
  * //2. write arrays to file
  * ArrayList<MLArray> list = new ArrayList<MLArray>();
  * list.add( mlDouble );
  * list.add( mlChar );
- * 
+ *
  * new MatFileWriter( "mat_file.mat", list );
- * </code></pre>
- * 
+ * </code>
+ * </pre>
+ *
  * this is "equal" to Matlab commands:
- * <pre><code>
+ *
+ * <pre>
+ * <code>
  * >> double_arr = [ 1 2; 3 4; 5 6];
  * >> char_arr = 'I am dummy';
  * >>
  * >> save('mat_file.mat', 'double_arr', 'char_arr');
- * </pre></code>
- * 
- * @author Wojciech Gradkowski (<a href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
+ * </pre>
+ *
+ * </code>
+ *
+ * @author Wojciech Gradkowski (<a
+ *         href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
  */
 public class MatFileWriter {
+
+	/**
+	 * A hack stolen from Greg Wilkins of Mortbay.
+	 * A {@link ByteArrayOutputStream} with revealed internals so there is no more wasteful
+	 * copying when calling {@link ByteArrayOutputStream#toByteArray()}
+	 * @author ss
+	 *
+	 */
+	static class ByteArrayOutputStream2 extends ByteArrayOutputStream {
+		public ByteArrayOutputStream2() {
+			super();
+		}
+
+		public byte[] getBuf() {
+			return buf;
+		}
+
+		public int getCount() {
+			return count;
+		}
+	}
 	//    private static final Logger logger = Logger.getLogger(MatFileWriter.class);
 
 	/**
@@ -66,7 +94,7 @@ public class MatFileWriter {
 
 	/**
 	 * Writes MLArrays into file given by <code>fileName</code>.
-	 * 
+	 *
 	 * @param fileName - name of ouput file
 	 * @param data - <code>Collection</code> of <code>MLArray</code> elements
 	 * @throws IOException
@@ -78,22 +106,22 @@ public class MatFileWriter {
 
 	/**
 	 * Writes MLArrays into <code>File</code>.
-	 * 
+	 *
 	 * @param file - an output <code>File</code>
 	 * @param data - <code>Collection</code> of <code>MLArray</code> elements
 	 * @throws IOException
 	 * @throws DataFormatException
 	 */
-	@SuppressWarnings("resource") // the channel is closed after writing
+	@SuppressWarnings("resource")
 	public MatFileWriter(File file, Collection<MLArray> data) throws IOException {
 		this((new FileOutputStream(file)).getChannel(), data);
 	}
 
 	/**
 	 * Writes MLArrays into <code>OuputSteram</code>.
-	 * 
+	 *
 	 * Writes MAT-file header and compressed data (<code>miCOMPRESSED</code>).
-	 * 
+	 *
 	 * @param output - <code>OutputStream</code>
 	 * @param data - <code>Collection</code> of <code>MLArray</code> elements
 	 * @throws IOException
@@ -105,7 +133,7 @@ public class MatFileWriter {
 	/**
 	 * Writes <code>MLArrays</code> into file created from
 	 * <code>filepath</code>.
-	 * 
+	 *
 	 * @param filepath
 	 *            the absolute file path of a MAT-file to which data is written
 	 * @param data
@@ -120,7 +148,7 @@ public class MatFileWriter {
 
 	/**
 	 * Writes <code>MLArrays</code> into <code>File</code>
-	 * 
+	 *
 	 * @param file
 	 *            the MAT-file to which data is written
 	 * @param data
@@ -143,7 +171,7 @@ public class MatFileWriter {
 
 	/**
 	 * Writes <code>MLArrays</code> into <code>WritableByteChannel</code>.
-	 * 
+	 *
 	 * @param channel
 	 *            the channel to write to
 	 * @param data
@@ -159,31 +187,24 @@ public class MatFileWriter {
 
 			//write data
 			for (MLArray matrix : data) {
-				//prepare buffer for MATRIX data
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				DataOutputStream dos = new DataOutputStream(baos);
-				//write MATRIX bytes into buffer
-				writeMatrix(dos, matrix);
-
 				//compress data to save storage
 				Deflater compresser = new Deflater();
 
-				byte[] input = baos.toByteArray();
-
-				ByteArrayOutputStream compressed = new ByteArrayOutputStream();
+				ByteArrayOutputStream2 compressed = new ByteArrayOutputStream2();
 				DataOutputStream dout = new DataOutputStream(new DeflaterOutputStream(compressed, compresser));
 
-				dout.write(input);
-
+				writeMatrix(dout, matrix);
+				dout.flush();
 				dout.close();
-				compressed.close();
 
 				//write COMPRESSED tag and compressed data into output channel
-				byte[] compressedBytes = compressed.toByteArray();
-				ByteBuffer buf = ByteBuffer.allocateDirect(2 * 4 /* Int size */ + compressedBytes.length);
+
+				int compressedSize = compressed.getCount();
+				ByteBuffer buf = ByteBuffer.allocateDirect(2 * 4 /* Int size */ + compressedSize);
 				buf.putInt(MatDataTypes.miCOMPRESSED);
-				buf.putInt(compressedBytes.length);
-				buf.put(compressedBytes);
+
+				buf.putInt(compressedSize);
+				buf.put(compressed.getBuf(), 0, compressedSize);
 
 				buf.flip();
 				channel.write(buf);
@@ -230,7 +251,7 @@ public class MatFileWriter {
 
 	/**
 	 * Writes MATRIX into <code>OutputStream</code>.
-	 * 
+	 *
 	 * @param os - <code>OutputStream</code>
 	 * @param array - a <code>MLArray</code>
 	 * @throws IOException
@@ -256,9 +277,9 @@ public class MatFileWriter {
 			//write char data
 			buffer = new ByteArrayOutputStream();
 			bufferDOS = new DataOutputStream(buffer);
-			List<Character> ac = ((MLChar) array).exportChar();
-			for (int i = 0; i < ac.size(); i++) {
-				String temp = new StringBuffer().append(ac.get(i).charValue()).toString();
+			Character[] ac = ((MLChar) array).exportChar();
+			for (int i = 0; i < ac.length; i++) {
+				String temp = new StringBuffer().append(ac[i].charValue()).toString();
 				bufferDOS.write(temp.getBytes("UTF-8"));
 			}
 			tag = new OSArrayTag(MatDataTypes.miUTF8, buffer.toByteArray());
@@ -330,6 +351,17 @@ public class MatFileWriter {
 				tag.writeTo(dos);
 			}
 			break;
+		case MLArray.mxINT32_CLASS:
+			tag = new OSArrayTag(MatDataTypes.miINT32,
+					((MLNumericArray<?>) array).getRealByteBuffer());
+			tag.writeTo(dos);
+
+			if (array.isComplex()) {
+				tag = new OSArrayTag(MatDataTypes.miINT32,
+						((MLNumericArray<?>) array).getImaginaryByteBuffer());
+				tag.writeTo(dos);
+			}
+			break;
 		case MLArray.mxINT64_CLASS:
 
 			tag = new OSArrayTag(MatDataTypes.miINT64,
@@ -378,6 +410,7 @@ public class MatFileWriter {
 		case MLArray.mxSPARSE_CLASS:
 			int[] ai;
 			//write ir
+
 			buffer = new ByteArrayOutputStream();
 			bufferDOS = new DataOutputStream(buffer);
 			ai = ((MLSparse) array).getIR();
@@ -432,7 +465,7 @@ public class MatFileWriter {
 
 	/**
 	 * Writes MATRIX flags into <code>OutputStream</code>.
-	 * 
+	 *
 	 * @param os - <code>OutputStream</code>
 	 * @param array - a <code>MLArray</code>
 	 * @throws IOException
@@ -455,7 +488,7 @@ public class MatFileWriter {
 
 	/**
 	 * Writes MATRIX dimensions into <code>OutputStream</code>.
-	 * 
+	 *
 	 * @param os - <code>OutputStream</code>
 	 * @param array - a <code>MLArray</code>
 	 * @throws IOException
@@ -475,7 +508,7 @@ public class MatFileWriter {
 
 	/**
 	 * Writes MATRIX name into <code>OutputStream</code>.
-	 * 
+	 *
 	 * @param os - <code>OutputStream</code>
 	 * @param array - a <code>MLArray</code>
 	 * @throws IOException
@@ -483,9 +516,11 @@ public class MatFileWriter {
 	private void writeName(DataOutputStream os, MLArray array) throws IOException {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		DataOutputStream bufferDOS = new DataOutputStream(buffer);
+
 		byte[] nameByteArray = array.getNameToByteArray();
 		bufferDOS.write(nameByteArray);
 		OSArrayTag tag = new OSArrayTag(MatDataTypes.miINT8, buffer.toByteArray());
 		tag.writeTo(os);
 	}
+
 }

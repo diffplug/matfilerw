@@ -30,6 +30,10 @@ As far as compatibility, the TL;DR is that it will work with any MAT-File with d
 * MATLAB does not export to v7.3 by default.
 * The [Mathworks website](http://www.mathworks.com/help/matlab/import_export/mat-file-versions.html?refresh=true) has more details.
 
+## codemercenary/jmatio and the status of ca.mjdsystems
+
+Since JMatIO wasn't updated for a while, lots of people made forks.  One of the most prominent was Jason Lokerson's, hosted on GitHub as codemercenary/JMatIO.  It included several improvements, but all the packages were renamed to "ca.mjdsystems.jmatio".  In an effort to bring all JMatIO's under one roof, we have included its source code, unchanged, into MatFileRW.  We are working on merging all of its improvements into the main "com.jmatio" classes, and the "ca.mjdsystems" namespace is deprecated, and will be removed in 2.0.
+
 ## Acknowledgements
 
 This project is forked from the JMatIO project originally maintained on [SourceForge](http://sourceforge.net/projects/jmatio/), and now maintained on [GitHub](https://github.com/gradusnikov/jmatio).  The name was changed to ensure that we don't infringe the original project's license, but we did not change the package names, so this project is binary compatible with the original JMatIO.  We are very thankful to Wojciech Gradkowski for creating JMatIO, but this fork is in no way associated with or endorsed by any authors of the original project.

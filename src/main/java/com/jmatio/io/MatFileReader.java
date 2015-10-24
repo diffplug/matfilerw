@@ -5,9 +5,11 @@
  */
 package com.jmatio.io;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
@@ -18,14 +20,17 @@ import java.nio.channels.FileChannel;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.InflaterInputStream;
 
 import com.jmatio.common.MatDataTypes;
-import com.jmatio.io.stream.BufferedOutputStream;
+import com.jmatio.io.MatFileWriter.ByteArrayOutputStream2;
 import com.jmatio.io.stream.ByteBufferInputStream;
-import com.jmatio.io.stream.ByteBufferedOutputStream;
+import com.jmatio.io.stream.HeapBufferDataOutputStream;
 import com.jmatio.io.stream.MatFileInputStream;
 import com.jmatio.types.ByteStorageSupport;
 import com.jmatio.types.MLArray;
@@ -63,14 +68,23 @@ import com.jmatio.types.MLUInt8;
  * Map content = mfr.getContent();
  * </pre></code>
  * 
- * @see com.jmatio.io.MatFileFilter
+ * @see ca.mjdsystems.jmatio.io.MatFileFilter
  * @author Wojciech Gradkowski (<a href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
+ */
+/**
+ * @author Wojciech Gradkowski (<a
+ *         href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
+ * 
  */
 public class MatFileReader {
 	public static final int MEMORY_MAPPED_FILE = 1;
 	public static final int DIRECT_BYTE_BUFFER = 2;
 	public static final int HEAP_BYTE_BUFFER = 4;
 
+	/**
+	 * Type of matlab mat file.
+	 */
+	private final MatFileType matType;
 	/**
 	 * MAT-file header
 	 */
@@ -87,6 +101,14 @@ public class MatFileReader {
 	 * Array name filter
 	 */
 	private MatFileFilter filter;
+	/**
+	 * Whether or not we have found an MCOS type variable.  Needed to know if further processing is needed.
+	 */
+	private boolean haveMCOS = false;
+	/**
+	 * Holds the likely candidate for the MCOS extra data at the end of a MAT file.
+	 */
+	private MLUInt8 mcosData;
 
 	/**
 	 * Creates instance of <code>MatFileReader</code> and reads MAT-file 
@@ -98,7 +120,7 @@ public class MatFileReader {
 	 * @throws IOException when error occurred while processing the file.
 	 */
 	public MatFileReader(String fileName) throws FileNotFoundException, IOException {
-		this(new File(fileName), new MatFileFilter());
+		this(new File(fileName), new MatFileFilter(), MatFileType.Regular);
 	}
 
 	/**
@@ -113,11 +135,11 @@ public class MatFileReader {
 	 * @throws IOException when error occurred while processing the file.
 	 */
 	public MatFileReader(String fileName, MatFileFilter filter) throws IOException {
-		this(new File(fileName), filter);
+		this(new File(fileName), filter, MatFileType.Regular);
 	}
 
 	/**
-	 * Creates instance of <code>MatFileReader</code> and reads MAT-file 
+	 * Creates instance of <code>MatFileReader</code> and reads MAT-file
 	 * from <code>file</code>. 
 	 * 
 	 * This method reads MAT-file without filtering.
@@ -126,7 +148,7 @@ public class MatFileReader {
 	 * @throws IOException when error occurred while processing the file.
 	 */
 	public MatFileReader(File file) throws IOException {
-		this(file, new MatFileFilter());
+		this(file, new MatFileFilter(), MatFileType.Regular);
 
 	}
 
@@ -147,15 +169,64 @@ public class MatFileReader {
 	 * @throws IOException
 	 *             when error occurred while processing the file.
 	 */
-	public MatFileReader(File file, MatFileFilter filter) throws IOException {
-		this();
+	public MatFileReader(File file, MatFileFilter filter, MatFileType matType) throws IOException {
+		this(matType);
 
 		read(file, filter, MEMORY_MAPPED_FILE);
 	}
 
-	public MatFileReader() {
+	public MatFileReader(File file, MatFileFilter filter) throws IOException {
+		this(file, filter, MatFileType.Regular);
+	}
+
+	public MatFileReader(MatFileType matType) {
+		this.matType = matType;
 		filter = new MatFileFilter();
 		data = new LinkedHashMap<String, MLArray>();
+	}
+
+	public MatFileReader() {
+		this(MatFileType.Regular);
+	}
+
+	/**
+	 * Creates instance of <code>MatFileReader</code> and reads MAT-file from
+	 * <code>file</code>.
+	 * 
+	 * This method reads MAT-file without filtering.
+	 * 
+	 * @param stream
+	 *            the MAT-file stream
+	 * @throws IOException
+	 *             when error occurred while processing the file.
+	 */
+	public MatFileReader(InputStream stream, MatFileType type) throws IOException {
+		this(stream, new MatFileFilter(), type);
+	}
+
+	/**
+	 * Creates instance of <code>MatFileReader</code> and reads MAT-file from
+	 * <code>file</code>.
+	 * <p>
+	 * Results are filtered by <code>MatFileFilter</code>. Arrays that do not
+	 * meet filter match condition will not be available in results.
+	 * <p>
+	 * <i>Note: this method reads file using the memory mapped file policy, see
+	 * notes to </code>
+	 * {@link #read(File, MatFileFilter, com.jmatio.io.MatFileReader.MallocPolicy)}
+	 * </code>
+	 * 
+	 * @param stream
+	 *            the MAT-file stream
+	 * @param MatFileFilter
+	 *            array name filter.
+	 * @throws IOException
+	 *             when error occurred while processing the file.
+	 */
+	public MatFileReader(InputStream stream, MatFileFilter filter, MatFileType type) throws IOException {
+		this(type);
+
+		read(stream, filter);
 	}
 
 	/**
@@ -172,6 +243,21 @@ public class MatFileReader {
 	 */
 	public synchronized Map<String, MLArray> read(File file) throws IOException {
 		return read(file, new MatFileFilter(), MEMORY_MAPPED_FILE);
+	}
+
+	/**
+	 * Reads the content of a MAT-file and returns the mapped content.
+	 * <p>
+	 * This method calls <code>read(stream, new MatFileFilter())</code>.
+	 * 
+	 * @param stream
+	 *            a valid MAT-file stream to be read
+	 * @return the same as <code>{@link #getContent()}</code>
+	 * @throws IOException
+	 *             if error occurs during file processing
+	 */
+	public synchronized Map<String, MLArray> read(InputStream stream) throws IOException {
+		return read(stream, new MatFileFilter());
 	}
 
 	/**
@@ -222,6 +308,7 @@ public class MatFileReader {
 	 * @throws IOException
 	 *             if error occurs during file processing
 	 */
+	private static final int DIRECT_BUFFER_LIMIT = 1 << 25;
 
 	public synchronized Map<String, MLArray> read(File file, MatFileFilter filter, int policy) throws IOException {
 		return read(new RandomAccessFile(file, "r"), filter, policy);
@@ -285,12 +372,8 @@ public class MatFileReader {
 			default:
 				throw new IllegalArgumentException("Unknown file allocation policy");
 			}
-			//read in file header
-			readHeader(buf);
-
-			while (buf.remaining() > 0) {
-				readData(buf);
-			}
+			// Do the actual work.
+			parseData(buf);
 
 			return getContent();
 		} catch (IOException e) {
@@ -322,7 +405,261 @@ public class MatFileReader {
 		}
 	}
 
-	private static final int DIRECT_BUFFER_LIMIT = 1 << 25;
+	private void parseData(ByteBuffer buf) throws IOException {
+		//read in file header
+		readHeader(buf);
+
+		while (buf.remaining() > 0) {
+			readData(buf);
+		}
+		if (haveMCOS) {
+			parseMCOS(mcosData);
+			if (data.get("@") == mcosData) {
+				data.remove("@");
+			}
+			for (Map.Entry<String, MLArray> it : data.entrySet()) {
+				if (it.getValue() == mcosData) {
+					data.remove(it.getKey());
+					break;
+				}
+			}
+		}
+		mcosData = null;
+	}
+
+	private void parseMCOS(MLUInt8 mcosData) throws IOException {
+		// First, parse back out the mcosData.
+		ByteBuffer buffer = mcosData.getRealByteBuffer();
+		ByteBufferInputStream dataStream = new ByteBufferInputStream(buffer, buffer.limit());
+
+		Map<String, MLArray> mcosContent;
+
+		MatFileReader matFile = new MatFileReader(dataStream, MatFileType.ReducedHeader);
+		mcosContent = matFile.getContent();
+		MLCell mcosInfo = (MLCell) ((MLStructure) mcosContent.get("@0")).getField("MCOS");
+		ByteBuffer mcosDataBuf = ((MLUInt8) mcosInfo.get(0)).getRealByteBuffer();
+		// This bytebuffer needs to be read in the byte order of the MAT file order.  Thus fix.
+		mcosDataBuf.order(matFile.getMatFileHeader().getByteOrder());
+
+		// Parse out the data buffer.  First get version information.  Should always equal 2.
+		int version = mcosDataBuf.getInt();
+		if (version != 2) {
+			throw new IllegalStateException("MAT file's MCOS data has a different version(?).  Got: " + version + ", wanted 2.");
+		}
+
+		// Get the string count + define the string array.
+		int strCount = mcosDataBuf.getInt();
+		String[] strs = new String[strCount];
+
+		// Get the segment indexes.
+		int segmentIndexes[] = new int[6];
+		for (int i = 0; i < segmentIndexes.length; ++i) {
+			segmentIndexes[i] = mcosDataBuf.getInt();
+		}
+
+		// There should now be 8 0 bytes.  Make sure this is true to avoid object format changes.
+		if (mcosDataBuf.getLong() != 0) {
+			throw new IllegalStateException("MAT file's MCOS data has different byte values for unknown fields!  Aborting!");
+		}
+
+		// Finally, read in each string.  Java doesn't provide an easy way to do this in bulk, so just use a stupid formula for now.
+		for (int i = 0; i < strCount; ++i) {
+			StringBuilder sb = new StringBuilder();
+			for (char next = (char) mcosDataBuf.get(); next != '\0'; next = (char) mcosDataBuf.get()) {
+				sb.append(next);
+			}
+			strs[i] = sb.toString();
+		}
+
+		// Sanity check, next 8 byte aligned position in the buffer should equal the start of the first segment!
+		if (((mcosDataBuf.position() + 0x07) & ~0x07) != segmentIndexes[0]) {
+			throw new IllegalStateException("Data from the strings section was not all read!");
+		}
+
+		// First segment, class information.  Really just need the class names.
+		List<String> classNamesList = new ArrayList<String>();
+		mcosDataBuf.position(segmentIndexes[0]);
+		// There are 16 unknown bytes.  Ensure they are 0.
+		if (mcosDataBuf.getLong() != 0 || mcosDataBuf.getLong() != 0) {
+			throw new IllegalStateException("MAT file's MCOS data has different byte values for unknown fields!  Aborting!");
+		}
+		while (mcosDataBuf.position() < segmentIndexes[1]) {
+			mcosDataBuf.getInt(); // packageNameIndex - Unused for now.
+			int classNameIndex = mcosDataBuf.getInt();
+			String className = strs[classNameIndex - 1];
+			classNamesList.add(className);
+			if (mcosDataBuf.getLong() != 0) {
+				throw new IllegalStateException("MAT file's MCOS data has different byte values for unknown fields!  Aborting!");
+			}
+		}
+
+		// Sanity check, position in the buffer should equal the start of the second segment!
+		if (mcosDataBuf.position() != segmentIndexes[1]) {
+			throw new IllegalStateException("Data from the class section was not all read!");
+		}
+
+		// @todo: Second segment, Object properties containing other properties.  Not used yet, thus ignored.
+		mcosDataBuf.position(segmentIndexes[2]);
+
+		// Third segment.  Contains all the useful per-object information.
+		Map<Integer, MatMCOSObjectInformation> objectInfoList = new HashMap<Integer, MatMCOSObjectInformation>();
+		// There are 24 unknown bytes.  Ensure they are 0.
+		if (mcosDataBuf.getLong() != 0 || mcosDataBuf.getLong() != 0 || mcosDataBuf.getLong() != 0) {
+			throw new IllegalStateException("MAT file's MCOS data has different byte values for unknown fields!  Aborting!");
+		}
+		int objectCount = 1;
+		while (mcosDataBuf.position() < segmentIndexes[3]) {
+			// First fetch the data.
+			int classIndex = mcosDataBuf.getInt();
+			if (mcosDataBuf.getLong() != 0) {
+				throw new IllegalStateException("MAT file's MCOS data has different byte values for unknown fields!  Aborting!");
+			}
+			int segment2Index = mcosDataBuf.getInt();
+			int segment4Index = mcosDataBuf.getInt();
+			mcosDataBuf.getInt(); // This value is random.  But we need to move the buffer forward, so read it without a check.
+			int objectId = objectCount++; // It would appear that the "objectId" is in fact some other MATLAB value.  Thus ignore,
+			// and use the index into this segment as the id instead.
+
+			// Then parse it into the form needed for the object.
+			objectInfoList.put(objectId - 1, new MatMCOSObjectInformation(classNamesList.get(classIndex - 1), classIndex, objectId, segment2Index, segment4Index));
+		}
+
+		// Sanity check, position in the buffer should equal the start of the fourth segment!
+		if (mcosDataBuf.position() != segmentIndexes[3]) {
+			throw new IllegalStateException("Data from the object section was not all read!  At: " + mcosDataBuf.position() + ", wanted: " + segmentIndexes[3]);
+		}
+
+		// Fourth segment.  Contains the regular properties for objects.
+		// There are 8 unknown bytes.  Ensure they are 0.
+		if (mcosDataBuf.getLong() != 0) {
+			throw new IllegalStateException("MAT file's MCOS data has different byte values for unknown fields!  Aborting!");
+		}
+		List<Map<String, MLArray>> segment4Properties = new ArrayList<Map<String, MLArray>>();
+		while (mcosDataBuf.position() < segmentIndexes[4]) {
+			Map<String, MLArray> properties = new HashMap<String, MLArray>();
+			int propertiesCount = mcosDataBuf.getInt();
+			for (int i = 0; i < propertiesCount; ++i) {
+				int nameIndex = mcosDataBuf.getInt();
+				int flag = mcosDataBuf.getInt();
+				int heapIndex = mcosDataBuf.getInt();
+
+				String propertyName = strs[nameIndex - 1];
+				MLArray property;
+				switch (flag) {
+				case 0:
+					property = new MLChar(propertyName, strs[heapIndex - 1]);
+					break;
+				case 1:
+					property = mcosInfo.get(heapIndex + 2);
+					break;
+				case 2:
+					// @todo: Handle a boolean.
+					throw new UnsupportedOperationException("Mat file parsing does not yet support booleans!");
+				default:
+					throw new UnsupportedOperationException("Don't yet support parameter type: " + flag + "!");
+				}
+				if (property instanceof MLUInt32) {
+					int[][] data = ((MLUInt32) property).getArray();
+					if (data[0][0] == 0xdd000000 && data[1][0] == 0x02) {
+						MLObjectPlaceholder objHolder = new MLObjectPlaceholder(propertyName, "", data);
+						property = processMCOS(objHolder, classNamesList, objectInfoList);
+					}
+				}
+				properties.put(propertyName, property);
+			}
+			segment4Properties.add(properties);
+			mcosDataBuf.position((mcosDataBuf.position() + 0x07) & ~0x07);
+		}
+
+		// Sanity check, position in the buffer should equal the start of the fifth segment!
+		if (mcosDataBuf.position() != segmentIndexes[4]) {
+			throw new IllegalStateException("Data from the properties section (2) was not all read!  At: " + mcosDataBuf.position() + ", wanted: " + segmentIndexes[4]);
+		}
+
+		// Now merge in the properties from segment 4 into object.
+		for (MatMCOSObjectInformation it : objectInfoList.values()) {
+			Map<String, MLArray> objAttributes = it.structure;
+			if (it.segment4PropertiesIndex > 0) {
+				for (Map.Entry<String, MLArray> attribute : segment4Properties.get(it.segment4PropertiesIndex - 1).entrySet()) {
+					objAttributes.put(attribute.getKey(), attribute.getValue());
+				}
+			} else {
+				throw new IllegalStateException("Properties are not found!  Not sure where to look ...");
+			}
+		}
+
+		// Finally, merge in attributes from the global grab bag.
+		MLCell attribBag = (MLCell) mcosInfo.get(mcosInfo.getSize() - 1); // Get the grab bag.
+		for (MatMCOSObjectInformation it : objectInfoList.values()) {
+			MLStructure attributes = (MLStructure) attribBag.get(it.classId);
+			Collection<String> attributeNames = attributes.getFieldNames();
+			Map<String, MLArray> objAttributes = it.structure;
+			for (String attributeName : attributeNames) {
+				if (objAttributes.get(attributeName) == null) {
+					objAttributes.put(attributeName, attributes.getField(attributeName));
+				}
+			}
+		}
+
+		for (Map.Entry<String, MLArray> it : data.entrySet()) {
+			if (it.getValue() instanceof MLObjectPlaceholder) {
+				MLObjectPlaceholder objHolder = (MLObjectPlaceholder) it.getValue();
+				it.setValue(processMCOS(objHolder, classNamesList, objectInfoList));
+			}
+		}
+	}
+
+	private MLObject processMCOS(MLObjectPlaceholder objHolder, List<String> classNamesList, Map<Integer, MatMCOSObjectInformation> objectInfoList) {
+		int classId = objHolder.classId;
+		MLObject obj = new MLObject(objHolder.name, classNamesList.get(classId - 1), objHolder.getDimensions(), 0);
+		for (int i = 0; i < obj.getSize(); ++i) {
+			MatMCOSObjectInformation objectInformation = objectInfoList.get(objHolder.objectIds[i] - 1);
+			if (classId != objectInformation.classId) {
+				throw new IllegalStateException("Found an object in array with a different class id! Actual: " + objectInformation.classId + ", expected: " + classId + "!");
+			}
+			obj.setFields(i, objectInformation.structure);
+		}
+		return obj;
+	}
+
+	/**
+	 * Read a mat file from a stream. Internally this will read the stream fully
+	 * into memory before parsing it.
+	 * 
+	 * @param stream
+	 *            a valid MAT-file stream to be read
+	 * @param filter
+	 *            the array filter applied during reading
+	 * 
+	 * @return the same as <code>{@link #getContent()}</code>
+	 * @see MatFileFilter
+	 * @throws IOException
+	 *             if error occurs during file processing
+	 */
+	public synchronized Map<String, MLArray> read(InputStream stream, MatFileFilter filter) throws IOException {
+		this.filter = filter;
+
+		data.clear();
+
+		ByteBuffer buf = null;
+
+		final ByteArrayOutputStream2 baos = new ByteArrayOutputStream2();
+		copy(stream, baos);
+		buf = ByteBuffer.wrap(baos.getBuf(), 0, baos.getCount());
+
+		// Do the actual work
+		parseData(buf);
+
+		return getContent();
+	}
+
+	private void copy(InputStream stream, ByteArrayOutputStream2 output) throws IOException {
+		final byte[] buffer = new byte[1024 * 4];
+		int n = 0;
+		while (-1 != (n = stream.read(buffer))) {
+			output.write(buffer, 0, n);
+		}
+	}
 
 	/**
 	 * Workaround taken from bug <a
@@ -424,7 +761,7 @@ public class MatFileReader {
 		ISMatTag tag = new ISMatTag(buf);
 		switch (tag.type) {
 		case MatDataTypes.miCOMPRESSED:
-			long numOfBytes = tag.size;
+			int numOfBytes = tag.size;
 			//inflate and recur
 			if (buf.remaining() < numOfBytes) {
 				throw new MatlabIOException("Compressed buffer length miscalculated!");
@@ -436,28 +773,29 @@ public class MatFileReader {
 			//process data decompression
 			byte[] result = new byte[1024];
 
-			// use direct buffer allocation
-			//                BufferedOutputStream dos = new FileBufferedOutputStream();
-			BufferedOutputStream dos = new ByteBufferedOutputStream(tag.size, false);
+			HeapBufferDataOutputStream dos = new HeapBufferDataOutputStream();
+			int i;
 			try {
-				int i;
-				try {
-					do {
-						i = iis.read(result, 0, result.length);
-						int len = Math.max(0, i);
-						dos.write(result, 0, len);
-					} while (i > 0);
-				} catch (IOException e) {
-					throw new MatlabIOException("Could not decompress data: " + e);
-				} finally {
-					iis.close();
-					dos.flush();
-				}
-				//create a ByteBuffer from the deflated data
-				ByteBuffer out = dos.buffer();
-				out.rewind();
-				//with proper byte ordering
-				out.order(byteOrder);
+				do {
+					i = iis.read(result, 0, result.length);
+					int len = Math.max(0, i);
+					dos.write(result, 0, len);
+				} while (i > 0);
+			} catch (EOFException eofe) {
+				System.out.println("EOFException detected!");
+			} catch (IOException e) {
+				throw new MatlabIOException("Could not decompress data: " + e);
+			} finally {
+				iis.close();
+				dos.flush();
+			}
+			//create a ByteBuffer from the deflated data
+			ByteBuffer out = dos.getByteBuffer();
+
+			//with proper byte ordering
+			out.order(byteOrder);
+
+			try {
 				readData(out);
 			} catch (IOException e) {
 				throw e;
@@ -472,8 +810,15 @@ public class MatFileReader {
 
 			MLArray element = readMatrix(buf, true);
 
-			if (element != null && !data.containsKey(element.getName())) {
-				data.put(element.getName(), element);
+			if (element != null) {
+				if (!data.containsKey(element.getName())) {
+					data.put(element.getName(), element);
+				}
+				if (element.getName() == "@") {
+					int nextIndex = 0;
+					for (; data.containsKey("@" + nextIndex); nextIndex++) {}
+					data.put("@" + nextIndex, element);
+				}
 			} else {
 				int red = buf.position() - pos;
 				int toread = tag.size - red;
@@ -624,6 +969,12 @@ public class MatFileReader {
 				tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getImaginaryByteBuffer(),
 						(MLNumericArray<?>) mlArray);
 			}
+
+			// This might be the MCOS extra data.  If there is no name, set it as the current set of data.
+			if (name.equals("")) {
+				mcosData = (MLUInt8) mlArray;
+			}
+
 			break;
 		case MLArray.mxINT8_CLASS:
 			mlArray = new MLInt8(name, dims, type, attributes);
@@ -781,34 +1132,54 @@ public class MatFileReader {
 			ISMatTag contentTag = new ISMatTag(buf);
 
 			if (contentTag.type == MatDataTypes.miMATRIX) {
-				//should return UInt8 or UInt32, but MLNumericArray is the LCD
-				MLArray wrappedContent = readMatrix(buf, false);
+				if (name.equals("java")) {
+					//should return UInt8 or UInt32, but MLNumericArray is the LCD
+					MLArray wrappedContent = readMatrix(buf, false);
 
-				//our first job is to find the binary content
-				MLNumericArray<?> binaryContent = null;
-				if (wrappedContent instanceof MLCell) {
-					//sometimes we'll get a cell array
-					//in that case, we'll take the first NumericArray we can find
-					MLCell cellContent = (MLCell) wrappedContent;
-					for (MLArray candidate : cellContent.cells()) {
-						if (candidate instanceof MLNumericArray) {
-							binaryContent = (MLNumericArray<?>) candidate;
-							break;
+					//our first job is to find the binary content
+					MLNumericArray<?> binaryContent = null;
+					if (wrappedContent instanceof MLCell) {
+						//sometimes we'll get a cell array
+						//in that case, we'll take the first NumericArray we can find
+						MLCell cellContent = (MLCell) wrappedContent;
+						for (MLArray candidate : cellContent.cells()) {
+							if (candidate instanceof MLNumericArray) {
+								binaryContent = (MLNumericArray<?>) candidate;
+								break;
+							}
 						}
+					} else if (wrappedContent instanceof MLNumericArray) {
+						binaryContent = (MLNumericArray<?>) wrappedContent;
+					} else if (wrappedContent instanceof MLStructure) {
+						MLStructure structureContent = (MLStructure) wrappedContent;
+						MLCell cellContent = (MLCell) structureContent.getField("Values", 0);
+						binaryContent = (MLNumericArray<?>) cellContent.get(0);
+					} else {
+						throw new IOException("Unexpected array type: " + wrappedContent.name);
 					}
-				} else if (wrappedContent instanceof MLNumericArray) {
-					binaryContent = (MLNumericArray<?>) wrappedContent;
-				} else if (wrappedContent instanceof MLStructure) {
-					MLStructure structureContent = (MLStructure) wrappedContent;
-					MLCell cellContent = (MLCell) structureContent.getField("Values", 0);
-					binaryContent = (MLNumericArray<?>) cellContent.get(0);
-				} else {
-					throw new IOException("Unexpected array type: " + wrappedContent.name);
-				}
 
-				mlArray = new MLJavaObject(arrName, className, binaryContent);
+					mlArray = new MLJavaObject(arrName, className, binaryContent);
+				} else if (name.equals("MCOS")) {
+					// FileWrapper__ is a special MATLAB internal name.  Should never appear from users.
+					if (!className.equals("FileWrapper__")) {
+						MLUInt32 content = (MLUInt32) readMatrix(buf, false);
+						int[][] t = content.getArray();
+
+						// Check that the first four numbers are the same, as expected.
+						if (t[0][0] != 0xdd000000 || t[1][0] != 2) {
+							throw new IOException("MCOS per-object header was different then expected!  Got: " + content.contentToString());
+						}
+
+						mlArray = new MLObjectPlaceholder(arrName, className, t);
+						haveMCOS = true;
+					} else { // This is where we get the useful MCOS data.  Only used on FileWrapper__ classes.
+						mlArray = readMatrix(buf, false);
+					}
+				} else {
+					throw new IOException("Unknown object type (" + name + ") found.");
+				}
 			} else {
-				throw new IOException("Unexpected java object content");
+				throw new IOException("Unexpected object content");
 			}
 			break;
 		case MLArray.mxOBJECT_CLASS:
@@ -820,10 +1191,10 @@ public class MatFileReader {
 
 			// TODO: currently copy pasted from structure
 
-			struct = new MLStructure(name, dims, type, attributes);
+			mlArray = new MLObject(name, className, dims, attributes);
 
 			//field name lenght - this subelement always uses the compressed data element format
-			new ISMatTag(buf);
+			tag = new ISMatTag(buf);
 			maxlen = buf.getInt(); //maximum field length
 
 			//////  read fields data as Int8
@@ -841,20 +1212,20 @@ public class MatFileReader {
 			buf.position(buf.position() + tag.padding);
 			//read fields
 			for (int index = 0; index < 1; index++) {
+				Map<String, MLArray> fields = new HashMap<String, MLArray>();
 				for (int i = 0; i < numOfFields; i++) {
 					//read matrix recursively
 					tag = new ISMatTag(buf);
 
 					if (tag.size > 0) {
 						MLArray fieldValue = readMatrix(buf, false);
-						struct.setField(fieldNames[i], fieldValue, index);
+						fields.put(fieldNames[i], fieldValue);
 					} else {
-						struct.setField(fieldNames[i], new MLEmptyArray(), index);
+						fields.put(fieldNames[i], new MLEmptyArray());
 					}
 				}
+				((MLObject) mlArray).setFields(index, fields);
 			}
-
-			mlArray = new MLObject(name, className, struct);
 			break;
 		default:
 			throw new MatlabIOException("Incorrect matlab array class: " + MLArray.typeToString(type));
@@ -948,18 +1319,23 @@ public class MatFileReader {
 		int version;
 		byte[] endianIndicator = new byte[2];
 
-		//descriptive text 116 bytes
-		byte[] descriptionBuffer = new byte[116];
-		buf.get(descriptionBuffer);
+		// This part of the header is missing if the file isn't a regular mat file.  So ignore.
+		if (matType == MatFileType.Regular) {
+			//descriptive text 116 bytes
+			byte[] descriptionBuffer = new byte[116];
+			buf.get(descriptionBuffer);
 
-		description = zeroEndByteArrayToString(descriptionBuffer);
+			description = zeroEndByteArrayToString(descriptionBuffer);
 
-		if (!description.matches("MATLAB 5.0 MAT-file.*")) {
-			throw new MatlabIOException("This is not a valid MATLAB 5.0 MAT-file.");
+			if (!description.matches("MATLAB 5.0 MAT-file.*")) {
+				throw new MatlabIOException("This is not a valid MATLAB 5.0 MAT-file.");
+			}
+
+			//subsyst data offset 8 bytes
+			buf.position(buf.position() + 8);
+		} else {
+			description = "Simulink generated MATLAB 5.0 MAT-file"; // Default simulink description.
 		}
-
-		//subsyst data offset 8 bytes
-		buf.position(buf.position() + 8);
 
 		byte[] bversion = new byte[2];
 		//version 2 bytes
@@ -980,7 +1356,11 @@ public class MatFileReader {
 
 		buf.order(byteOrder);
 
-		matFileHeader = new MatFileHeader(description, version, endianIndicator);
+		matFileHeader = new MatFileHeader(description, version, endianIndicator, byteOrder);
+
+		// After the header, the next read must be aligned.  Thus force the alignment.  Only matters with reduced header data,
+		// but apply it regardless for safety.
+		buf.position((buf.position() + 7) & 0xfffffff8);
 	}
 
 	/**
@@ -1032,6 +1412,7 @@ public class MatFileReader {
 
 			//skip padding
 			mfis.skip(padding);
+
 			return ab;
 		}
 
@@ -1045,6 +1426,7 @@ public class MatFileReader {
 			}
 
 			//skip padding
+
 			mfis.skip(padding);
 			return ad;
 		}
@@ -1064,11 +1446,8 @@ public class MatFileReader {
 		}
 
 		public String readToString() throws IOException {
-			//
 			byte[] bytes = readToByteArray();
-
 			return new String(bytes, "UTF-8");
-
 		}
 	}
 }

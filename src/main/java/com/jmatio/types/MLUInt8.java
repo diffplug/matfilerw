@@ -156,7 +156,7 @@ public class MLUInt8 extends MLNumericArray<Byte> {
 	 * @see com.jmatio.types.MLNumericArray#get(java.nio.ByteBuffer, int)
 	 */
 	@Override
-	protected Byte get(ByteBuffer buffer, int index) {
+	protected Byte _get(ByteBuffer buffer, int index) {
 		return buffer.get(index);
 	}
 

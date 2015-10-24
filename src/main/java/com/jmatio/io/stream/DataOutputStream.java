@@ -25,7 +25,7 @@ interface DataOutputStream {
 	 * @return the {@link ByteBuffer}
 	 * @throws IOException
 	 */
-	public abstract ByteBuffer buffer() throws IOException;
+	public abstract ByteBuffer getByteBuffer() throws IOException;
 
 	/**
 	 * Writes a sequence of bytes to this stream from the given buffer.
