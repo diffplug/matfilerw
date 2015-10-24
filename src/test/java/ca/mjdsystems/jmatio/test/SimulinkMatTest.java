@@ -112,6 +112,7 @@ public class SimulinkMatTest {
 		assertThat(finished.read(), is(-1));
 
 		assertThat(buf, is(expectedBuf));
+		decoder.close();
 	}
 
 	// This just ensures the SimulinkDecoder works correctly with MatFileReader.

@@ -6,6 +6,7 @@
 package com.jmatio.types;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -80,7 +81,7 @@ public class MLSparse extends MLNumericArray<Double> {
 	 * 
 	 * <tt>jc</tt> points to an integer array of length N+1 that contains column index information.
 	 * For j, in the range <tt>0&lt;=j&lt;=N</tt>, <tt>jc[j]</tt> is the index in ir and <tt>pr</tt> (and <tt>pi</tt>
-	 * if it exists) of the first nonzero entry in the jth column and <tt>jc[j+1]�1</tt> index
+	 * if it exists) of the first nonzero entry in the jth column and <tt>jc[j+1]?????????1</tt> index
 	 * of the last nonzero entry. As a result, <tt>jc[N]</tt> is also equal to nnz, the number
 	 * of nonzero entries in the matrix. If nnz is less than nzmax, then more nonzero
 	 * entries can be inserted in the array without allocating additional storage
@@ -113,11 +114,11 @@ public class MLSparse extends MLNumericArray<Double> {
 		if (real.containsKey(i)) {
 			return real.get(i);
 		}
-		return new Double(0);
+		return 0.0;
 	}
 
 	/* (non-Javadoc)
-	 * @see ca.mjdsystems.jmatio.types.MLNumericArray#getReal(int)
+	 * @see com.jmatio.types.MLNumericArray#getReal(int)
 	 */
 	public Double getReal(int index) {
 		throw new IllegalArgumentException("Can't get Sparse array elements by index. " +
@@ -172,11 +173,11 @@ public class MLSparse extends MLNumericArray<Double> {
 		if (imaginary.containsKey(i)) {
 			return imaginary.get(i);
 		}
-		return new Double(0);
+		return 0.0;
 	}
 
 	/* (non-Javadoc)
-	 * @see ca.mjdsystems.jmatio.types.MLNumericArray#getImaginary(int)
+	 * @see com.jmatio.types.MLNumericArray#getImaginary(int)
 	 */
 	public Double getImaginary(int index) {
 		throw new IllegalArgumentException("Can't get Sparse array elements by index. " +
@@ -260,6 +261,7 @@ public class MLSparse extends MLNumericArray<Double> {
 		/* (non-Javadoc)
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
+		@Override
 		public int compareTo(IndexMN anOtherIndex) {
 			return getIndex(m, n) - getIndex(anOtherIndex.m, anOtherIndex.n);
 		}
@@ -267,6 +269,7 @@ public class MLSparse extends MLNumericArray<Double> {
 		/* (non-Javadoc)
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
+		@Override
 		public boolean equals(Object o) {
 			if (o instanceof IndexMN) {
 				return m == ((IndexMN) o).m && n == ((IndexMN) o).n;
@@ -274,9 +277,15 @@ public class MLSparse extends MLNumericArray<Double> {
 			return super.equals(o);
 		}
 
+		@Override
+		public int hashCode() {
+			return Arrays.hashCode(new int[]{m, n});
+		}
+
 		/* (non-Javadoc)
 		 * @see java.lang.Object#toString()
 		 */
+		@Override
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
 			sb.append("{");

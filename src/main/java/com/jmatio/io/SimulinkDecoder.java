@@ -5,11 +5,13 @@
  */
 package com.jmatio.io;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.jmatio.common.MatDataTypes;
 
 /** This class decodes the Simulink base64 representation of a MAT file.
  *
@@ -17,9 +19,13 @@ import java.util.Map;
  */
 public class SimulinkDecoder extends InputStream {
 	public SimulinkDecoder(String input) {
-		this.input = input.getBytes();
-		for (byte i = 0; i < 64; ++i) {
-			decoderRing.put((byte) (i + ' '), i);
+		try {
+			this.input = input.getBytes(MatDataTypes.CHARSET);
+			for (byte i = 0; i < 64; ++i) {
+				decoderRing.put((byte) (i + ' '), i);
+			}
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
 		}
 	}
 

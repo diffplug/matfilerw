@@ -75,7 +75,7 @@ public class MLUInt8 extends MLNumericArray<Byte> {
 	}
 
 	/* (non-Javadoc)
-	 * @see ca.mjdsystems.jmatio.types.GenericArrayCreator#createArray(int, int)
+	 * @see com.jmatio.types.GenericArrayCreator#createArray(int, int)
 	 */
 	public Byte[] createArray(int m, int n) {
 		return new Byte[m * n];
@@ -153,7 +153,7 @@ public class MLUInt8 extends MLNumericArray<Byte> {
 	/**
 	 * Override to accelerate the performance
 	 * 
-	 * @see com.jmatio.types.MLNumericArray#_get(java.nio.ByteBuffer, int)
+	 * @see com.jmatio.types.MLNumericArray#get(java.nio.ByteBuffer, int)
 	 */
 	@Override
 	protected Byte _get(ByteBuffer buffer, int index) {

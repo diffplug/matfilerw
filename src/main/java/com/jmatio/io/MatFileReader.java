@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
@@ -20,11 +19,19 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.InflaterInputStream;
 
 import com.jmatio.common.MatDataTypes;
 import com.jmatio.io.MatFileWriter.ByteArrayOutputStream2;
+import com.jmatio.io.stream.ByteBufferInputStream;
+import com.jmatio.io.stream.HeapBufferDataOutputStream;
+import com.jmatio.io.stream.MatFileInputStream;
 import com.jmatio.types.ByteStorageSupport;
 import com.jmatio.types.MLArray;
 import com.jmatio.types.MLCell;
@@ -41,6 +48,7 @@ import com.jmatio.types.MLObject;
 import com.jmatio.types.MLSingle;
 import com.jmatio.types.MLSparse;
 import com.jmatio.types.MLStructure;
+import com.jmatio.types.MLUInt16;
 import com.jmatio.types.MLUInt32;
 import com.jmatio.types.MLUInt64;
 import com.jmatio.types.MLUInt8;
@@ -80,15 +88,15 @@ public class MatFileReader {
 	/**
 	 * MAT-file header
 	 */
-	private MatFileHeader matFileHeader;
+	MatFileHeader matFileHeader;
 	/**
 	 * Container for red <code>MLArray</code>s
 	 */
-	private Map<String, MLArray> data;
+	Map<String, MLArray> data;
 	/**
 	 * Tells how bytes are organized in the buffer.
 	 */
-	private ByteOrder byteOrder;
+	ByteOrder byteOrder;
 	/**
 	 * Array name filter
 	 */
@@ -167,10 +175,18 @@ public class MatFileReader {
 		read(file, filter, MEMORY_MAPPED_FILE);
 	}
 
+	public MatFileReader(File file, MatFileFilter filter) throws IOException {
+		this(file, filter, MatFileType.Regular);
+	}
+
 	public MatFileReader(MatFileType matType) {
 		this.matType = matType;
 		filter = new MatFileFilter();
 		data = new LinkedHashMap<String, MLArray>();
+	}
+
+	public MatFileReader() {
+		this(MatFileType.Regular);
 	}
 
 	/**
@@ -294,8 +310,11 @@ public class MatFileReader {
 	 */
 	private static final int DIRECT_BUFFER_LIMIT = 1 << 25;
 
-	public synchronized Map<String, MLArray> read(File file, MatFileFilter filter,
-			int policy) throws IOException {
+	public synchronized Map<String, MLArray> read(File file, MatFileFilter filter, int policy) throws IOException {
+		return read(new RandomAccessFile(file, "r"), filter, policy);
+	}
+
+	public synchronized Map<String, MLArray> read(RandomAccessFile raFile, MatFileFilter filter, int policy) throws IOException {
 		this.filter = filter;
 
 		//clear the results
@@ -304,12 +323,10 @@ public class MatFileReader {
 		}
 
 		FileChannel roChannel = null;
-		RandomAccessFile raFile = null;
 		ByteBuffer buf = null;
 		WeakReference<MappedByteBuffer> bufferWeakRef = null;
 		try {
 			//Create a read-only memory-mapped file
-			raFile = new RandomAccessFile(file, "r");
 			roChannel = raFile.getChannel();
 			// until java bug #4715154 is fixed I am not using memory mapped files
 			// The bug disables re-opening the memory mapped files for writing
@@ -336,7 +353,7 @@ public class MatFileReader {
 				int numberOfBlocks = filesize / DIRECT_BUFFER_LIMIT + ((filesize % DIRECT_BUFFER_LIMIT) > 0 ? 1 : 0);
 				if (numberOfBlocks > 1) {
 					ByteBuffer tempByteBuffer = ByteBuffer.allocateDirect(DIRECT_BUFFER_LIMIT);
-					for (int block = 0; block < numberOfBlocks; block++) {
+					for (long block = 0; block < numberOfBlocks; block++) {
 						tempByteBuffer.clear();
 						roChannel.read(tempByteBuffer, block * DIRECT_BUFFER_LIMIT);
 						tempByteBuffer.flip();
@@ -386,7 +403,6 @@ public class MatFileReader {
 				}
 			}
 		}
-
 	}
 
 	private void parseData(ByteBuffer buf) throws IOException {
@@ -468,8 +484,8 @@ public class MatFileReader {
 			throw new IllegalStateException("MAT file's MCOS data has different byte values for unknown fields!  Aborting!");
 		}
 		while (mcosDataBuf.position() < segmentIndexes[1]) {
-			int packageNameIndex = mcosDataBuf.getInt(); // Unused for now.
-			int classNameIndex = mcosDataBuf.getInt(); // Unused for now.
+			mcosDataBuf.getInt(); // packageNameIndex - Unused for now.
+			int classNameIndex = mcosDataBuf.getInt();
 			String className = strs[classNameIndex - 1];
 			classNamesList.add(className);
 			if (mcosDataBuf.getLong() != 0) {
@@ -740,7 +756,7 @@ public class MatFileReader {
 	 *            input byte buffer
 	 * @throws IOException when error occurs while reading the buffer.
 	 */
-	private void readData(ByteBuffer buf) throws IOException {
+	void readData(ByteBuffer buf) throws IOException {
 		//read data
 		ISMatTag tag = new ISMatTag(buf);
 		switch (tag.type) {
@@ -781,7 +797,6 @@ public class MatFileReader {
 
 			try {
 				readData(out);
-
 			} catch (IOException e) {
 				throw e;
 			} finally {
@@ -871,8 +886,8 @@ public class MatFileReader {
 
 			MLStructure struct = new MLStructure(name, dims, type, attributes);
 
-			// field name length - this subelement always uses the compressed data element format
-			tag = new ISMatTag(buf);
+			//field name lenght - this subelement always uses the compressed data element format
+			new ISMatTag(buf);
 			int maxlen = buf.getInt(); //maximum field length
 
 			//////  read fields data as Int8
@@ -886,7 +901,6 @@ public class MatFileReader {
 				buf.get(names);
 				fieldNames[i] = zeroEndByteArrayToString(names);
 			}
-
 			buf.position(buf.position() + tag.padding);
 			//read fields
 			for (int index = 0; index < struct.getM() * struct.getN(); index++) {
@@ -894,12 +908,14 @@ public class MatFileReader {
 					//read matrix recursively
 					tag = new ISMatTag(buf);
 
+					MLArray array;
 					if (tag.size > 0) {
-						MLArray fieldValue = readMatrix(buf, false);
-						struct.setField(fieldNames[i], fieldValue, index);
+						array = readMatrix(buf, false);
 					} else {
-						struct.setField(fieldNames[i], new MLEmptyArray(), index);
+						array = new MLEmptyArray();
 					}
+					array.name = fieldNames[i];
+					struct.setField(fieldNames[i], array, index);
 				}
 			}
 			mlArray = struct;
@@ -922,8 +938,7 @@ public class MatFileReader {
 			mlArray = new MLDouble(name, dims, type, attributes);
 			//read real
 			tag = new ISMatTag(buf);
-			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(),
-					(MLNumericArray<?>) mlArray);
+			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(), (MLNumericArray<?>) mlArray);
 			//read complex
 			if (mlArray.isComplex()) {
 				tag = new ISMatTag(buf);
@@ -935,8 +950,7 @@ public class MatFileReader {
 			mlArray = new MLSingle(name, dims, type, attributes);
 			//read real
 			tag = new ISMatTag(buf);
-			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(),
-					(MLNumericArray<?>) mlArray);
+			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(), (MLNumericArray<?>) mlArray);
 			//read complex
 			if (mlArray.isComplex()) {
 				tag = new ISMatTag(buf);
@@ -948,8 +962,7 @@ public class MatFileReader {
 			mlArray = new MLUInt8(name, dims, type, attributes);
 			//read real
 			tag = new ISMatTag(buf);
-			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(),
-					(MLNumericArray<?>) mlArray);
+			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(), (MLNumericArray<?>) mlArray);
 			//read complex
 			if (mlArray.isComplex()) {
 				tag = new ISMatTag(buf);
@@ -967,8 +980,7 @@ public class MatFileReader {
 			mlArray = new MLInt8(name, dims, type, attributes);
 			//read real
 			tag = new ISMatTag(buf);
-			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(),
-					(MLNumericArray<?>) mlArray);
+			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(), (MLNumericArray<?>) mlArray);
 			//read complex
 			if (mlArray.isComplex()) {
 				tag = new ISMatTag(buf);
@@ -976,26 +988,36 @@ public class MatFileReader {
 						(MLNumericArray<?>) mlArray);
 			}
 			break;
-
 		case MLArray.mxINT16_CLASS:
 			mlArray = new MLInt16(name, dims, type, attributes);
 			//read real
 			tag = new ISMatTag(buf);
-			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(),
-					(MLNumericArray<?>) mlArray);
+			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(), (MLNumericArray<?>) mlArray);
 			//read complex
 			if (mlArray.isComplex()) {
 				tag = new ISMatTag(buf);
 				tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getImaginaryByteBuffer(),
 						(MLNumericArray<?>) mlArray);
 			}
+			break;
+		case MLArray.mxUINT16_CLASS:
+			mlArray = new MLUInt16(name, dims, type, attributes);
+			//read real
+			tag = new ISMatTag(buf);
+			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(), (MLNumericArray<?>) mlArray);
+			//read complex
+			if (mlArray.isComplex()) {
+				tag = new ISMatTag(buf);
+				tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getImaginaryByteBuffer(),
+						(MLNumericArray<?>) mlArray);
+			}
+			//System.out.println( new String( buf.array() ) );
 			break;
 		case MLArray.mxINT32_CLASS:
 			mlArray = new MLInt32(name, dims, type, attributes);
 			//read real
 			tag = new ISMatTag(buf);
-			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(),
-					(MLNumericArray<?>) mlArray);
+			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(), (MLNumericArray<?>) mlArray);
 			//read complex
 			if (mlArray.isComplex()) {
 				tag = new ISMatTag(buf);
@@ -1007,8 +1029,7 @@ public class MatFileReader {
 			mlArray = new MLUInt32(name, dims, type, attributes);
 			//read real
 			tag = new ISMatTag(buf);
-			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(),
-					(MLNumericArray<?>) mlArray);
+			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(), (MLNumericArray<?>) mlArray);
 			//read complex
 			if (mlArray.isComplex()) {
 				tag = new ISMatTag(buf);
@@ -1020,8 +1041,7 @@ public class MatFileReader {
 			mlArray = new MLInt64(name, dims, type, attributes);
 			//read real
 			tag = new ISMatTag(buf);
-			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(),
-					(MLNumericArray<?>) mlArray);
+			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(), (MLNumericArray<?>) mlArray);
 			//read complex
 			if (mlArray.isComplex()) {
 				tag = new ISMatTag(buf);
@@ -1033,8 +1053,7 @@ public class MatFileReader {
 			mlArray = new MLUInt64(name, dims, type, attributes);
 			//read real
 			tag = new ISMatTag(buf);
-			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(),
-					(MLNumericArray<?>) mlArray);
+			tag.readToByteBuffer(((MLNumericArray<?>) mlArray).getRealByteBuffer(), (MLNumericArray<?>) mlArray);
 			//read complex
 			if (mlArray.isComplex()) {
 				tag = new ISMatTag(buf);
@@ -1106,29 +1125,40 @@ public class MatFileReader {
 			for (int i = 0; i < dims.length; i++) {
 				nn[i] = (byte) dims[i];
 			}
-			String arrName = new String(nn);
-			//                System.out.println( "Array name: " + arrName );
+			String arrName = new String(nn, MatDataTypes.CHARSET);
+			//System.out.println( "Array name: " + arrName );
 
 			// next tag should be miMatrix
 			ISMatTag contentTag = new ISMatTag(buf);
 
 			if (contentTag.type == MatDataTypes.miMATRIX) {
 				if (name.equals("java")) {
-					// should return UInt8
-					MLUInt8 content = (MLUInt8) readMatrix(buf, false);
+					//should return UInt8 or UInt32, but MLNumericArray is the LCD
+					MLArray wrappedContent = readMatrix(buf, false);
 
-					// de-serialize object
-					ObjectInputStream ois = new ObjectInputStream(
-							new ByteBufferInputStream(content.getRealByteBuffer(),
-									content.getRealByteBuffer().limit()));
-					try {
-						Object o = ois.readObject();
-						mlArray = new MLJavaObject(arrName, className, o);
-					} catch (Exception e) {
-						throw new IOException(e);
-					} finally {
-						ois.close();
+					//our first job is to find the binary content
+					MLNumericArray<?> binaryContent = null;
+					if (wrappedContent instanceof MLCell) {
+						//sometimes we'll get a cell array
+						//in that case, we'll take the first NumericArray we can find
+						MLCell cellContent = (MLCell) wrappedContent;
+						for (MLArray candidate : cellContent.cells()) {
+							if (candidate instanceof MLNumericArray) {
+								binaryContent = (MLNumericArray<?>) candidate;
+								break;
+							}
+						}
+					} else if (wrappedContent instanceof MLNumericArray) {
+						binaryContent = (MLNumericArray<?>) wrappedContent;
+					} else if (wrappedContent instanceof MLStructure) {
+						MLStructure structureContent = (MLStructure) wrappedContent;
+						MLCell cellContent = (MLCell) structureContent.getField("Values", 0);
+						binaryContent = (MLNumericArray<?>) cellContent.get(0);
+					} else {
+						throw new IOException("Unexpected array type: " + wrappedContent.name);
 					}
+
+					mlArray = new MLJavaObject(arrName, className, binaryContent);
 				} else if (name.equals("MCOS")) {
 					// FileWrapper__ is a special MATLAB internal name.  Should never appear from users.
 					if (!className.equals("FileWrapper__")) {
@@ -1219,7 +1249,7 @@ public class MatFileReader {
 		for (i = 0; i < bytes.length && bytes[i] != 0; i++)
 			;
 
-		return new String(bytes, 0, i);
+		return new String(bytes, 0, i, MatDataTypes.CHARSET);
 
 	}
 
@@ -1283,7 +1313,7 @@ public class MatFileReader {
 	 *             if reading from buffer fails or if this is not a valid
 	 *             MAT-file
 	 */
-	private void readHeader(ByteBuffer buf) throws IOException {
+	void readHeader(ByteBuffer buf) throws IOException {
 		//header values
 		String description;
 		int version;
@@ -1416,26 +1446,8 @@ public class MatFileReader {
 		}
 
 		public String readToString() throws IOException {
-			//
 			byte[] bytes = readToByteArray();
-
 			return new String(bytes, "UTF-8");
-
-		}
-
-		public char[] readToCharArray() throws IOException {
-			//allocate memory for array elements
-			int elements = size / sizeOf();
-			char[] ac = new char[elements];
-
-			for (int i = 0; i < elements; i++) {
-				ac[i] = mfis.readChar();
-			}
-
-			//skip padding
-			mfis.skip(padding);
-			return ac;
 		}
 	}
-
 }

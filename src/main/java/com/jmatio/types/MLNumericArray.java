@@ -279,18 +279,15 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 	}
 
 	/* (non-Javadoc)
-	 * @see ca.mjdsystems.jmatio.types.MLArray#contentToString()
+	 * @see com.jmatio.types.MLArray#contentToString()
 	 */
+	@Override
 	public String contentToString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append(name + " = \n");
-
 		if (getSize() > 1000) {
-			sb.append("Cannot display variables with more than 1000 elements.");
-			return sb.toString();
+			return "Cannot display variables with more than 1000 elements.";
 		}
+		StringBuilder sb = new StringBuilder();
 		for (int m = 0; m < getM(); m++) {
-			sb.append("\t");
 			for (int n = 0; n < getN(); n++) {
 				sb.append(getReal(m, n));
 				if (isComplex()) {
@@ -299,6 +296,10 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 				sb.append("\t");
 			}
 			sb.append("\n");
+		}
+		// don't let it end in \t\n
+		if (sb.length() > 2) {
+			sb.setLength(sb.length() - 2);
 		}
 		return sb.toString();
 	}
@@ -317,6 +318,15 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 			return result;
 		}
 		return super.equals(o);
+	}
+
+	@Override
+	public int hashCode() {
+		if (isComplex()) {
+			return Arrays.hashCode(new Object[]{real, dims, imaginary});
+		} else {
+			return Arrays.hashCode(new Object[]{real, dims});
+		}
 	}
 
 	/**

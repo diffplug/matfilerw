@@ -5,8 +5,13 @@
  */
 package com.jmatio.io;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteOrder;
 import java.util.Date;
+
+import com.jmatio.common.MatDataTypes;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * MAT-file header
@@ -16,6 +21,7 @@ import java.util.Date;
  * 
  * @author Wojciech Gradkowski (<a href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
  */
+@SuppressFBWarnings(value = {"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification = "This code is unlikely to be used in a security-sensitive environment.")
 public class MatFileHeader {
 	private static String DEFAULT_DESCRIPTIVE_TEXT = "MATLAB 5.0 MAT-file, Platform: "
 			+ System.getProperty("os.name")
@@ -92,14 +98,17 @@ public class MatFileHeader {
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("[");
-		sb.append("desriptive text: " + description);
-		sb.append(", version: " + version);
-		sb.append(", endianIndicator: " + new String(endianIndicator));
-		sb.append("]");
-
-		return sb.toString();
+		try {
+			StringBuffer sb = new StringBuffer();
+			sb.append("[");
+			sb.append("desriptive text: " + description);
+			sb.append(", version: " + version);
+			sb.append(", endianIndicator: " + new String(endianIndicator, MatDataTypes.CHARSET));
+			sb.append("]");
+			return sb.toString();
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public ByteOrder getByteOrder() {

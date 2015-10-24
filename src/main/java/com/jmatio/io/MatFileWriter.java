@@ -112,6 +112,7 @@ public class MatFileWriter {
 	 * @throws IOException
 	 * @throws DataFormatException
 	 */
+	@SuppressWarnings("resource")
 	public MatFileWriter(File file, Collection<MLArray> data) throws IOException {
 		this((new FileOutputStream(file)).getChannel(), data);
 	}
@@ -517,8 +518,6 @@ public class MatFileWriter {
 		DataOutputStream bufferDOS = new DataOutputStream(buffer);
 
 		byte[] nameByteArray = array.getNameToByteArray();
-		buffer = new ByteArrayOutputStream();
-		bufferDOS = new DataOutputStream(buffer);
 		bufferDOS.write(nameByteArray);
 		OSArrayTag tag = new OSArrayTag(MatDataTypes.miINT8, buffer.toByteArray());
 		tag.writeTo(os);

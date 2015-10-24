@@ -90,7 +90,7 @@ public class MLArrayQuery {
 			switch (type) {
 			case MLArray.mxOBJECT_CLASS: {
 				MLObject object = cast(current, MLObject.class);
-				MLArray field = object.getObject().getField(name, prevM, prevN);
+				MLArray field = object.getFields(0).get(name);
 				if (field == null) {
 					throw new RuntimeException("no such field: " + name);
 				}

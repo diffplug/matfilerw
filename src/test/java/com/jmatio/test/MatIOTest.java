@@ -1012,8 +1012,7 @@ public class MatIOTest {
 		MLObject mlObject = (MLObject) content.get("X");
 
 		assertEquals("inline", mlObject.getClassName());
-		assertTrue(mlObject.getObject() instanceof MLStructure);
-		assertTrue(mlObject.getObject().getFieldNames().contains("expr"));
+		assertTrue(mlObject.getFields(0).keySet().contains("expr"));
 	}
 
 	@Test

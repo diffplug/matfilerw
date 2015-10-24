@@ -27,7 +27,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.jmatio.io.*;
+import com.jmatio.io.MatFileFilter;
+import com.jmatio.io.MatFileIncrementalWriter;
+import com.jmatio.io.MatFileReader;
+import com.jmatio.io.MatFileType;
+import com.jmatio.io.MatFileWriter;
 import com.jmatio.types.MLArray;
 import com.jmatio.types.MLCell;
 import com.jmatio.types.MLChar;
@@ -150,12 +154,12 @@ public class MatIOTest {
 
 		List<MLArray> towrite = Arrays.asList(mlArray);
 		String filename = newTempFileLocation("cellcopy.mat");
-		MatFileWriter writer = new MatFileWriter(filename, towrite);
+		new MatFileWriter(filename, towrite);
 
 		reader = new MatFileReader(filename);
 		MLArray mlArrayRetrieved = reader.getMLArray("cel");
 
-		//assertEquals( ((MLCell)mlArray).get(0), ((MLCell)mlArrayRetrieved).get(0));
+		assertEquals(((MLStructure) mlArray).getFieldNames(), ((MLStructure) mlArrayRetrieved).getFieldNames());
 	}
 
 	/**
@@ -615,7 +619,7 @@ public class MatIOTest {
 		new MatFileWriter(filename, towrite);
 
 		reader = new MatFileReader(filename);
-		MLArray mlArrayRetrieved = reader.getMLArray("structure");
+		reader.getMLArray("structure");
 	}
 
 	/**

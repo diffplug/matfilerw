@@ -5,8 +5,6 @@
  */
 package com.jmatio.io;
 
-import java.util.Arrays;
-
 import com.jmatio.types.MLArray;
 
 /**

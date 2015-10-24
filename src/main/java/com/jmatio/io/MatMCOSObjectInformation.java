@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.jmatio.types.MLArray;
-import com.jmatio.types.MLStructure;
 
 /**
  *

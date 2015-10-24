@@ -12,9 +12,9 @@ import java.nio.ByteBuffer;
 public class ByteBufferInputStream extends InputStream {
 	private ByteBuffer buf;
 
-	private long limit;
+	private int limit;
 
-	public ByteBufferInputStream(final ByteBuffer buf, final long limit) {
+	public ByteBufferInputStream(final ByteBuffer buf, final int limit) {
 		this.buf = buf;
 		this.limit = limit;
 	}
@@ -34,7 +34,7 @@ public class ByteBufferInputStream extends InputStream {
 		if (!(limit > 0)) {
 			return -1;
 		}
-		len = (int) Math.min(len, limit);
+		len = Math.min(len, limit);
 		// Read only what's left
 		buf.get(bytes, off, len);
 		limit -= len;

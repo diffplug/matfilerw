@@ -5,6 +5,10 @@
  */
 package com.jmatio.types;
 
+import java.io.UnsupportedEncodingException;
+
+import com.jmatio.common.MatDataTypes;
+
 public class MLArray {
 
 	/* Matlab Array Types (Classes) */
@@ -67,7 +71,11 @@ public class MLArray {
 	}
 
 	public byte[] getNameToByteArray() {
-		return name.getBytes();
+		try {
+			return name.getBytes(MatDataTypes.CHARSET);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public int[] getDimensions() {
@@ -195,7 +203,7 @@ public class MLArray {
 	}
 
 	public boolean isComplex() {
-		return (attributes & mtFLAG_COMPLEX) != 0;
+		return (attributes & mtFLAG_COMPLEX) == mtFLAG_COMPLEX;
 	}
 
 	public boolean isSparse() {
@@ -255,7 +263,7 @@ public class MLArray {
 	}
 
 	public boolean isLogical() {
-		return (attributes & mtFLAG_LOGICAL) != 0;
+		return (attributes & mtFLAG_LOGICAL) == mtFLAG_LOGICAL;
 	}
 
 	public boolean isFunctionObject() {
@@ -288,6 +296,9 @@ public class MLArray {
 			}
 			sb.append("  ");
 			sb.append(typeToString(type));
+			if (isLogical()) {
+				sb.append(" (logical)");
+			}
 			sb.append(" array");
 			if (isSparse()) {
 				sb.append(" (sparse");

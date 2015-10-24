@@ -10,8 +10,12 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
-import java.io.*;
-import java.util.Collection;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Map;
 
 import org.junit.Rule;
@@ -21,7 +25,11 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import com.jmatio.io.MatFileReader;
-import com.jmatio.types.*;
+import com.jmatio.types.MLArray;
+import com.jmatio.types.MLChar;
+import com.jmatio.types.MLDouble;
+import com.jmatio.types.MLInt8;
+import com.jmatio.types.MLObject;
 
 /**
  * This test verifies that ReducedHeader generated mat files work correctly.

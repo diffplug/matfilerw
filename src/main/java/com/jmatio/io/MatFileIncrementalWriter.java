@@ -71,7 +71,6 @@ public class MatFileIncrementalWriter {
 	private WritableByteChannel channel = null;
 
 	private boolean headerWritten = false;
-	private boolean isStillValid = false;
 	private Set<String> varNames = new TreeSet<String>();
 
 	/**
@@ -92,6 +91,7 @@ public class MatFileIncrementalWriter {
 	 * @throws IOException
 	 * @throws DataFormatException
 	 */
+	@SuppressWarnings("resource") // the channel is closed when you call close()
 	public MatFileIncrementalWriter(File file) throws IOException {
 		this((new FileOutputStream(file)).getChannel());
 	}
@@ -107,7 +107,6 @@ public class MatFileIncrementalWriter {
 	 */
 	public MatFileIncrementalWriter(WritableByteChannel chan) throws IOException {
 		this.channel = chan;
-		isStillValid = true;
 	}
 
 	public synchronized void write(MLArray data)
@@ -173,7 +172,6 @@ public class MatFileIncrementalWriter {
 				write(matrix);
 			}
 		} catch (IllegalArgumentException iae) {
-			isStillValid = false;
 			throw iae;
 		} catch (IOException e) {
 			throw e;
@@ -460,13 +458,9 @@ public class MatFileIncrementalWriter {
 	private void writeName(DataOutputStream os, MLArray array) throws IOException {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		DataOutputStream bufferDOS = new DataOutputStream(buffer);
-
 		byte[] nameByteArray = array.getNameToByteArray();
-		buffer = new ByteArrayOutputStream();
-		bufferDOS = new DataOutputStream(buffer);
 		bufferDOS.write(nameByteArray);
 		OSArrayTag tag = new OSArrayTag(MatDataTypes.miINT8, buffer.toByteArray());
 		tag.writeTo(os);
 	}
-
 }

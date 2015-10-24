@@ -7,6 +7,8 @@ package com.jmatio.types;
 
 import java.util.Arrays;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class MLChar extends MLArray implements GenericArrayCreator<Character> {
 	Character[] chars;
 
@@ -115,6 +117,7 @@ public class MLChar extends MLArray implements GenericArrayCreator<Character> {
 		return chars[getIndex(m, n)];
 	}
 
+	@SuppressFBWarnings(value = {"EI_EXPOSE_REP"}, justification = "This code is unlikely to be used in a security-sensitive environment.")
 	public Character[] exportChar() {
 		return chars;
 	}
@@ -123,8 +126,14 @@ public class MLChar extends MLArray implements GenericArrayCreator<Character> {
 	public boolean equals(Object o) {
 		if (o instanceof MLChar) {
 			return Arrays.equals(chars, ((MLChar) o).chars);
+		} else {
+			return false;
 		}
-		return super.equals(o);
+	}
+
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(chars);
 	}
 
 	/**
