@@ -17,6 +17,10 @@ public class MLSingle extends MLNumericArray<Float> {
 		super(name, dims, type, attributes);
 	}
 
+	public Float[] createArray(int m, int n) {
+		return new Float[m * n];
+	}
+
 	public Float buldFromBytes(byte[] bytes) {
 		if (bytes.length != getBytesAllocated()) {
 			throw new IllegalArgumentException(

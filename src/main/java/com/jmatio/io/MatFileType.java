@@ -3,9 +3,11 @@
  * All code up to tags/original: Copyright (c) 2006, Wojciech Gradkowski
  * All code after tags/original: Copyright (c) 2015, DiffPlug
  */
-package ca.mjdsystems.jmatio.types;
+package com.jmatio.io;
 
-public interface GenericArrayCreator<T> {
-	T[] createArray(int m, int n);
-
+/** Describes the type of Mat file.
+ * @author Matthew Dawson <matthew@mjdsystems.ca>
+ */
+public enum MatFileType {
+	Regular, ReducedHeader
 }

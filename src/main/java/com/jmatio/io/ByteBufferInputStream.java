@@ -3,7 +3,7 @@
  * All code up to tags/original: Copyright (c) 2006, Wojciech Gradkowski
  * All code after tags/original: Copyright (c) 2015, DiffPlug
  */
-package ca.mjdsystems.jmatio.io;
+package com.jmatio.io;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -3,13 +3,13 @@
  * All code up to tags/original: Copyright (c) 2006, Wojciech Gradkowski
  * All code after tags/original: Copyright (c) 2015, DiffPlug
  */
-package ca.mjdsystems.jmatio.io;
+package com.jmatio.io;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import ca.mjdsystems.jmatio.common.MatDataTypes;
-import ca.mjdsystems.jmatio.types.ByteStorageSupport;
+import com.jmatio.common.MatDataTypes;
+import com.jmatio.types.ByteStorageSupport;
 
 /**
  * MAT-file input stream class. 
@@ -25,7 +25,7 @@ class MatFileInputStream {
 	 * 
 	 * @param is - input stream
 	 * @param type - type of data in the stream
-	 * @see ca.mjdsystems.jmatio.common.MatDataTypes
+	 * @see com.jmatio.common.MatDataTypes
 	 */
 	public MatFileInputStream(ByteBuffer buf, int type) {
 		this.type = type;

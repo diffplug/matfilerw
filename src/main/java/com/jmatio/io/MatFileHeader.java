@@ -5,10 +5,8 @@
  */
 package com.jmatio.io;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.ByteOrder;
 import java.util.Date;
-
-import com.jmatio.common.MatDataTypes;
 
 /**
  * MAT-file header
@@ -19,10 +17,12 @@ import com.jmatio.common.MatDataTypes;
  * @author Wojciech Gradkowski (<a href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
  */
 public class MatFileHeader {
-	private static final String DEFAULT_DESCRIPTIVE_TEXT = "MATLAB 5.0 MAT-file, Platform: "
+	private static String DEFAULT_DESCRIPTIVE_TEXT = "MATLAB 5.0 MAT-file, Platform: "
 			+ System.getProperty("os.name")
 			+ ", CREATED on: ";
-	public static final int DEFAULT_VERSION = 0x0100;
+	private static int DEFAULT_VERSION = 0x0100;
+	private static byte[] DEFAULT_ENDIAN_INDICATOR = new byte[]{(byte) 'M', (byte) 'I'};
+	private final ByteOrder byteOrder;
 
 	private int version;
 	private String description;
@@ -35,11 +35,11 @@ public class MatFileHeader {
 	 * @param version - by default is set to 0x0100
 	 * @param endianIndicator - byte array size of 2 indicating byte-swapping requirement
 	 */
-	public MatFileHeader(String description, int version, byte[] endianIndicator) {
+	public MatFileHeader(String description, int version, byte[] endianIndicator, ByteOrder byteOrder) {
 		this.description = description;
 		this.version = version;
-		this.endianIndicator = new byte[endianIndicator.length];
-		System.arraycopy(endianIndicator, 0, this.endianIndicator, 0, endianIndicator.length);
+		this.endianIndicator = endianIndicator;
+		this.byteOrder = byteOrder;
 	}
 
 	/**
@@ -57,7 +57,7 @@ public class MatFileHeader {
 	 * 
 	 * @return - a byte array size of 2
 	 */
-	byte[] getEndianIndicator() {
+	public byte[] getEndianIndicator() {
 		return endianIndicator;
 	}
 
@@ -84,28 +84,26 @@ public class MatFileHeader {
 	public static MatFileHeader createHeader() {
 		return new MatFileHeader(DEFAULT_DESCRIPTIVE_TEXT + (new Date()).toString(),
 				DEFAULT_VERSION,
-				DEFAULT_ENDIAN_INDICATOR());
-	}
-
-	/** Returns the default endianness indicator. */
-	private static final byte[] DEFAULT_ENDIAN_INDICATOR() {
-		return new byte[]{(byte) 'M', (byte) 'I'};
+				DEFAULT_ENDIAN_INDICATOR,
+				ByteOrder.BIG_ENDIAN);
 	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		try {
-			StringBuffer sb = new StringBuffer();
-			sb.append("[");
-			sb.append("desriptive text: " + description);
-			sb.append(", version: " + version);
-			sb.append(", endianIndicator: " + new String(endianIndicator, MatDataTypes.CHARSET));
-			sb.append("]");
-			return sb.toString();
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
+		StringBuffer sb = new StringBuffer();
+		sb.append("[");
+		sb.append("desriptive text: " + description);
+		sb.append(", version: " + version);
+		sb.append(", endianIndicator: " + new String(endianIndicator));
+		sb.append("]");
+
+		return sb.toString();
+	}
+
+	public ByteOrder getByteOrder() {
+		assert((byteOrder != ByteOrder.LITTLE_ENDIAN || endianIndicator[0] == 'I') && (byteOrder != ByteOrder.BIG_ENDIAN || endianIndicator[0] == 'M'));
+		return byteOrder;
 	}
 }

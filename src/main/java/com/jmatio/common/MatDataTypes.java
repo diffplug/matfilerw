@@ -11,8 +11,6 @@ package com.jmatio.common;
  * @author Wojciech Gradkowski <wgradkowski@gmail.com>
  */
 public class MatDataTypes {
-	public static final String CHARSET = "UTF-8";
-
 	/* MAT-File Data Types */
 	public static final int miUNKNOWN = 0;
 	public static final int miINT8 = 1;
@@ -135,4 +133,5 @@ public class MatDataTypes {
 		}
 		return s;
 	}
+
 }

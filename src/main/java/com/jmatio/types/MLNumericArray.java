@@ -21,7 +21,8 @@ import java.util.Arrays;
  * @param <T>
  */
 public abstract class MLNumericArray<T extends Number> extends MLArray
-		implements ByteStorageSupport<T> {
+		implements GenericArrayCreator<T>,
+		ByteStorageSupport<T> {
 	private ByteBuffer real;
 	private ByteBuffer imaginary;
 	/** The buffer for creating Number from bytes */
@@ -82,7 +83,7 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 	 * @return
 	 */
 	public T getReal(int index) {
-		return get(real, index);
+		return _get(real, index);
 	}
 
 	/**
@@ -103,7 +104,7 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 	 * @param index - column-packed vector index
 	 */
 	public void setReal(T value, int index) {
-		set(real, value, index);
+		_set(real, value, index);
 	}
 
 	/**
@@ -137,7 +138,7 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 	 */
 	public void setImaginary(T value, int index) {
 		if (isComplex()) {
-			set(imaginary, value, index);
+			_set(imaginary, value, index);
 		}
 	}
 
@@ -157,7 +158,7 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 	 * @return
 	 */
 	public T getImaginary(int index) {
-		return get(imaginary, index);
+		return _get(imaginary, index);
 	}
 
 	/**
@@ -228,7 +229,7 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 		if (isComplex()) {
 			throw new IllegalStateException("Cannot use this method for Complex matrices");
 		}
-		return get(real, index);
+		return _get(real, index);
 	}
 
 	/**
@@ -245,13 +246,13 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 		return index * getBytesAllocated();
 	}
 
-	protected T get(ByteBuffer buffer, int index) {
+	protected T _get(ByteBuffer buffer, int index) {
 		buffer.position(getByteOffset(index));
 		buffer.get(bytes, 0, bytes.length);
 		return buldFromBytes(bytes);
 	}
 
-	protected void set(ByteBuffer buffer, T value, int index) {
+	protected void _set(ByteBuffer buffer, T value, int index) {
 		buffer.position(getByteOffset(index));
 		buffer.put(getByteArray(value));
 	}
@@ -278,15 +279,18 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 	}
 
 	/* (non-Javadoc)
-	 * @see com.jmatio.types.MLArray#contentToString()
+	 * @see ca.mjdsystems.jmatio.types.MLArray#contentToString()
 	 */
-	@Override
 	public String contentToString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(name + " = \n");
+
 		if (getSize() > 1000) {
-			return "Cannot display variables with more than 1000 elements.";
+			sb.append("Cannot display variables with more than 1000 elements.");
+			return sb.toString();
 		}
-		StringBuilder sb = new StringBuilder();
 		for (int m = 0; m < getM(); m++) {
+			sb.append("\t");
 			for (int n = 0; n < getN(); n++) {
 				sb.append(getReal(m, n));
 				if (isComplex()) {
@@ -295,10 +299,6 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 				sb.append("\t");
 			}
 			sb.append("\n");
-		}
-		// don't let it end in \t\n
-		if (sb.length() > 2) {
-			sb.setLength(sb.length() - 2);
 		}
 		return sb.toString();
 	}
@@ -317,15 +317,6 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 			return result;
 		}
 		return super.equals(o);
-	}
-
-	@Override
-	public int hashCode() {
-		if (isComplex()) {
-			return Arrays.hashCode(new Object[]{real, dims, imaginary});
-		} else {
-			return Arrays.hashCode(new Object[]{real, dims});
-		}
 	}
 
 	/**

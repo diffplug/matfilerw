@@ -69,6 +69,13 @@ public class MLInt32 extends MLNumericArray<Integer> {
 		this(name, castToInteger(vals), m);
 	}
 
+	/* (non-Javadoc)
+	 * @see ca.mjdsystems.jmatio.types.GenericArrayCreator#createArray(int, int)
+	 */
+	public Integer[] createArray(int m, int n) {
+		return new Integer[m * n];
+	}
+
 	/**
 	 * Gets two-dimensional real array.
 	 * 

@@ -68,6 +68,13 @@ public class MLInt8 extends MLNumericArray<Byte> {
 		this(name, castToByte(vals), m);
 	}
 
+	/* (non-Javadoc)
+	 * @see ca.mjdsystems.jmatio.types.GenericArrayCreator#createArray(int, int)
+	 */
+	public Byte[] createArray(int m, int n) {
+		return new Byte[m * n];
+	}
+
 	/**
 	 * Gets two-dimensional real array.
 	 * 
@@ -140,10 +147,10 @@ public class MLInt8 extends MLNumericArray<Byte> {
 	/**
 	 * Override to accelerate the performance
 	 * 
-	 * @see com.jmatio.types.MLNumericArray#get(java.nio.ByteBuffer, int)
+	 * @see com.jmatio.types.MLNumericArray#_get(java.nio.ByteBuffer, int)
 	 */
 	@Override
-	protected Byte get(ByteBuffer buffer, int index) {
+	protected Byte _get(ByteBuffer buffer, int index) {
 		return buffer.get(index);
 	}
 

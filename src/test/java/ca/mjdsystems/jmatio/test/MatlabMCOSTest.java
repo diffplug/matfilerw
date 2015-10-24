@@ -20,8 +20,8 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import ca.mjdsystems.jmatio.io.MatFileReader;
-import ca.mjdsystems.jmatio.types.*;
+import com.jmatio.io.MatFileReader;
+import com.jmatio.types.*;
 
 /**
  * This test verifies that ReducedHeader generated mat files work correctly.

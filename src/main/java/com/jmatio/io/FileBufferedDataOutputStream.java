@@ -3,7 +3,7 @@
  * All code up to tags/original: Copyright (c) 2006, Wojciech Gradkowski
  * All code after tags/original: Copyright (c) 2015, DiffPlug
  */
-package ca.mjdsystems.jmatio.io;
+package com.jmatio.io;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import ca.mjdsystems.jmatio.types.MLArray;
+import com.jmatio.types.MLArray;
 
 /**
  * This is an {@link OutputStream} that is backed by a {@link RandomAccessFile}

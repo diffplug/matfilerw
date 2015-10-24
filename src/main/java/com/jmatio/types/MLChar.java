@@ -6,9 +6,8 @@
 package com.jmatio.types;
 
 import java.util.Arrays;
-import java.util.List;
 
-public class MLChar extends MLArray {
+public class MLChar extends MLArray implements GenericArrayCreator<Character> {
 	Character[] chars;
 
 	/**
@@ -75,7 +74,7 @@ public class MLChar extends MLArray {
 		chars = createArray(getM(), getN());
 	}
 
-	protected Character[] createArray(int m, int n) {
+	public Character[] createArray(int m, int n) {
 		return new Character[m * n];
 	}
 
@@ -102,9 +101,9 @@ public class MLChar extends MLArray {
 	 */
 	public void set(String value, int idx) {
 		int rowOffset = getM();
-
 		for (int i = 0; i < getN(); i++) {
 			if (i < value.length()) {
+
 				setChar(value.charAt(i), idx + (rowOffset * i));
 			} else {
 				setChar(' ', idx + (rowOffset * i));
@@ -116,22 +115,16 @@ public class MLChar extends MLArray {
 		return chars[getIndex(m, n)];
 	}
 
-	public List<Character> exportChar() {
-		return Arrays.asList(chars);
+	public Character[] exportChar() {
+		return chars;
 	}
 
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof MLChar) {
 			return Arrays.equals(chars, ((MLChar) o).chars);
-		} else {
-			return false;
 		}
-	}
-
-	@Override
-	public int hashCode() {
-		return Arrays.hashCode(chars);
+		return super.equals(o);
 	}
 
 	/**

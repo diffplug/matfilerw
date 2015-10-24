@@ -27,19 +27,19 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import ca.mjdsystems.jmatio.io.*;
-import ca.mjdsystems.jmatio.types.MLArray;
-import ca.mjdsystems.jmatio.types.MLCell;
-import ca.mjdsystems.jmatio.types.MLChar;
-import ca.mjdsystems.jmatio.types.MLDouble;
-import ca.mjdsystems.jmatio.types.MLInt64;
-import ca.mjdsystems.jmatio.types.MLInt8;
-import ca.mjdsystems.jmatio.types.MLNumericArray;
-import ca.mjdsystems.jmatio.types.MLSingle;
-import ca.mjdsystems.jmatio.types.MLSparse;
-import ca.mjdsystems.jmatio.types.MLStructure;
-import ca.mjdsystems.jmatio.types.MLUInt64;
-import ca.mjdsystems.jmatio.types.MLUInt8;
+import com.jmatio.io.*;
+import com.jmatio.types.MLArray;
+import com.jmatio.types.MLCell;
+import com.jmatio.types.MLChar;
+import com.jmatio.types.MLDouble;
+import com.jmatio.types.MLInt64;
+import com.jmatio.types.MLInt8;
+import com.jmatio.types.MLNumericArray;
+import com.jmatio.types.MLSingle;
+import com.jmatio.types.MLSparse;
+import com.jmatio.types.MLStructure;
+import com.jmatio.types.MLUInt64;
+import com.jmatio.types.MLUInt8;
 
 /**
  * The test suite for JMatIO
