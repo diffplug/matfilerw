@@ -36,7 +36,8 @@ jar.doFirst {
 
 jar.manifest {
 	attributes (
-		'Export-Package': 'com.jmatio.*',
+		'Export-Package': 'com.jmatio.*,ca.mjdsystems.*',
+		'Import-Package': 'sun.misc;resolution:=optional,com.jmatio.*,ca.mjdsystems.*',
 		'Bundle-SymbolicName': "${project.group}.${project.name}",
 		'Bundle-Vendor': 'DiffPlug',
 		'Bundle-DocURL': "https://github.com/${project.org}/${project.name}",
