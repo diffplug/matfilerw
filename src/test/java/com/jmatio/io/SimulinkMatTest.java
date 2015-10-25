@@ -5,8 +5,8 @@
  */
 package com.jmatio.io;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
@@ -41,49 +41,49 @@ public class SimulinkMatTest {
 		MLObject data = (MLObject) reader.getContent().get("@");
 
 		// First check that the root element is correct.
-		assertThat(data, is(notNullValue()));
-		assertThat(data.getClassName(), is("Data"));
-		assertThat(data.getSize(), is(1));
+		assertThat(data, notNullValue());
+		assertThat(data.getClassName(), equalTo("Data"));
+		assertThat(data.getSize(), equalTo(1));
 		Map<String, MLArray> dataO = data.getFields(0);
-		assertThat(dataO.size(), is(10));
-		assertThat(((MLChar) dataO.get("function_name")).getString(0), is("quad_fcn_subtype"));
-		assertThat(((MLChar) dataO.get("function_inputs")).getString(0), is("c,a,b:{x:real|(a=0 => x /= 0) AND (a /= 0 => (x^2) - 4*a*c >= 0)}"));
-		assertThat(((MLDouble) dataO.get("open")).get(0), is(0.0));
-		assertThat(((MLDouble) dataO.get("fig")).getSize(), is(0)); // This field should just exist, but be empty!
-		assertThat(((MLDouble) dataO.get("multi_mode")).get(0), is(1.0));
-		assertThat(((MLDouble) dataO.get("checked")).get(0), is(0.0));
+		assertThat(dataO.size(), equalTo(10));
+		assertThat(((MLChar) dataO.get("function_name")).getString(0), equalTo("quad_fcn_subtype"));
+		assertThat(((MLChar) dataO.get("function_inputs")).getString(0), equalTo("c,a,b:{x:real|(a=0 => x /= 0) AND (a /= 0 => (x^2) - 4*a*c >= 0)}"));
+		assertThat(((MLDouble) dataO.get("open")).get(0), equalTo(0.0));
+		assertThat(((MLDouble) dataO.get("fig")).getSize(), equalTo(0)); // This field should just exist, but be empty!
+		assertThat(((MLDouble) dataO.get("multi_mode")).get(0), equalTo(1.0));
+		assertThat(((MLDouble) dataO.get("checked")).get(0), equalTo(0.0));
 
 		// Next, make sure the settings structure came out right.  Not super important, but a good test.
 		MLStructure settings = (MLStructure) dataO.get("settings");
-		assertThat(settings.getAllFields().size(), is(5));
-		assertThat(((MLDouble) settings.getField("set")).get(0), is(1.0));
-		assertThat((settings.getField("inputs")), is(instanceOf(MLDouble.class)));
-		assertThat(((MLDouble) settings.getField("count")).get(0), is(1000.0));
-		assertThat(((MLDouble) settings.getField("range")).get(0), is(100.0));
-		assertThat(((MLDouble) settings.getField("except")).get(0), is(0.0));
+		assertThat(settings.getAllFields().size(), equalTo(5));
+		assertThat(((MLDouble) settings.getField("set")).get(0), equalTo(1.0));
+		assertThat((settings.getField("inputs")), instanceOf(MLDouble.class));
+		assertThat(((MLDouble) settings.getField("count")).get(0), equalTo(1000.0));
+		assertThat(((MLDouble) settings.getField("range")).get(0), equalTo(100.0));
+		assertThat(((MLDouble) settings.getField("except")).get(0), equalTo(0.0));
 
 		// Next, verify Grid2, as it is easiest.
 		MLObject Grid2 = (MLObject) dataO.get("Grid2");
-		assertThat(Grid2.getClassName(), is("Grid"));
-		assertThat(Grid2.getSize(), is(1));
+		assertThat(Grid2.getClassName(), equalTo("Grid"));
+		assertThat(Grid2.getSize(), equalTo(1));
 		Map<String, MLArray> gridO = Grid2.getFields(0);
 
-		assertThat(((MLDouble) gridO.get("num_cells")).get(0), is(2.0));
-		assertThat(gridO.get("split_pb").getSize(), is(0));
-		assertThat(gridO.get("parent_grid").getSize(), is(0));
-		assertThat(gridO.get("parent_cell").getSize(), is(0));
-		assertThat(gridO.get("new_cell_pb").getSize(), is(0));
-		assertThat(gridO.get("delete_cell_pb").getSize(), is(0));
-		assertThat(((MLObject) gridO.get("rGrid")).getFields(0), is(((MLObject) dataO.get("Grid0")).getFields(0)));
-		assertThat(((MLDouble) gridO.get("grid_index")).get(0), is(2.0));
+		assertThat(((MLDouble) gridO.get("num_cells")).get(0), equalTo(2.0));
+		assertThat(gridO.get("split_pb").getSize(), equalTo(0));
+		assertThat(gridO.get("parent_grid").getSize(), equalTo(0));
+		assertThat(gridO.get("parent_cell").getSize(), equalTo(0));
+		assertThat(gridO.get("new_cell_pb").getSize(), equalTo(0));
+		assertThat(gridO.get("delete_cell_pb").getSize(), equalTo(0));
+		assertThat(((MLObject) gridO.get("rGrid")).getFields(0), equalTo(((MLObject) dataO.get("Grid0")).getFields(0)));
+		assertThat(((MLDouble) gridO.get("grid_index")).get(0), equalTo(2.0));
 
 		MLObject cells = (MLObject) gridO.get("cells");
-		assertThat(cells.getSize(), is(2));
+		assertThat(cells.getSize(), equalTo(2));
 		Map<String, MLArray> cellO = cells.getFields(0);
 
-		assertThat(((MLChar) cellO.get("cond_text")).getString(0), is("a == 0"));
+		assertThat(((MLChar) cellO.get("cond_text")).getString(0), equalTo("a == 0"));
 
-		assertThat(((MLChar) cells.getFields(1).get("cond_text")).getString(0), is("a ~= 0"));
+		assertThat(((MLChar) cells.getFields(1).get("cond_text")).getString(0), equalTo("a ~= 0"));
 	}
 
 	// This just ensures the SimulinkDecoder actually decodes correctly.
@@ -97,21 +97,21 @@ public class SimulinkMatTest {
 
 		int read = decoder.read(buf);
 
-		assertThat(read, is(expectedTETSize));
+		assertThat(read, equalTo(expectedTETSize));
 
 		// Verify we are at the end of the stream
-		assertThat(decoder.read(), is(-1));
+		assertThat(decoder.read(), equalTo(-1));
 
 		// Double check that EOF will be re-thrown on each extra call to read.
-		assertThat(decoder.read(), is(-1));
+		assertThat(decoder.read(), equalTo(-1));
 
 		byte[] expectedBuf = new byte[expectedTETSize];
 		InputStream finished = SimulinkMatTest.class.getResourceAsStream("/simulink_tet_out.mat");
 		// Sanity check, make sure there are no hidden bytes left on the stream, and all bytes have been read in.
-		assertThat(finished.read(expectedBuf), is(expectedTETSize));
-		assertThat(finished.read(), is(-1));
+		assertThat(finished.read(expectedBuf), equalTo(expectedTETSize));
+		assertThat(finished.read(), equalTo(-1));
 
-		assertThat(buf, is(expectedBuf));
+		assertThat(buf, equalTo(expectedBuf));
 		decoder.close();
 	}
 
@@ -125,9 +125,9 @@ public class SimulinkMatTest {
 		MLObject data = (MLObject) reader.getContent().get("@");
 
 		// Just check that the root element is basically correct.
-		assertThat(data, is(notNullValue()));
-		assertThat(data.getClassName(), is("Data"));
-		assertThat(data.getSize(), is(1));
+		assertThat(data, notNullValue());
+		assertThat(data.getClassName(), equalTo("Data"));
+		assertThat(data.getSize(), equalTo(1));
 	}
 
 	private File fileFromStream(String location) throws IOException {

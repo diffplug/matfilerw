@@ -5,7 +5,7 @@
  */
 package com.jmatio.io;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
@@ -47,14 +47,14 @@ public class MatlabMCOSTest {
 		MatFileReader reader = new MatFileReader(file);
 		Map<String, MLArray> content = reader.getContent();
 
-		assertThat(content.size(), is(1));
+		assertThat(content.size(), equalTo(1));
 
 		MLObject obj = (MLObject) content.get("obj");
-		assertThat(obj, is(notNullValue()));
+		assertThat(obj, notNullValue());
 
-		assertThat(obj.getName(), is("obj"));
-		assertThat(obj.getClassName(), is("SimpleEmpty"));
-		assertThat(obj.getFields(0).size(), is(0));
+		assertThat(obj.getName(), equalTo("obj"));
+		assertThat(obj.getClassName(), equalTo("SimpleEmpty"));
+		assertThat(obj.getFields(0).size(), equalTo(0));
 	}
 
 	@Test
@@ -63,21 +63,21 @@ public class MatlabMCOSTest {
 		MatFileReader reader = new MatFileReader(file);
 		Map<String, MLArray> content = reader.getContent();
 
-		assertThat(content.size(), is(2));
+		assertThat(content.size(), equalTo(2));
 
 		MLObject obj = (MLObject) content.get("obj1");
-		assertThat(obj, is(notNullValue()));
+		assertThat(obj, notNullValue());
 
-		assertThat(obj.getName(), is("obj1"));
-		assertThat(obj.getClassName(), is("SimpleEmpty"));
-		assertThat(obj.getFields(0).size(), is(0));
+		assertThat(obj.getName(), equalTo("obj1"));
+		assertThat(obj.getClassName(), equalTo("SimpleEmpty"));
+		assertThat(obj.getFields(0).size(), equalTo(0));
 
 		obj = (MLObject) content.get("obj2");
-		assertThat(obj, is(notNullValue()));
+		assertThat(obj, notNullValue());
 
-		assertThat(obj.getName(), is("obj2"));
-		assertThat(obj.getClassName(), is("SimpleEmpty"));
-		assertThat(obj.getFields(0).size(), is(0));
+		assertThat(obj.getName(), equalTo("obj2"));
+		assertThat(obj.getClassName(), equalTo("SimpleEmpty"));
+		assertThat(obj.getFields(0).size(), equalTo(0));
 	}
 
 	@Test
@@ -86,18 +86,18 @@ public class MatlabMCOSTest {
 		MatFileReader reader = new MatFileReader(file);
 		Map<String, MLArray> content = reader.getContent();
 
-		assertThat(content.size(), is(1));
+		assertThat(content.size(), equalTo(1));
 
 		MLObject obj = (MLObject) content.get("obj");
-		assertThat(obj, is(notNullValue()));
+		assertThat(obj, notNullValue());
 
-		assertThat(obj.getName(), is("obj"));
-		assertThat(obj.getClassName(), is("SimpleSingleText"));
+		assertThat(obj.getName(), equalTo("obj"));
+		assertThat(obj.getClassName(), equalTo("SimpleSingleText"));
 		Map<String, MLArray> fields = obj.getFields(0);
-		assertThat(fields.size(), is(1));
+		assertThat(fields.size(), equalTo(1));
 
 		MLChar field = (MLChar) fields.get("test_text");
-		assertThat(field.getString(0), is("Default text"));
+		assertThat(field.getString(0), equalTo("Default text"));
 	}
 
 	@Test
@@ -106,40 +106,40 @@ public class MatlabMCOSTest {
 		MatFileReader reader = new MatFileReader(file);
 		Map<String, MLArray> content = reader.getContent();
 
-		assertThat(content.size(), is(3));
+		assertThat(content.size(), equalTo(3));
 
 		MLObject obj = (MLObject) content.get("obj1");
-		assertThat(obj, is(notNullValue()));
+		assertThat(obj, notNullValue());
 
-		assertThat(obj.getName(), is("obj1"));
-		assertThat(obj.getClassName(), is("SimpleSingleText"));
+		assertThat(obj.getName(), equalTo("obj1"));
+		assertThat(obj.getClassName(), equalTo("SimpleSingleText"));
 		Map<String, MLArray> fields = obj.getFields(0);
-		assertThat(fields.size(), is(1));
+		assertThat(fields.size(), equalTo(1));
 
 		MLChar field = (MLChar) fields.get("test_text");
-		assertThat(field.getString(0), is("other text 1"));
+		assertThat(field.getString(0), equalTo("other text 1"));
 
 		obj = (MLObject) content.get("obj2");
-		assertThat(obj, is(notNullValue()));
+		assertThat(obj, notNullValue());
 
-		assertThat(obj.getName(), is("obj2"));
-		assertThat(obj.getClassName(), is("SimpleSingleText"));
+		assertThat(obj.getName(), equalTo("obj2"));
+		assertThat(obj.getClassName(), equalTo("SimpleSingleText"));
 		fields = obj.getFields(0);
-		assertThat(fields.size(), is(1));
+		assertThat(fields.size(), equalTo(1));
 
 		field = (MLChar) fields.get("test_text");
-		assertThat(field.getString(0), is("Default text"));
+		assertThat(field.getString(0), equalTo("Default text"));
 
 		obj = (MLObject) content.get("obj3");
-		assertThat(obj, is(notNullValue()));
+		assertThat(obj, notNullValue());
 
-		assertThat(obj.getName(), is("obj3"));
-		assertThat(obj.getClassName(), is("SimpleSingleText"));
+		assertThat(obj.getName(), equalTo("obj3"));
+		assertThat(obj.getClassName(), equalTo("SimpleSingleText"));
 		fields = obj.getFields(0);
-		assertThat(fields.size(), is(1));
+		assertThat(fields.size(), equalTo(1));
 
 		field = (MLChar) fields.get("test_text");
-		assertThat(field.getString(0), is("other text 3"));
+		assertThat(field.getString(0), equalTo("other text 3"));
 	}
 
 	@Test
@@ -148,57 +148,57 @@ public class MatlabMCOSTest {
 		MatFileReader reader = new MatFileReader(file);
 		Map<String, MLArray> content = reader.getContent();
 
-		assertThat(content.size(), is(4));
+		assertThat(content.size(), equalTo(4));
 
 		MLObject obj = (MLObject) content.get("obj1");
-		assertThat(obj, is(notNullValue()));
+		assertThat(obj, notNullValue());
 
-		assertThat(obj.getName(), is("obj1"));
-		assertThat(obj.getClassName(), is("HandleSingle"));
-		assertThat(((MLObject) content.get("obj3")).getFields(0), is(sameInstance(obj.getFields(0))));
+		assertThat(obj.getName(), equalTo("obj1"));
+		assertThat(obj.getClassName(), equalTo("HandleSingle"));
+		assertThat(((MLObject) content.get("obj3")).getFields(0), sameInstance(obj.getFields(0)));
 		Map<String, MLArray> fields = obj.getFields(0);
-		assertThat(fields.size(), is(1));
+		assertThat(fields.size(), equalTo(1));
 
 		MLInt8 intField = (MLInt8) fields.get("myelement");
-		assertThat(intField.getSize(), is(1));
-		assertThat(intField.get(0).byteValue(), is((byte) 25));
+		assertThat(intField.getSize(), equalTo(1));
+		assertThat(intField.get(0).byteValue(), equalTo((byte) 25));
 
 		obj = (MLObject) content.get("obj3");
-		assertThat(obj, is(notNullValue()));
+		assertThat(obj, notNullValue());
 
-		assertThat(obj.getName(), is("obj3"));
-		assertThat(obj.getClassName(), is("HandleSingle"));
-		assertThat(((MLObject) content.get("obj1")).getFields(0), is(sameInstance(obj.getFields(0))));
+		assertThat(obj.getName(), equalTo("obj3"));
+		assertThat(obj.getClassName(), equalTo("HandleSingle"));
+		assertThat(((MLObject) content.get("obj1")).getFields(0), sameInstance(obj.getFields(0)));
 		fields = obj.getFields(0);
-		assertThat(fields.size(), is(1));
+		assertThat(fields.size(), equalTo(1));
 
 		intField = (MLInt8) fields.get("myelement");
-		assertThat(intField.getSize(), is(1));
-		assertThat(intField.get(0).byteValue(), is((byte) 25));
+		assertThat(intField.getSize(), equalTo(1));
+		assertThat(intField.get(0).byteValue(), equalTo((byte) 25));
 
 		obj = (MLObject) content.get("obj2");
-		assertThat(obj, is(notNullValue()));
+		assertThat(obj, notNullValue());
 
-		assertThat(obj.getName(), is("obj2"));
-		assertThat(obj.getClassName(), is("HandleSingle"));
-		assertThat(((MLObject) content.get("obj4")).getFields(0), is(sameInstance(obj.getFields(0))));
+		assertThat(obj.getName(), equalTo("obj2"));
+		assertThat(obj.getClassName(), equalTo("HandleSingle"));
+		assertThat(((MLObject) content.get("obj4")).getFields(0), sameInstance(obj.getFields(0)));
 		fields = obj.getFields(0);
-		assertThat(fields.size(), is(1));
+		assertThat(fields.size(), equalTo(1));
 
 		MLChar charField = (MLChar) fields.get("myelement");
-		assertThat(charField.getString(0), is("testing"));
+		assertThat(charField.getString(0), equalTo("testing"));
 
 		obj = (MLObject) content.get("obj4");
-		assertThat(obj, is(notNullValue()));
+		assertThat(obj, notNullValue());
 
-		assertThat(obj.getName(), is("obj4"));
-		assertThat(obj.getClassName(), is("HandleSingle"));
-		assertThat(((MLObject) content.get("obj2")).getFields(0), is(sameInstance(obj.getFields(0))));
+		assertThat(obj.getName(), equalTo("obj4"));
+		assertThat(obj.getClassName(), equalTo("HandleSingle"));
+		assertThat(((MLObject) content.get("obj2")).getFields(0), sameInstance(obj.getFields(0)));
 		fields = obj.getFields(0);
-		assertThat(fields.size(), is(1));
+		assertThat(fields.size(), equalTo(1));
 
 		charField = (MLChar) fields.get("myelement");
-		assertThat(charField.getString(0), is("testing"));
+		assertThat(charField.getString(0), equalTo("testing"));
 	}
 
 	@Test
@@ -207,17 +207,17 @@ public class MatlabMCOSTest {
 		MatFileReader reader = new MatFileReader(file);
 		Map<String, MLArray> content = reader.getContent();
 
-		assertThat(content.size(), is(1));
+		assertThat(content.size(), equalTo(1));
 
 		MLObject obj = (MLObject) content.get("a");
-		assertThat(obj, is(notNullValue()));
+		assertThat(obj, notNullValue());
 
-		assertThat(obj.getName(), is("a"));
-		assertThat(obj.getClassName(), is("SimpleSingleText"));
-		assertThat(((MLDouble) obj.getFields(0).get("test_text")).get(0), is(1.0));
-		assertThat(((MLDouble) obj.getFields(1).get("test_text")).get(0), is(2.0));
-		assertThat(((MLDouble) obj.getFields(2).get("test_text")).get(0), is(3.0));
-		assertThat(((MLDouble) obj.getFields(3).get("test_text")).get(0), is(4.0));
+		assertThat(obj.getName(), equalTo("a"));
+		assertThat(obj.getClassName(), equalTo("SimpleSingleText"));
+		assertThat(((MLDouble) obj.getFields(0).get("test_text")).get(0), equalTo(1.0));
+		assertThat(((MLDouble) obj.getFields(1).get("test_text")).get(0), equalTo(2.0));
+		assertThat(((MLDouble) obj.getFields(2).get("test_text")).get(0), equalTo(3.0));
+		assertThat(((MLDouble) obj.getFields(3).get("test_text")).get(0), equalTo(4.0));
 	}
 
 	private File fileFromStream(String location) throws IOException {
