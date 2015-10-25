@@ -5,6 +5,7 @@
  */
 package ca.mjdsystems.jmatio.types;
 
+@Deprecated
 public class MLArray {
 
 	/* Matlab Array Types (Classes) */

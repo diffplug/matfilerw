@@ -66,6 +66,7 @@ import ca.mjdsystems.jmatio.types.MLStructure;
  * 
  * @author 
  */
+@Deprecated
 public class MatFileIncrementalWriter {
 	//    private static final Logger logger = Logger.getLogger(MatFileWriter.class);
 	private WritableByteChannel channel = null;

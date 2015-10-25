@@ -5,6 +5,7 @@
  */
 package ca.mjdsystems.jmatio.types;
 
+@Deprecated
 public class MLJavaObject extends MLArray {
 	private final Object o;
 	private final String className;

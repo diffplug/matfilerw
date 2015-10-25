@@ -20,6 +20,7 @@ import java.util.Arrays;
  *
  * @param <T>
  */
+@Deprecated
 public abstract class MLNumericArray<T extends Number> extends MLArray
 		implements GenericArrayCreator<T>,
 		ByteStorageSupport<T> {

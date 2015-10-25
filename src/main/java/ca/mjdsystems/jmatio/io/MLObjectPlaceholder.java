@@ -13,6 +13,7 @@ import ca.mjdsystems.jmatio.types.MLArray;
  *
  * @author Matthew Dawson <matthew@mjdsystems.ca>
  */
+@Deprecated
 class MLObjectPlaceholder extends MLArray {
 	MLObjectPlaceholder(String name, String className, int[][] information) {
 		super(name, new int[]{information[2][0], information[3][0]}, -1, 0);

@@ -7,6 +7,7 @@ package ca.mjdsystems.jmatio.types;
 
 import java.util.Arrays;
 
+@Deprecated
 public class MLChar extends MLArray implements GenericArrayCreator<Character> {
 	Character[] chars;
 

@@ -7,6 +7,7 @@ package ca.mjdsystems.jmatio.types;
 
 import java.util.ArrayList;
 
+@Deprecated
 public class MLCell extends MLArray {
 	private ArrayList<MLArray> cells;
 

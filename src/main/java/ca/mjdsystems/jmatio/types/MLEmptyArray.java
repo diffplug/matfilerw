@@ -5,6 +5,7 @@
  */
 package ca.mjdsystems.jmatio.types;
 
+@Deprecated
 public class MLEmptyArray extends MLArray {
 	public MLEmptyArray() {
 		this(null);

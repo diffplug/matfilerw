@@ -5,6 +5,7 @@
  */
 package ca.mjdsystems.jmatio.types;
 
+@Deprecated
 public interface ByteStorageSupport<T extends Number> {
 	int getBytesAllocated();
 

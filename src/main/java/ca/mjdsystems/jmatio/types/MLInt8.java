@@ -7,6 +7,7 @@ package ca.mjdsystems.jmatio.types;
 
 import java.nio.ByteBuffer;
 
+@Deprecated
 public class MLInt8 extends MLNumericArray<Byte> {
 	/**
 	 * Normally this constructor is used only by MatFileReader and MatFileWriter

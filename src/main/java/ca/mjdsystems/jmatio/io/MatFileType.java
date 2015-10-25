@@ -8,6 +8,7 @@ package ca.mjdsystems.jmatio.io;
 /** Describes the type of Mat file.
  * @author Matthew Dawson <matthew@mjdsystems.ca>
  */
+@Deprecated
 public enum MatFileType {
 	Regular, ReducedHeader
 }

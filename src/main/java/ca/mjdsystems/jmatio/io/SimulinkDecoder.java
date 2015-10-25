@@ -15,6 +15,7 @@ import java.util.Map;
  *
  * @author Matthew Dawson <matthew@mjdsystems.ca>
  */
+@Deprecated
 public class SimulinkDecoder extends InputStream {
 	public SimulinkDecoder(String input) {
 		this.input = input.getBytes();

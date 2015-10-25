@@ -22,6 +22,7 @@ import ca.mjdsystems.jmatio.types.MLArray;
  *         href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
  * 
  */
+@Deprecated
 class FileBufferedDataOutputStream extends OutputStream implements DataOutputStream {
 	private static final int BUFFER_SIZE = 1024;
 	private ByteBuffer buf;

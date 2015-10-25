@@ -11,6 +11,7 @@ import ca.mjdsystems.jmatio.common.MatDataTypes;
  * 
  * @author Wojciech Gradkowski (<a href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
  */
+@Deprecated
 class MatTag {
 	protected int type;
 	protected int size;

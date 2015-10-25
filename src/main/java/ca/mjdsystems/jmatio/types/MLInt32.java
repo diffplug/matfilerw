@@ -7,6 +7,7 @@ package ca.mjdsystems.jmatio.types;
 
 import java.nio.ByteBuffer;
 
+@Deprecated
 public class MLInt32 extends MLNumericArray<Integer> {
 
 	/**

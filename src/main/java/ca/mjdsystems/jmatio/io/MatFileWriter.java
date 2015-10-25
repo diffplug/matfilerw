@@ -61,6 +61,7 @@ import ca.mjdsystems.jmatio.types.MLStructure;
  * @author Wojciech Gradkowski (<a
  *         href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
  */
+@Deprecated
 public class MatFileWriter {
 
 	/**

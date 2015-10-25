@@ -7,6 +7,7 @@ package ca.mjdsystems.jmatio.types;
 
 import java.nio.ByteBuffer;
 
+@Deprecated
 public class MLSingle extends MLNumericArray<Float> {
 
 	public MLSingle(String name, Float[] vals, int m) {

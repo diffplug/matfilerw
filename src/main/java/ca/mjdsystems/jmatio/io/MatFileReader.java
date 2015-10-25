@@ -68,6 +68,7 @@ import ca.mjdsystems.jmatio.types.MLUInt8;
  *         href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
  * 
  */
+@Deprecated
 public class MatFileReader {
 	public static final int MEMORY_MAPPED_FILE = 1;
 	public static final int DIRECT_BYTE_BUFFER = 2;

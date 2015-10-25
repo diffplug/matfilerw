@@ -8,6 +8,7 @@ package ca.mjdsystems.jmatio.io;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+@Deprecated
 interface DataOutputStream {
 	/**
 	 * Returns the current size of this stream.

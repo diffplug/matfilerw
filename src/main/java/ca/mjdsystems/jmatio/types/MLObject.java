@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Deprecated
 public class MLObject extends MLArray {
 	private final List<Map<String, MLArray>> objects = new ArrayList<Map<String, MLArray>>();
 	private final String className;

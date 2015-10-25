@@ -12,6 +12,7 @@ import java.io.IOException;
  * 
  * @author Wojciech Gradkowski (<a href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class MatlabIOException extends IOException {
 	public MatlabIOException(String s) {

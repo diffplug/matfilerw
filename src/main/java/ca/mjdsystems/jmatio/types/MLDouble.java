@@ -12,6 +12,7 @@ import java.nio.ByteBuffer;
  * 
  * @author Wojciech Gradkowski <wgradkowski@gmail.com>
  */
+@Deprecated
 public class MLDouble extends MLNumericArray<Double> {
 
 	/**

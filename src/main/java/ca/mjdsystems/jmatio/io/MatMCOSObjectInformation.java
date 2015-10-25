@@ -15,6 +15,7 @@ import ca.mjdsystems.jmatio.types.MLStructure;
  *
  * @author Matthew Dawson <matthew@mjdsystems.ca>
  */
+@Deprecated
 class MatMCOSObjectInformation {
 	MatMCOSObjectInformation(String className, int classId, int objectId, int segment2PropertiesIndex, int segment4PropertiesIndex) {
 		this.className = className;

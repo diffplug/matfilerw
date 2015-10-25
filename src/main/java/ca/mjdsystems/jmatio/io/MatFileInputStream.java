@@ -16,6 +16,7 @@ import ca.mjdsystems.jmatio.types.ByteStorageSupport;
  * 
  * @author Wojciech Gradkowski <wgradkowski@gmail.com>
  */
+@Deprecated
 class MatFileInputStream {
 	private final int type;
 	private final ByteBuffer buf;

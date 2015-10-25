@@ -29,6 +29,7 @@ import java.util.Set;
  * @see ca.mjdsystems.jmatio.io.MatFileReader
  * @author Wojciech Gradkowski (<a href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
  */
+@Deprecated
 public class MatFileFilter {
 	private Set<String> filter;
 

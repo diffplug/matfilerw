@@ -11,6 +11,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+@Deprecated
 public class MLSparse extends MLNumericArray<Double> {
 	int nzmax;
 	private SortedSet<IndexMN> indexSet;

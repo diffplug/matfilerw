@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+@Deprecated
 public class HeapBufferDataOutputStream extends ByteArrayOutputStream implements DataOutputStream {
 	private final int BUFFER_SIZE = 1024;
 

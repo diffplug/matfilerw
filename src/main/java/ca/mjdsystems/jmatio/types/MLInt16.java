@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
  * Class represents Int16 array (matrix)
  * 
  */
+@Deprecated
 public class MLInt16 extends MLNumericArray<Short> {
 
 	/**

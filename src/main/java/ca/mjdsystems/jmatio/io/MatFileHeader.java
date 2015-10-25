@@ -16,6 +16,7 @@ import java.util.Date;
  * 
  * @author Wojciech Gradkowski (<a href="mailto:wgradkowski@gmail.com">wgradkowski@gmail.com</a>)
  */
+@Deprecated
 public class MatFileHeader {
 	private static String DEFAULT_DESCRIPTIVE_TEXT = "MATLAB 5.0 MAT-file, Platform: "
 			+ System.getProperty("os.name")

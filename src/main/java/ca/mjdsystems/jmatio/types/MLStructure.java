@@ -25,6 +25,7 @@ import java.util.Set;
  * 
  * @author Wojciech Gradkowski <wgradkowski@gmail.com>
  */
+@Deprecated
 public class MLStructure extends MLArray {
 	/**
 	 * A Set that keeps structure field names

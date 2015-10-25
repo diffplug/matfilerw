@@ -10,6 +10,7 @@ package ca.mjdsystems.jmatio.common;
  * 
  * @author Wojciech Gradkowski <wgradkowski@gmail.com>
  */
+@Deprecated
 public class MatDataTypes {
 	/* MAT-File Data Types */
 	public static final int miUNKNOWN = 0;

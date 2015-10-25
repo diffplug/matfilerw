@@ -5,6 +5,7 @@
  */
 package ca.mjdsystems.jmatio.types;
 
+@Deprecated
 public interface GenericArrayCreator<T> {
 	T[] createArray(int m, int n);
 

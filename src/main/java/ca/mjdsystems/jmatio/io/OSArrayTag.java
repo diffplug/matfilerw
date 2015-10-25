@@ -13,6 +13,7 @@ import java.nio.ByteBuffer;
  * Tiny class that represents MAT-file TAG 
  * It simplifies writing data. Automates writing padding for instance.
  */
+@Deprecated
 class OSArrayTag extends MatTag {
 	private ByteBuffer data;
 

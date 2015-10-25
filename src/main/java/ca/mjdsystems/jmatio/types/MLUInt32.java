@@ -5,6 +5,7 @@
  */
 package ca.mjdsystems.jmatio.types;
 
+@Deprecated
 public class MLUInt32 extends MLInt32 {
 
 	public MLUInt32(String name, int[] dims, int type, int attributes) {
