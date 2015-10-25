@@ -884,7 +884,7 @@ public class MatFileReader {
 		switch (type) {
 		case MLArray.mxSTRUCT_CLASS:
 
-			MLStructure struct = new MLStructure(name, dims, type, attributes);
+			MLStructure struct = new MLStructure(name, dims, attributes);
 
 			//field name lenght - this subelement always uses the compressed data element format
 			new ISMatTag(buf);
@@ -1208,23 +1208,22 @@ public class MatFileReader {
 				buf.get(names);
 				fieldNames[i] = zeroEndByteArrayToString(names);
 			}
-
 			buf.position(buf.position() + tag.padding);
 			//read fields
-			for (int index = 0; index < 1; index++) {
-				Map<String, MLArray> fields = new HashMap<String, MLArray>();
+			for (int index = 0; index < mlArray.getM() * mlArray.getN(); index++) {
 				for (int i = 0; i < numOfFields; i++) {
 					//read matrix recursively
 					tag = new ISMatTag(buf);
 
+					MLArray array;
 					if (tag.size > 0) {
-						MLArray fieldValue = readMatrix(buf, false);
-						fields.put(fieldNames[i], fieldValue);
+						array = readMatrix(buf, false);
 					} else {
-						fields.put(fieldNames[i], new MLEmptyArray());
+						array = new MLEmptyArray();
 					}
+					array.name = fieldNames[i];
+					((MLObject) mlArray).setField(fieldNames[i], array, index);
 				}
-				((MLObject) mlArray).setFields(index, fields);
 			}
 			break;
 		default:

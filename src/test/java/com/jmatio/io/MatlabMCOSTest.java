@@ -54,7 +54,7 @@ public class MatlabMCOSTest {
 
 		assertThat(obj.getName(), equalTo("obj"));
 		assertThat(obj.getClassName(), equalTo("SimpleEmpty"));
-		assertThat(obj.getFields(0).size(), equalTo(0));
+		assertThat(obj.getFieldNames().size(), equalTo(0));
 	}
 
 	@Test
@@ -70,14 +70,14 @@ public class MatlabMCOSTest {
 
 		assertThat(obj.getName(), equalTo("obj1"));
 		assertThat(obj.getClassName(), equalTo("SimpleEmpty"));
-		assertThat(obj.getFields(0).size(), equalTo(0));
+		assertThat(obj.getFieldNames().size(), equalTo(0));
 
 		obj = (MLObject) content.get("obj2");
 		assertThat(obj, notNullValue());
 
 		assertThat(obj.getName(), equalTo("obj2"));
 		assertThat(obj.getClassName(), equalTo("SimpleEmpty"));
-		assertThat(obj.getFields(0).size(), equalTo(0));
+		assertThat(obj.getFieldNames().size(), equalTo(0));
 	}
 
 	@Test
@@ -155,7 +155,7 @@ public class MatlabMCOSTest {
 
 		assertThat(obj.getName(), equalTo("obj1"));
 		assertThat(obj.getClassName(), equalTo("HandleSingle"));
-		assertThat(((MLObject) content.get("obj3")).getFields(0), sameInstance(obj.getFields(0)));
+		assertThat(((MLObject) content.get("obj3")).getFields(0), equalTo(obj.getFields(0)));
 		Map<String, MLArray> fields = obj.getFields(0);
 		assertThat(fields.size(), equalTo(1));
 
@@ -168,7 +168,7 @@ public class MatlabMCOSTest {
 
 		assertThat(obj.getName(), equalTo("obj3"));
 		assertThat(obj.getClassName(), equalTo("HandleSingle"));
-		assertThat(((MLObject) content.get("obj1")).getFields(0), sameInstance(obj.getFields(0)));
+		assertThat(((MLObject) content.get("obj1")).getFields(0), equalTo(obj.getFields(0)));
 		fields = obj.getFields(0);
 		assertThat(fields.size(), equalTo(1));
 
@@ -181,7 +181,7 @@ public class MatlabMCOSTest {
 
 		assertThat(obj.getName(), equalTo("obj2"));
 		assertThat(obj.getClassName(), equalTo("HandleSingle"));
-		assertThat(((MLObject) content.get("obj4")).getFields(0), sameInstance(obj.getFields(0)));
+		assertThat(((MLObject) content.get("obj4")).getFields(0), equalTo(obj.getFields(0)));
 		fields = obj.getFields(0);
 		assertThat(fields.size(), equalTo(1));
 
@@ -193,7 +193,7 @@ public class MatlabMCOSTest {
 
 		assertThat(obj.getName(), equalTo("obj4"));
 		assertThat(obj.getClassName(), equalTo("HandleSingle"));
-		assertThat(((MLObject) content.get("obj2")).getFields(0), sameInstance(obj.getFields(0)));
+		assertThat(((MLObject) content.get("obj2")).getFields(0), equalTo(obj.getFields(0)));
 		fields = obj.getFields(0);
 		assertThat(fields.size(), equalTo(1));
 
