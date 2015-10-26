@@ -36,8 +36,8 @@ jar.doFirst {
 
 jar.manifest {
 	attributes (
-		'Export-Package': 'com.jmatio.*,ca.mjdsystems.*',
-		'Import-Package': 'sun.misc;resolution:=optional,com.jmatio.*,ca.mjdsystems.*',
+		'Export-Package': 'com.jmatio.*',
+		'Import-Package': 'sun.misc;resolution:=optional,com.jmatio.*',
 		'Bundle-SymbolicName': "${project.group}.${project.name}",
 		'Bundle-Vendor': 'DiffPlug',
 		'Bundle-DocURL': "https://github.com/${project.org}/${project.name}",
@@ -156,7 +156,7 @@ apply plugin: 'findbugs'
 findbugs {
 	toolVersion = VER_FINDBUGS
 	sourceSets = [sourceSets.main]	// don't check the test code
-	ignoreFailures = true 	// gotta let errors through to publish a version with the old code
+	ignoreFailures = false 	// no bugs or it doesn't ship
 	reportsDir = file('build/findbugs')
 	effort = 'max'			// min|default|max
 	reportLevel = 'medium'	// low|medium|high (low = sensitive to even minor mistakes)
