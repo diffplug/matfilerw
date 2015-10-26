@@ -16,7 +16,7 @@ output = [
 [![Javadoc](https://img.shields.io/badge/javadoc-OK-blue.svg)](https://diffplug.github.io/matfilerw/javadoc/1.3.1/)
 [![License Apache](https://img.shields.io/badge/license-BSD-blue.svg)](https://tldrlegal.com/license/bsd-3-clause-license-(revised))
 
-[![Changelog](https://img.shields.io/badge/changelog-1.4.0--SNAPSHOT-brightgreen.svg)](CHANGES.md)
+[![Changelog](https://img.shields.io/badge/changelog-2.0.0.TRANSITION-brightgreen.svg)](CHANGES.md)
 [![Travis CI](https://travis-ci.org/diffplug/matfilerw.svg?branch=master)](https://travis-ci.org/diffplug/matfilerw)
 <!---freshmark /shields -->
 
@@ -30,9 +30,11 @@ As far as compatibility, the TL;DR is that it will work with any MAT-File with d
 * MATLAB does not export to v7.3 by default.
 * The [Mathworks website](http://www.mathworks.com/help/matlab/import_export/mat-file-versions.html?refresh=true) has more details.
 
-## codemercenary/jmatio and the status of ca.mjdsystems
+## codemercenary/jmatio and ca.mjdsystems.jmatio
 
-Since JMatIO wasn't updated for a while, lots of people made forks.  One of the most prominent was Jason Lokerson's, hosted on GitHub as codemercenary/JMatIO.  It included several improvements, but all the packages were renamed to "ca.mjdsystems.jmatio".  In an effort to bring all JMatIO's under one roof, we have included its source code, unchanged, into MatFileRW.  We are working on merging all of its improvements into the main "com.jmatio" classes, and the "ca.mjdsystems" namespace is deprecated, and will be removed in 2.0.
+Since JMatIO wasn't updated for a while, lots of people made forks.  One of the most prominent was Jason Lokerson's, hosted on GitHub as codemercenary/JMatIO.  It included several improvements, but all the packages were renamed to `ca.mjdsystems.jmatio`.  Starting with 1.4.0, all of the improvements from MatFileRW and `ca.mjdsystems.jmatio` have been merged into the `com.jmatio` packages.
+
+If you are a user of the `ca.mjdsystems` packages, you should download `com.diffplug.matsim:matfilerw:1.4.TRANSITION` from mavenCentral.  This contains the `ca.mjdsystems.jmatio` packages unchanged, but marked as deprecated.  After you have removed all dependencies on the `ca.mjdsystems.jmatio` packages, you will be able to use the regular `1.4.0` version, and its descendants.
 
 ## Acknowledgements
 

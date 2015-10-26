@@ -1,10 +1,26 @@
 # MatFileRW releases
 
-### Version 1.4.0-SNAPSHOT - TBD ([javadoc](http://diffplug.github.io/matfilerw/javadoc/snapshot/), [jcenter](https://oss.sonatype.org/content/repositories/snapshots/com/diffplug/matsim/matfilerw/))
+### Version 2.1.0-SNAPSHOT - TBD ([javadoc](http://diffplug.github.io/matfilerw/javadoc/snapshot/), [jcenter](https://oss.sonatype.org/content/repositories/snapshots/com/diffplug/matsim/matfilerw/))
+
+### Version 2.0.0 - October 25th 2015 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/2.0.0/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/2.0.0/view))
+
+* Incorporated all changes from `codesourcery/JMatIO`.
+	+ Adds support for MCOS Objects.
+	+ Adds a Simulink decoder for reading files from Simulink MDL files.
+	+ Improved performance.
+* `MLObject` and `MLStructure` now share `MLStructureObjectBase` as a base class.  This caused a small breaking change to `MLObject`s API.
+* `MatFileHeader` now wraps up the whole endianness mess, which also required a small breaking change.
+
+### Version 2.0.TRANSITION - October 25th 2015 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/2.0.TRANSITION/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/2.0.TRANSITION/view))
+
+Only pertinent for people who are migrating from a JMatIO fork whose packages were renamed to `ca.mjdsystems.jmatio`.
+
+* `ca.mjdsystems.jmatio` code is included umodified, but marked as deprecated.
+* `com.jmatio` code is identitical to `2.0.0`.
 
 ### Version 1.3.1 - October 16th 2015 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/1.3.1/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/1.3.1/view))
 
-- Corrected the license in the maven metadata.
+* Corrected the license in the maven metadata.
 
 ### Version 1.3.0 - October 16th 2015 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/1.3.0/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/1.3.0/view))
 

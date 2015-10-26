@@ -1,18 +1,18 @@
 Manifest-Version: 1.0
 Bundle-Description: MatFileRW - Read and write .mat files
 Bundle-DocURL: https://github.com/diffplug/matfilerw
-Bundle-License: https://github.com/diffplug/matfilerw/blob/v1.4.0-SNAPSH
- OT/LICENSE
+Bundle-License: https://github.com/diffplug/matfilerw/blob/v2.0.TRANSITI
+ ON/LICENSE
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: com.diffplug.matsim.matfilerw
 Bundle-Vendor: DiffPlug
-Bundle-Version: 1.4.0.SNAPSHOT
-Export-Package: com.jmatio.common;version="1.4.0",com.jmatio.common.util
- ;uses:="com.jmatio.types";version="1.4.0",com.jmatio.io;uses:="com.jmat
- io.types";version="1.4.0",com.jmatio.io.stream;uses:="com.jmatio.types"
- ;version="1.4.0",com.jmatio.types;version="1.4.0",ca.mjdsystems.jmatio.
- common;version="1.4.0",ca.mjdsystems.jmatio.io;uses:="ca.mjdsystems.jma
- tio.types";version="1.4.0",ca.mjdsystems.jmatio.types;version="1.4.0"
+Bundle-Version: 2.0.0.TRANSITION
+Export-Package: com.jmatio.common;version="2.0.0",com.jmatio.common.util
+ ;uses:="com.jmatio.types";version="2.0.0",com.jmatio.io;uses:="com.jmat
+ io.types";version="2.0.0",com.jmatio.io.stream;uses:="com.jmatio.types"
+ ;version="2.0.0",com.jmatio.types;version="2.0.0",ca.mjdsystems.jmatio.
+ common;version="2.0.0",ca.mjdsystems.jmatio.io;uses:="ca.mjdsystems.jma
+ tio.types";version="2.0.0",ca.mjdsystems.jmatio.types;version="2.0.0"
 Import-Package: sun.misc;resolution:=optional,com.jmatio.common,com.jmat
  io.io.stream,com.jmatio.types,ca.mjdsystems.jmatio.common,ca.mjdsystems
  .jmatio.types
