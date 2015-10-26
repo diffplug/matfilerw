@@ -34,7 +34,7 @@ As far as compatibility, the TL;DR is that it will work with any MAT-File with d
 
 Since JMatIO wasn't updated for a while, lots of people made forks.  One of the most prominent was Jason Lokerson's, hosted on GitHub as codemercenary/JMatIO.  It included several improvements, but all the packages were renamed to `ca.mjdsystems.jmatio`.  Starting with 1.4.0, all of the improvements from MatFileRW and `ca.mjdsystems.jmatio` have been merged into the `com.jmatio` packages.
 
-If you are a user of the `ca.mjdsystems` packages, you should download `com.diffplug.matsim:matfilerw:1.4.TRANSITION` from mavenCentral.  This contains the `ca.mjdsystems.jmatio` packages unchanged, but marked as deprecated.  After you have removed all dependencies on the `ca.mjdsystems.jmatio` packages, you will be able to use the regular `1.4.0` version, and its descendants.
+If you are a user of the `ca.mjdsystems` packages, you should download `com.diffplug.matsim:matfilerw:2.0.0.TRANSITION` from mavenCentral.  This contains the `ca.mjdsystems.jmatio` packages unchanged, but marked as deprecated.  After you have removed all dependencies on the `ca.mjdsystems.jmatio` packages, you will be able to use the regular `2.0.0` version, and its descendants.
 
 ## Acknowledgements
 
