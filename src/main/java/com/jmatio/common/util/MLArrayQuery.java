@@ -75,7 +75,7 @@ public class MLArrayQuery {
 			if (current == null) {
 				current = array;
 
-				if (!current.getName().equals(name) && !current.getName().equals("@")) {
+				if (!current.getName().equals(name) && !current.getName().equals(MLArray.DEFAULT_NAME)) {
 					throw new RuntimeException("No such array or field <" + name + "> in <" + current.getName() + ">");
 				}
 

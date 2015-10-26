@@ -811,13 +811,17 @@ public class MatFileReader {
 			MLArray element = readMatrix(buf, true);
 
 			if (element != null) {
+				// Sometimes a MAT file will contain more than one unnamed
+				// element.  This ensures that all of them will be accessible
+				// in the end result.
 				if (!data.containsKey(element.getName())) {
 					data.put(element.getName(), element);
 				}
-				if (element.getName() == "@") {
+				if (element.getName() == MLArray.DEFAULT_NAME) {
+					// identity comparison is okay because we assigned it in the first place
 					int nextIndex = 0;
 					for (; data.containsKey("@" + nextIndex); nextIndex++) {}
-					data.put("@" + nextIndex, element);
+					data.put(MLArray.DEFAULT_NAME + nextIndex, element);
 				}
 			} else {
 				int red = buf.position() - pos;

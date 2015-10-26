@@ -41,6 +41,8 @@ public class MLArray {
 	protected int attributes;
 	protected int type;
 
+	public static final String DEFAULT_NAME = "@";
+
 	public MLArray(String name, int[] dims, int type, int attributes) {
 		this.dims = new int[dims.length];
 		System.arraycopy(dims, 0, this.dims, 0, dims.length);
@@ -48,7 +50,7 @@ public class MLArray {
 		if (name != null && !name.equals("")) {
 			this.name = name;
 		} else {
-			this.name = "@"; //default name
+			this.name = DEFAULT_NAME; //default name
 		}
 
 		this.type = type;
