@@ -8,10 +8,8 @@ package com.jmatio.io;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Map;
 
-import com.jmatio.io.MatFileHeader;
 import com.jmatio.types.MLArray;
 
 /**
@@ -44,17 +42,7 @@ public class MatFile {
 	public static Map<String, MLArray> readBare(MatFileHeader header, ByteBuffer buffer) throws IOException {
 		MatFileReader reader = new MatFileReader();
 		reader.matFileHeader = header;
-
-		// set the byteOrder based on this
-		if (header.getEndianIndicator()[0] == 'I' && header.getEndianIndicator()[1] == 'M') {
-			reader.byteOrder = ByteOrder.LITTLE_ENDIAN;
-		} else if (header.getEndianIndicator()[0] == 'M' && header.getEndianIndicator()[1] == 'I') {
-			reader.byteOrder = ByteOrder.BIG_ENDIAN;
-		} else {
-			throw new IllegalArgumentException("Unsupported endianness!");
-		}
-		buffer.order(reader.byteOrder);
-
+		buffer.order(header.getByteOrder());
 		reader.readData(buffer);
 		return reader.data;
 	}

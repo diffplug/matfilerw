@@ -5,11 +5,9 @@
  */
 package com.jmatio.io;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.Date;
-
-import com.jmatio.common.MatDataTypes;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -26,13 +24,56 @@ public class MatFileHeader {
 	private static String DEFAULT_DESCRIPTIVE_TEXT = "MATLAB 5.0 MAT-file, Platform: "
 			+ System.getProperty("os.name")
 			+ ", CREATED on: ";
-	private static int DEFAULT_VERSION = 0x0100;
-	private static byte[] DEFAULT_ENDIAN_INDICATOR = new byte[]{(byte) 'M', (byte) 'I'};
-	private final ByteOrder byteOrder;
+	public static final int DEFAULT_VERSION = 0x0100;
+	public static final ByteOrder DEFAULT_ENDIAN = ByteOrder.BIG_ENDIAN;
+
+	private static final byte[] ENDIAN_INDICATOR_BIG = new byte[]{(byte) 'M', (byte) 'I'};
+	private static final byte[] ENDIAN_INDICATOR_LITTLE = new byte[]{(byte) 'I', (byte) 'M'};
 
 	private int version;
 	private String description;
-	private byte[] endianIndicator;
+	private final ByteOrder byteOrder;
+
+	/**
+	 * Parses a MatFileHeader from its desciption and the raw bytes of the version and endian indicator.
+	 * 
+	 * @param description - descriptive test
+	 * @param bversion - 2-byte array containing the version (raw from a MAT-File)
+	 * @param endianIndicator - 2-byte array containing the endian indicator (raw from a MAT-File(
+	 * @return
+	 */
+	public static MatFileHeader parseFrom(String description, byte[] bversion, byte[] endianIndicator) {
+		int version;
+		ByteOrder byteOrder = parseByteOrder(endianIndicator);
+		if (byteOrder == ByteOrder.BIG_ENDIAN) {
+			version = bversion[0] & 0xff | bversion[1] << 8;
+		} else if (byteOrder == ByteOrder.LITTLE_ENDIAN) {
+			version = bversion[1] & 0xff | bversion[0] << 8;
+		} else {
+			throw new IllegalArgumentException("Unknown byteOrder " + byteOrder);
+		}
+		return new MatFileHeader(description, version, byteOrder);
+	}
+
+	/**
+	 * Parses out the byte order based on a byte array containing
+	 * either 'MI' (big-endian) or 'IM' (little-endian).
+	 *
+	 * @param endianIndicator 2-byte long array holding the endian indicator
+	 */
+	public static ByteOrder parseByteOrder(byte[] endianIndicator) {
+		if (Arrays.equals(ENDIAN_INDICATOR_BIG, endianIndicator)) {
+			return ByteOrder.BIG_ENDIAN;
+		} else if (Arrays.equals(ENDIAN_INDICATOR_LITTLE, endianIndicator)) {
+			return ByteOrder.LITTLE_ENDIAN;
+		} else {
+			StringBuilder arrayBuilder = new StringBuilder();
+			for (int i = 0; i < endianIndicator.length; ++i) {
+				arrayBuilder.append(endianIndicator[i]);
+			}
+			throw new IllegalArgumentException("Unknown endian indicator " + arrayBuilder.toString());
+		}
+	}
 
 	/**
 	 * New MAT-file header
@@ -41,10 +82,9 @@ public class MatFileHeader {
 	 * @param version - by default is set to 0x0100
 	 * @param endianIndicator - byte array size of 2 indicating byte-swapping requirement
 	 */
-	public MatFileHeader(String description, int version, byte[] endianIndicator, ByteOrder byteOrder) {
+	public MatFileHeader(String description, int version, ByteOrder byteOrder) {
 		this.description = description;
 		this.version = version;
-		this.endianIndicator = endianIndicator;
 		this.byteOrder = byteOrder;
 	}
 
@@ -64,7 +104,13 @@ public class MatFileHeader {
 	 * @return - a byte array size of 2
 	 */
 	public byte[] getEndianIndicator() {
-		return endianIndicator;
+		if (byteOrder == ByteOrder.BIG_ENDIAN) {
+			return Arrays.copyOf(ENDIAN_INDICATOR_BIG, 2);
+		} else if (byteOrder == ByteOrder.LITTLE_ENDIAN) {
+			return Arrays.copyOf(ENDIAN_INDICATOR_LITTLE, 2);
+		} else {
+			throw new IllegalArgumentException("Unknown byteOrder '" + byteOrder + "'");
+		}
 	}
 
 	/**
@@ -90,29 +136,23 @@ public class MatFileHeader {
 	public static MatFileHeader createHeader() {
 		return new MatFileHeader(DEFAULT_DESCRIPTIVE_TEXT + (new Date()).toString(),
 				DEFAULT_VERSION,
-				DEFAULT_ENDIAN_INDICATOR,
-				ByteOrder.BIG_ENDIAN);
+				DEFAULT_ENDIAN);
 	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		try {
-			StringBuffer sb = new StringBuffer();
-			sb.append("[");
-			sb.append("desriptive text: " + description);
-			sb.append(", version: " + version);
-			sb.append(", endianIndicator: " + new String(endianIndicator, MatDataTypes.CHARSET));
-			sb.append("]");
-			return sb.toString();
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
+		StringBuffer sb = new StringBuffer();
+		sb.append("[");
+		sb.append("desriptive text: " + description);
+		sb.append(", version: " + version);
+		sb.append(", byteOrder: " + byteOrder);
+		sb.append("]");
+		return sb.toString();
 	}
 
 	public ByteOrder getByteOrder() {
-		assert((byteOrder != ByteOrder.LITTLE_ENDIAN || endianIndicator[0] == 'I') && (byteOrder != ByteOrder.BIG_ENDIAN || endianIndicator[0] == 'M'));
 		return byteOrder;
 	}
 }

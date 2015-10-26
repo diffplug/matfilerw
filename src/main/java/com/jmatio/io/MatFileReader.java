@@ -14,7 +14,6 @@ import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.AccessController;
@@ -93,10 +92,6 @@ public class MatFileReader {
 	 * Container for red <code>MLArray</code>s
 	 */
 	Map<String, MLArray> data;
-	/**
-	 * Tells how bytes are organized in the buffer.
-	 */
-	ByteOrder byteOrder;
 	/**
 	 * Array name filter
 	 */
@@ -793,7 +788,7 @@ public class MatFileReader {
 			ByteBuffer out = dos.getByteBuffer();
 
 			//with proper byte ordering
-			out.order(byteOrder);
+			out.order(matFileHeader.getByteOrder());
 
 			try {
 				readData(out);
@@ -809,7 +804,6 @@ public class MatFileReader {
 			int pos = buf.position();
 
 			MLArray element = readMatrix(buf, true);
-
 			if (element != null) {
 				// Sometimes a MAT file will contain more than one unnamed
 				// element.  This ensures that all of them will be accessible
@@ -1319,7 +1313,6 @@ public class MatFileReader {
 	void readHeader(ByteBuffer buf) throws IOException {
 		//header values
 		String description;
-		int version;
 		byte[] endianIndicator = new byte[2];
 
 		// This part of the header is missing if the file isn't a regular mat file.  So ignore.
@@ -1347,19 +1340,8 @@ public class MatFileReader {
 		//endian indicator 2 bytes
 		buf.get(endianIndicator);
 
-		//program reading the MAT-file must perform byte swapping to interpret the data
-		//in the MAT-file correctly
-		if ((char) endianIndicator[0] == 'I' && (char) endianIndicator[1] == 'M') {
-			byteOrder = ByteOrder.LITTLE_ENDIAN;
-			version = bversion[1] & 0xff | bversion[0] << 8;
-		} else {
-			byteOrder = ByteOrder.BIG_ENDIAN;
-			version = bversion[0] & 0xff | bversion[1] << 8;
-		}
-
-		buf.order(byteOrder);
-
-		matFileHeader = new MatFileHeader(description, version, endianIndicator, byteOrder);
+		matFileHeader = MatFileHeader.parseFrom(description, bversion, endianIndicator);
+		buf.order(matFileHeader.getByteOrder());
 
 		// After the header, the next read must be aligned.  Thus force the alignment.  Only matters with reduced header data,
 		// but apply it regardless for safety.
