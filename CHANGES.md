@@ -11,7 +11,7 @@
 * `MLObject` and `MLStructure` now share `MLStructureObjectBase` as a base class.  This caused a small breaking change to `MLObject`s API.
 * `MatFileHeader` now wraps up the whole endianness mess, which also required a small breaking change.
 
-### Version 2.0.TRANSITION - October 25th 2015 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/2.0.TRANSITION/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/2.0.TRANSITION/view))
+### Version 2.0.0.TRANSITION - October 25th 2015 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/2.0.TRANSITION/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/2.0.TRANSITION/view))
 
 Only pertinent for people who are migrating from a JMatIO fork whose packages were renamed to `ca.mjdsystems.jmatio`.
 
