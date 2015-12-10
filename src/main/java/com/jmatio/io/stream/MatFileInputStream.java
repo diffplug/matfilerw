@@ -139,6 +139,8 @@ public class MatFileInputStream {
 		case MatDataTypes.miDOUBLE:
 			return (byte) buf.getDouble();
 		case MatDataTypes.miUTF8:
+		case MatDataTypes.miUTF16:
+		case MatDataTypes.miUTF32:
 			return (byte) buf.get();
 		default:
 			throw new IllegalArgumentException("Unknown data type: " + type);

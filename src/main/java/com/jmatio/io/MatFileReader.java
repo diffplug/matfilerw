@@ -14,6 +14,7 @@ import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.AccessController;
@@ -390,7 +391,7 @@ public class MatFileReader {
 					while (bufferWeakRef.get() != null) {
 						if (System.currentTimeMillis() - start > GC_TIMEOUT_MS) {
 							break; //a hell cannot be unmapped - hopefully GC will
-									//do it's job later
+							//do it's job later
 						}
 						System.gc();
 						Thread.yield();
@@ -1065,7 +1066,7 @@ public class MatFileReader {
 			//read real
 			tag = new ISMatTag(buf);
 			//                char[] ac = tag.readToCharArray();
-			String str = tag.readToString();
+			String str = tag.readToString(matFileHeader.getByteOrder());
 
 			for (int i = 0; i < str.length(); i++) {
 				mlchar.setChar(str.charAt(i), i);
@@ -1112,7 +1113,7 @@ public class MatFileReader {
 			//read class name
 			tag = new ISMatTag(buf);
 			// class name
-			String className = tag.readToString();
+			String className = tag.readToString(matFileHeader.getByteOrder());
 			//                System.out.println( "Class name: " + className );
 			// should be "java"
 			//                System.out.println( "Array name: " + name );
@@ -1185,7 +1186,7 @@ public class MatFileReader {
 			tag = new ISMatTag(buf);
 
 			// class name
-			className = tag.readToString();
+			className = tag.readToString(matFileHeader.getByteOrder());
 
 			// TODO: currently copy pasted from structure
 
@@ -1295,8 +1296,7 @@ public class MatFileReader {
 	 */
 	private String readName(ByteBuffer buf) throws IOException {
 		ISMatTag tag = new ISMatTag(buf);
-
-		return tag.readToString();
+		return tag.readToString(matFileHeader.getByteOrder());
 	}
 
 	/**
@@ -1370,8 +1370,7 @@ public class MatFileReader {
 				type = tmp;
 				size = buf.getInt();
 				compressed = false;
-			} else //data _packed_ in the tag (compressed)
-			{
+			} else { //data _packed_ in the tag (compressed)
 				size = tmp >> 16; // 2 more significant bytes
 				type = tmp & 0xffff; // 2 less significant bytes;
 				compressed = true;
@@ -1430,9 +1429,22 @@ public class MatFileReader {
 			return ai;
 		}
 
-		public String readToString() throws IOException {
+		private String charset(ByteOrder byteOrder) {
+			switch (type) {
+			case MatDataTypes.miUTF8:
+				return "UTF-8";
+			case MatDataTypes.miUTF16:
+				return byteOrder == ByteOrder.BIG_ENDIAN ? "UTF-16BE" : "UTF-16LE";
+			case MatDataTypes.miUTF32:
+				return byteOrder == ByteOrder.BIG_ENDIAN ? "UTF-32BE" : "UTF-32LE";
+			default:
+				return "US-ASCII";
+			}
+		}
+
+		public String readToString(ByteOrder byteOrder) throws IOException {
 			byte[] bytes = readToByteArray();
-			return new String(bytes, "UTF-8");
+			return new String(bytes, charset(byteOrder));
 		}
 	}
 }

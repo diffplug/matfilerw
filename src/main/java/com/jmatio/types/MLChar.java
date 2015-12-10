@@ -105,7 +105,6 @@ public class MLChar extends MLArray implements GenericArrayCreator<Character> {
 		int rowOffset = getM();
 		for (int i = 0; i < getN(); i++) {
 			if (i < value.length()) {
-
 				setChar(value.charAt(i), idx + (rowOffset * i));
 			} else {
 				setChar(' ', idx + (rowOffset * i));

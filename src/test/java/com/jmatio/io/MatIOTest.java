@@ -19,14 +19,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.jmatio.io.MatFileFilter;
-import com.jmatio.io.MatFileIncrementalWriter;
-import com.jmatio.io.MatFileReader;
-import com.jmatio.io.MatFileWriter;
 import com.jmatio.types.MLArray;
 import com.jmatio.types.MLCell;
 import com.jmatio.types.MLChar;
@@ -1046,5 +1043,22 @@ public class MatIOTest {
 		assertEquals(1.0, ((MLDouble) content.get("@0")).get(0), .0001);
 		assertEquals(2.0, ((MLDouble) content.get("@1")).get(0), .0001);
 		assertEquals(3.0, ((MLDouble) content.get("@2")).get(0), .0001);
+	}
+
+	@Test
+	public void testUTF() throws IOException {
+		// read array form file
+		MatFileReader mfr = new MatFileReader(getTestFile("utf.mat"));
+		Map<String, MLArray> map = mfr.getContent();
+		MLStructure val = (MLStructure) map.get("val");
+		// extract each utf
+		MLChar utf8 = (MLChar) val.getField("utf8");
+		MLChar utf16 = (MLChar) val.getField("utf16");
+		MLChar utf32 = (MLChar) val.getField("utf32");
+		// assert the content
+		String expected = "\uD841\uDF0E";
+		Assert.assertEquals(expected, utf8.getString(0));
+		Assert.assertEquals(expected, utf16.getString(0));
+		Assert.assertEquals(expected, utf32.getString(0));
 	}
 }
