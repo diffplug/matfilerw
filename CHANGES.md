@@ -1,6 +1,10 @@
 # MatFileRW releases
 
-### Version 2.1.0-SNAPSHOT - TBD ([javadoc](http://diffplug.github.io/matfilerw/javadoc/snapshot/), [jcenter](https://oss.sonatype.org/content/repositories/snapshots/com/diffplug/matsim/matfilerw/))
+### Version 2.2.0-SNAPSHOT - TBD ([javadoc](http://diffplug.github.io/matfilerw/javadoc/snapshot/), [jcenter](https://oss.sonatype.org/content/repositories/snapshots/com/diffplug/matsim/matfilerw/))
+
+### Version 2.1.0 - December 10th 2015 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/2.1.0/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/2.1.0/view))
+
+* Fixed support for reading UTF fields (closes [#2](https://github.com/diffplug/matfilerw/issues/2))
 
 ### Version 2.0.0 - October 25th 2015 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/2.0.0/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/2.0.0/view))
 
