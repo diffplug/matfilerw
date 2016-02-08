@@ -49,7 +49,12 @@ public class MatFile {
 
 	/** Reads a full set of bytes (including the header). */
 	public static MatFile readFull(ByteBuffer buf) throws IOException {
-		MatFileReader reader = new MatFileReader();
+		return readFull(buf, MatFileType.Regular);
+	}
+
+	/** Reads a full set of bytes (including the header). */
+	public static MatFile readFull(ByteBuffer buf, MatFileType type) throws IOException {
+		MatFileReader reader = new MatFileReader(type);
 		reader.readHeader(buf);
 		while (buf.remaining() > 0) {
 			reader.readData(buf);
