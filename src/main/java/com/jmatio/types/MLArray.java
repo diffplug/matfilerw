@@ -40,6 +40,7 @@ public class MLArray {
 	public String name;
 	protected int attributes;
 	protected int type;
+	private int dimsFactors[]; // Used for calculating the index in arrays with higher dimensions than 2.
 
 	public static final String DEFAULT_NAME = "@";
 
@@ -55,6 +56,36 @@ public class MLArray {
 
 		this.type = type;
 		this.attributes = attributes;
+
+		dimsFactors = new int[dims.length];
+		for (int dimIx = dims.length - 1, f = 1; dimIx >= 0; dimIx--) {
+			dimsFactors[dimIx] = f;
+			f *= dims[dimIx];
+		}
+	}
+
+	/**
+	 * Returns the one-dim index for indexes in each of the dimensions for this array.
+	 *
+	 * @param indexes Length must be same as number of dimensions. Element value must be >= 0 and < dimension size for the corresponding dimension.
+	 * @return The index.
+	 */
+	public int getIndex(int... indexes) {
+		if (indexes.length != dims.length) {
+			throw new IllegalArgumentException("Cannot use " + indexes.length + " indexes for " + dims.length + " dimensions.");
+		}
+		int ix = 0;
+		for (int dimIx = 0; dimIx < indexes.length; dimIx++) {
+			ix += dimsFactors[dimIx] * validateDimSize(dimIx, indexes[dimIx]);
+		}
+		return ix;
+	}
+
+	private int validateDimSize(int dimIx, int ixInDim) {
+		if (dims[dimIx] > ixInDim) {
+			return ixInDim;
+		}
+		throw new IllegalArgumentException("Index " + ixInDim + " does not exist for dimension " + dimIx);
 	}
 
 	/**

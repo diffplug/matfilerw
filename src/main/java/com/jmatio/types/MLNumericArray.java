@@ -208,6 +208,14 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 	}
 
 	/**
+	 * @param value		Element value.
+	 * @param indices	Length must be same as number of dimensions. Element value must be >= 0 and < dimension size for the corresponding dimension.
+	 */
+	public void set(T value, int... indices) {
+		set(value, getIndex(indices));
+	}
+
+	/**
 	 * Does the same as <code>getReal</code>.
 	 * 
 	 * @param m - row index
@@ -230,6 +238,14 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 			throw new IllegalStateException("Cannot use this method for Complex matrices");
 		}
 		return _get(real, index);
+	}
+
+	/**
+	 * @param indices Length must be same as number of dimensions. Element value must be >= 0 and < dimension size for the corresponding dimension.
+	 * @return The value.
+	 */
+	public T get(int... indices) {
+		return get(getIndex(indices));
 	}
 
 	/**
