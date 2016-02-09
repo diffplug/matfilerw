@@ -1,9 +1,14 @@
 # MatFileRW releases
 
-### Version 2.2.0-SNAPSHOT - TBD ([javadoc](http://diffplug.github.io/matfilerw/javadoc/snapshot/), [jcenter](https://oss.sonatype.org/content/repositories/snapshots/com/diffplug/matsim/matfilerw/))
+### Version 2.3.0-SNAPSHOT - TBD ([javadoc](http://diffplug.github.io/matfilerw/javadoc/snapshot/), [jcenter](https://oss.sonatype.org/content/repositories/snapshots/com/diffplug/matsim/matfilerw/))
+
+* Nothing so far...
+
+### Version 2.2.0 - February 9th 2016 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/2.2.0/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/2.2.0/view))
 
 * Added `MatFile.readFull(ByteBuffer buf, MatFileType type)`
 * Added `MLArray.getIndex(int...)` and `MLNumericArray.set(T value, int...)` and `T get(int...)` for N-dimensional indices.
+* Fixed the JRE6 download in the build file.
 
 ### Version 2.1.0 - December 10th 2015 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/2.1.0/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/2.1.0/view))
 

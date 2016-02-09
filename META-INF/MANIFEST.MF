@@ -1,12 +1,12 @@
 Manifest-Version: 1.0
 Bundle-Description: MatFileRW - Read and write .mat files
 Bundle-DocURL: https://github.com/diffplug/matfilerw
-Bundle-License: https://github.com/diffplug/matfilerw/blob/v2.2.0-SNAPSH
- OT/LICENSE
+Bundle-License: https://github.com/diffplug/matfilerw/blob/v2.2.0/LICENS
+ E
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: com.diffplug.matsim.matfilerw
 Bundle-Vendor: DiffPlug
-Bundle-Version: 2.2.0.SNAPSHOT
+Bundle-Version: 2.2.0
 Export-Package: com.jmatio.common;version="2.2.0",com.jmatio.common.util
  ;uses:="com.jmatio.types";version="2.2.0",com.jmatio.io;uses:="com.jmat
  io.types";version="2.2.0",com.jmatio.io.stream;uses:="com.jmatio.types"
