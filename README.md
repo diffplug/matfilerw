@@ -50,6 +50,7 @@ People whose commits are included in this project
 * int32 writing by Gabriel Shubiner
 * ZLIP EOF Exception fix by David Williams
 * Integration work by Jason Lokerson
+* Multidimensional array indexing by Mikael Grev
 
 Tools used by this project
 * Formatted by [spotless](https://github.com/diffplug/spotless), [as such](https://github.com/diffplug/matfilerw/blob/v1.3.1/build.gradle?ts=4#L129-L149).
