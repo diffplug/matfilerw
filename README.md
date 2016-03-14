@@ -20,7 +20,7 @@ output = [
 [![Travis CI](https://travis-ci.org/diffplug/matfilerw.svg?branch=master)](https://travis-ci.org/diffplug/matfilerw)
 <!---freshmark /shields -->
 
-MatFileRW is a library which allows reading and writing MAT files.  Have a look at [MatIOTest.java](src/test/java/com/jmatio/test/MatIOTest.java?ts=4) to see each part in use.
+MatFileRW is a library which allows reading and writing MAT files.  Have a look at [MatIOTest.java](https://github.com/diffplug/matfilerw/blob/master/src/test/java/com/jmatio/io/MatIOTest.java) to see each part in use.
 
 As far as compatibility, the TL;DR is that it will work with any MAT-File with default settings.  The dirty details are that this library works with `v6` and `v7`, but not `v4` or `v7.3`.
 
