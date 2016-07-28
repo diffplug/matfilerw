@@ -38,6 +38,7 @@ import com.jmatio.types.MLCell;
 import com.jmatio.types.MLChar;
 import com.jmatio.types.MLDouble;
 import com.jmatio.types.MLEmptyArray;
+import com.jmatio.types.MLHandle;
 import com.jmatio.types.MLInt16;
 import com.jmatio.types.MLInt32;
 import com.jmatio.types.MLInt64;
@@ -1174,6 +1175,9 @@ public class MatFileReader {
 					} else { // This is where we get the useful MCOS data.  Only used on FileWrapper__ classes.
 						mlArray = readMatrix(buf, false);
 					}
+				} else if (name.equals("handle")) {
+					MLCell wrappedContent = (MLCell) readMatrix(buf, true);
+					mlArray = new MLHandle(arrName, className, wrappedContent);
 				} else {
 					throw new IOException("Unknown object type (" + name + ") found.");
 				}

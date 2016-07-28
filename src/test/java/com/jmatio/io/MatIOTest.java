@@ -1061,4 +1061,21 @@ public class MatIOTest {
 		Assert.assertEquals(expected, utf16.getString(0));
 		Assert.assertEquals(expected, utf32.getString(0));
 	}
+
+	@Test
+	public void testHandleClass() throws IOException {
+		MatFileReader mfr = new MatFileReader(getTestFile("handles.mat"));
+		Map<String, MLArray> map = mfr.getContent();
+		MLObject objA = (MLObject) map.get("objA");
+		MLDouble myPropA = (MLDouble) objA.getField("myPropA");
+		Assert.assertEquals(5.0, myPropA.get(0, 0), 0.01);
+
+		MLObject objB = (MLObject) map.get("objB");
+		MLObject objBField = (MLObject) objB.getField("myObjA");
+		Assert.assertEquals(objA.getField("myPropA"), objBField.getField("myPropA"));
+
+		MLObject objC = (MLObject) map.get("objC");
+		MLObject objCField = (MLObject) objC.getField("myPropA");
+		Assert.assertEquals(objA.getField("myPropA"), objCField.getField("myPropA"));
+	}
 }
