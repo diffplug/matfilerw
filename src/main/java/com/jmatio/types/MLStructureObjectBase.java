@@ -11,12 +11,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * Base class for MLStructure and MLObject.
@@ -42,7 +41,7 @@ public abstract class MLStructureObjectBase extends MLArray {
 		super(name, dims, type, attributes);
 
 		mlStructArray = new TreeMap<Integer, Map<String, MLArray>>();
-		keys = new LinkedHashSet<String>();
+		keys = new TreeSet<String>();
 	}
 
 	/**
@@ -81,7 +80,7 @@ public abstract class MLStructureObjectBase extends MLArray {
 
 		Map<String, MLArray> map = mlStructArray.get(index);
 		if (map == null) {
-			map = new LinkedHashMap<String, MLArray>();
+			map = new TreeMap<String, MLArray>();
 			mlStructArray.put(index, map);
 		}
 		map.put(name, value);
@@ -136,7 +135,13 @@ public abstract class MLStructureObjectBase extends MLArray {
 		ArrayList<MLArray> fields = new ArrayList<MLArray>();
 
 		for (Map<String, MLArray> struct : mlStructArray.values()) {
-			fields.addAll(struct.values());
+                    for (String s : keys) {
+                        if (struct.containsKey(s)) {
+                            fields.add(struct.get(s));
+                        } else {
+                            fields.add(new MLEmptyArray());
+                        }
+                    }
 		}
 		return fields;
 	}
@@ -146,7 +151,7 @@ public abstract class MLStructureObjectBase extends MLArray {
 	 * @return the {@link Collection} of keys for this structure
 	 */
 	public Collection<String> getFieldNames() {
-		Set<String> fieldNames = new LinkedHashSet<String>();
+		Set<String> fieldNames = new TreeSet<String>();
 
 		fieldNames.addAll(keys);
 
