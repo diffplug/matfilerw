@@ -7,6 +7,8 @@ package com.jmatio.types;
 
 import java.util.Map;
 
+import com.jmatio.common.DeterministicKeyMap;
+
 /**
  * This class represents Matlab's Object object (object array).
  * 
@@ -28,7 +30,8 @@ public class MLObject extends MLStructureObjectBase {
 	}
 
 	public void setFields(int i, Map<String, MLArray> structure) {
-		mlStructArray.put(i, structure);
+		keys.addAll(structure.keySet());
+		mlStructArray.put(i, new DeterministicKeyMap<String, MLArray>(keys, structure));
 	}
 
 	/** Only used by {@link com.jmatio.io.MLObjectPlaceholder}. */

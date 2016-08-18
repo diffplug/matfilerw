@@ -11,12 +11,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import com.jmatio.common.DeterministicKeyMap;
 
 /**
  * Base class for MLStructure and MLObject.
@@ -25,24 +27,15 @@ import java.util.TreeMap;
  * , that means structures must have the same field names.
  */
 public abstract class MLStructureObjectBase extends MLArray {
-	/**
-	 * A Set that keeps structure field names
-	 */
-	protected Set<String> keys;
-	/**
-	 * Array of structures
-	 */
-	protected SortedMap<Integer, Map<String, MLArray>> mlStructArray;
-	/**
-	 * Current structure pointer for bulk insert 
-	 */
+	/** A Set that keeps structure field names */
+	protected Set<String> keys = new LinkedHashSet<String>();
+	/** Array of structures */
+	protected SortedMap<Integer, DeterministicKeyMap<String, MLArray>> mlStructArray = new TreeMap<Integer, DeterministicKeyMap<String, MLArray>>();
+	/** Current structure pointer for bulk insert */
 	protected int currentIndex = 0;
 
 	protected MLStructureObjectBase(String name, int[] dims, int type, int attributes) {
 		super(name, dims, type, attributes);
-
-		mlStructArray = new TreeMap<Integer, Map<String, MLArray>>();
-		keys = new LinkedHashSet<String>();
 	}
 
 	/**
@@ -52,7 +45,6 @@ public abstract class MLStructureObjectBase extends MLArray {
 	 * @param value - <code>MLArray</code> field value
 	 */
 	public void setField(String name, MLArray value) {
-		//fields.put(name, value);
 		setField(name, value, currentIndex);
 	}
 
@@ -79,9 +71,9 @@ public abstract class MLStructureObjectBase extends MLArray {
 		keys.add(name);
 		currentIndex = index;
 
-		Map<String, MLArray> map = mlStructArray.get(index);
+		DeterministicKeyMap<String, MLArray> map = mlStructArray.get(index);
 		if (map == null) {
-			map = new LinkedHashMap<String, MLArray>();
+			map = new DeterministicKeyMap<String, MLArray>(keys, new HashMap<String, MLArray>(keys.size()));
 			mlStructArray.put(index, map);
 		}
 		map.put(name, value);
@@ -96,10 +88,9 @@ public abstract class MLStructureObjectBase extends MLArray {
 		//get max field name
 		int maxLen = 0;
 		for (String s : keys) {
-			maxLen = s.length() > maxLen ? s.length() : maxLen;
+			maxLen = Math.max(maxLen, s.length());
 		}
 		return maxLen + 1;
-
 	}
 
 	/**
@@ -146,12 +137,7 @@ public abstract class MLStructureObjectBase extends MLArray {
 	 * @return the {@link Collection} of keys for this structure
 	 */
 	public Collection<String> getFieldNames() {
-		Set<String> fieldNames = new LinkedHashSet<String>();
-
-		fieldNames.addAll(keys);
-
-		return fieldNames;
-
+		return new LinkedHashSet<String>(keys);
 	}
 
 	/**
