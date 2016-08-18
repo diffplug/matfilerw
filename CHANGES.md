@@ -1,8 +1,14 @@
 # MatFileRW releases
 
-### Version 2.3.0-SNAPSHOT - TBD ([javadoc](http://diffplug.github.io/matfilerw/javadoc/snapshot/), [jcenter](https://oss.sonatype.org/content/repositories/snapshots/com/diffplug/matsim/matfilerw/))
+### Version 2.4.0-SNAPSHOT - TBD ([javadoc](http://diffplug.github.io/matfilerw/javadoc/snapshot/), [snapshot](https://oss.sonatype.org/content/repositories/snapshots/com/diffplug/matsim/matfilerw/))
 
 * Nothing so far...
+
+### Version 2.3.0 - August 18th 2016 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/2.3.0/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/2.3.0/view))
+
+* Fixed problem where a handle class is encoded within an MLObject.
+* MCOS variables can now be parsed from anywhere within the MAT-File (previously could only be a root variable).
+* Arrays of structs and fields are now enforced to have their fields be in a consistent order element to element.
 
 ### Version 2.2.0 - February 9th 2016 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/2.2.0/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/2.2.0/view))
 

@@ -12,11 +12,11 @@ output = [
 	].join('\n');
 -->
 [![Maven artifact](https://img.shields.io/badge/mavenCentral-com.diffplug.matsim%3Amatfilerw-blue.svg)](https://bintray.com/diffplug/opensource/matfilerw/view)
-[![Latest version](https://img.shields.io/badge/latest-2.2.0-blue.svg)](https://github.com/diffplug/matfilerw/releases/latest)
-[![Javadoc](https://img.shields.io/badge/javadoc-OK-blue.svg)](https://diffplug.github.io/matfilerw/javadoc/2.2.0/)
+[![Latest version](https://img.shields.io/badge/latest-2.3.0-blue.svg)](https://github.com/diffplug/matfilerw/releases/latest)
+[![Javadoc](https://img.shields.io/badge/javadoc-OK-blue.svg)](https://diffplug.github.io/matfilerw/javadoc/2.3.0/)
 [![License Apache](https://img.shields.io/badge/license-BSD-blue.svg)](https://tldrlegal.com/license/bsd-3-clause-license-(revised))
 
-[![Changelog](https://img.shields.io/badge/changelog-2.3.0--SNAPSHOT-brightgreen.svg)](CHANGES.md)
+[![Changelog](https://img.shields.io/badge/changelog-2.3.0-brightgreen.svg)](CHANGES.md)
 [![Travis CI](https://travis-ci.org/diffplug/matfilerw.svg?branch=master)](https://travis-ci.org/diffplug/matfilerw)
 <!---freshmark /shields -->
 
@@ -51,6 +51,7 @@ People whose commits are included in this project
 * ZLIP EOF Exception fix by David Williams
 * Integration work by Jason Lokerson
 * Multidimensional array indexing by Mikael Grev
+* AbstractIterator taken from Google's Guava
 
 Tools used by this project
 * Formatted by [spotless](https://github.com/diffplug/spotless), [as such](https://github.com/diffplug/matfilerw/blob/v1.3.1/build.gradle?ts=4#L129-L149).
