@@ -6,16 +6,16 @@
 package com.jmatio.io;
 
 import com.jmatio.types.MLArray;
+import com.jmatio.types.MLObject;
 
 /**
  *
  * @author Matthew Dawson <matthew@mjdsystems.ca>
  */
-class MLObjectPlaceholder extends MLArray {
+public class MLObjectPlaceholder extends MLArray {
 	MLObjectPlaceholder(String name, String className, int[][] information) {
 		super(name, new int[]{information[2][0], information[3][0]}, -1, 0);
 		this.className = className;
-		this.information = information;
 
 		this.objectIds = new int[information.length - 5];
 		for (int i = 0; i < objectIds.length; ++i) {
@@ -25,7 +25,11 @@ class MLObjectPlaceholder extends MLArray {
 	}
 
 	final String className;
-	final int[][] information;
 	final int[] objectIds;
 	final int classId;
+	MLObject target;
+
+	public MLObject getTarget() {
+		return target;
+	}
 }
