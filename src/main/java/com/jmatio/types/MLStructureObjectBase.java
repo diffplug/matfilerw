@@ -28,7 +28,7 @@ public abstract class MLStructureObjectBase extends MLArray {
 	/**
 	 * A Set that keeps structure field names
 	 */
-	private Set<String> keys;
+	protected Set<String> keys;
 	/**
 	 * Array of structures
 	 */
@@ -36,7 +36,7 @@ public abstract class MLStructureObjectBase extends MLArray {
 	/**
 	 * Current structure pointer for bulk insert 
 	 */
-	private int currentIndex = 0;
+	protected int currentIndex = 0;
 
 	protected MLStructureObjectBase(String name, int[] dims, int type, int attributes) {
 		super(name, dims, type, attributes);

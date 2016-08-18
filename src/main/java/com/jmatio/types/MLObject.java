@@ -16,7 +16,7 @@ import java.util.Map;
  * @author Wojciech Gradkowski <wgradkowski@gmail.com>
  */
 public class MLObject extends MLStructureObjectBase {
-	private final String className;
+	private String className;
 
 	public MLObject(String name, String className, int[] dimensions, int attributes) {
 		super(name, dimensions, MLArray.mxOBJECT_CLASS, 0);
@@ -29,5 +29,13 @@ public class MLObject extends MLStructureObjectBase {
 
 	public void setFields(int i, Map<String, MLArray> structure) {
 		mlStructArray.put(i, structure);
+	}
+
+	/** Only used by {@link com.jmatio.io.MLObjectPlaceholder}. */
+	protected void copyFrom(MLObject obj) {
+		this.className = obj.className;
+		this.keys = obj.keys;
+		this.mlStructArray = obj.mlStructArray;
+		this.currentIndex = obj.currentIndex;
 	}
 }

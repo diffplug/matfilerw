@@ -5,17 +5,15 @@
  */
 package com.jmatio.io;
 
-import com.jmatio.types.MLArray;
 import com.jmatio.types.MLObject;
 
 /**
  *
  * @author Matthew Dawson <matthew@mjdsystems.ca>
  */
-public class MLObjectPlaceholder extends MLArray {
+class MLObjectPlaceholder extends MLObject {
 	MLObjectPlaceholder(String name, String className, int[][] information) {
-		super(name, new int[]{information[2][0], information[3][0]}, -1, 0);
-		this.className = className;
+		super(name, className, new int[]{information[2][0], information[3][0]}, -1);
 
 		this.objectIds = new int[information.length - 5];
 		for (int i = 0; i < objectIds.length; ++i) {
@@ -24,12 +22,10 @@ public class MLObjectPlaceholder extends MLArray {
 		this.classId = information[information.length - 1][0];
 	}
 
-	final String className;
 	final int[] objectIds;
 	final int classId;
-	MLObject target;
 
-	public MLObject getTarget() {
-		return target;
+	void setTarget(MLObject obj) {
+		copyFrom(obj);
 	}
 }
