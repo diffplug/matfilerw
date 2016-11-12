@@ -126,6 +126,174 @@ public class MatIOTest {
 		// test if MLArray objects are equal
 		assertEquals("Test if value red from file equals value stored", mluint8, mlArrayRetrived);
 	}
+	
+	@Test
+	public void testMultipleDimArrayRealFromMatlabCreatedFile() throws IOException {
+		int ndims = 5;
+		int[] dims = new int[]{2, 3, 4, 5, 6};
+		File file = getTestFile("multiDimMatrix.mat");
+		MatFileReader reader = new MatFileReader(file);
+		MLDouble mlArray = (MLDouble) reader.getMLArray("in");
+		
+		int testNDims = mlArray.getNDimensions();
+		Assert.assertEquals(ndims, testNDims);
+		
+		int[] testDims = mlArray.getDimensions();
+		for (int i = 0; i < ndims; i++){
+			Assert.assertEquals(dims[i], testDims[i]);
+		}
+		
+		Double expectedVal = 0.0;
+		for (int i = 0; i < dims[4]; i++) {
+			for (int j = 0; j < dims[3]; j++) {
+				for (int k = 0; k < dims[2]; k++) {
+					for (int l = 0; l < dims[1]; l++) {
+						for (int m = 0; m < dims[0]; m++, expectedVal += 1.0) {
+							Double actual = mlArray.getReal( mlArray.getIndexCM(m, l, k, j, i) );
+							Assert.assertEquals( expectedVal, actual );
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	@Test
+	public void testMultipleDimArrayRealWIndicesFromMatlabCreatedFile() throws IOException {
+		int ndims = 5;
+		int[] dims = new int[]{2, 3, 4, 5, 6};
+		File file = getTestFile("multiDimMatrix.mat");
+		MatFileReader reader = new MatFileReader(file);
+		MLDouble mlArray = (MLDouble) reader.getMLArray("in");
+		
+		int testNDims = mlArray.getNDimensions();
+		Assert.assertEquals(ndims, testNDims);
+		
+		int[] testDims = mlArray.getDimensions();
+		for (int i = 0; i < ndims; i++){
+			Assert.assertEquals(dims[i], testDims[i]);
+		}
+		
+		Double expectedVal = 0.0;
+		for (int i = 0; i < dims[4]; i++) {
+			for (int j = 0; j < dims[3]; j++) {
+				for (int k = 0; k < dims[2]; k++) {
+					for (int l = 0; l < dims[1]; l++) {
+						for (int m = 0; m < dims[0]; m++, expectedVal += 1.0) {
+							Double actual = mlArray.getRealCM( m, l, k, j, i );
+							Assert.assertEquals( expectedVal, actual );
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	@Test
+	public void testMultipleDimArrayGetFromMatlabCreatedFile() throws IOException {
+		int ndims = 5;
+		int[] dims = new int[]{2, 3, 4, 5, 6};
+		File file = getTestFile("multiDimMatrix.mat");
+		MatFileReader reader = new MatFileReader(file);
+		MLDouble mlArray = (MLDouble) reader.getMLArray("in");
+		
+		int testNDims = mlArray.getNDimensions();
+		Assert.assertEquals(ndims, testNDims);
+		
+		int[] testDims = mlArray.getDimensions();
+		for (int i = 0; i < ndims; i++){
+			Assert.assertEquals(dims[i], testDims[i]);
+		}
+		
+		Double expectedVal = 0.0;
+		for (int i = 0; i < dims[4]; i++) {
+			for (int j = 0; j < dims[3]; j++) {
+				for (int k = 0; k < dims[2]; k++) {
+					for (int l = 0; l < dims[1]; l++) {
+						for (int m = 0; m < dims[0]; m++, expectedVal += 1.0) {
+							Double actual = mlArray.getCM( m, l, k, j, i );
+							Assert.assertEquals( expectedVal, actual );
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	@Test
+	public void testMultipleDimArrayComplexFromMatlabCreatedFile() throws IOException {
+		int ndims = 5;
+		int[] dims = new int[]{2, 3, 4, 5, 6};
+		File file = getTestFile("multiDimComplexMatrix.mat");
+		MatFileReader reader = new MatFileReader(file);
+		MLDouble mlArray = (MLDouble) reader.getMLArray("in");
+		
+		int testNDims = mlArray.getNDimensions();
+		Assert.assertEquals(ndims, testNDims);
+		
+		int[] testDims = mlArray.getDimensions();
+		for (int i = 0; i < ndims; i++){
+			Assert.assertEquals(dims[i], testDims[i]);
+		}
+		
+		Double expectedValRe = 0.0;
+		for (int i = 0; i < dims[4]; i++) {
+			for (int j = 0; j < dims[3]; j++) {
+				for (int k = 0; k < dims[2]; k++) {
+					for (int l = 0; l < dims[1]; l++) {
+						for (int m = 0; m < dims[0]; m++, expectedValRe += 1.0) {
+							Double actualRe = mlArray.getReal( mlArray.getIndexCM(m, l, k, j, i) );
+							Assert.assertEquals( expectedValRe, actualRe );
+							Double actualIm = mlArray.getImaginary( mlArray.getIndexCM(m, l, k, j, i) );
+							Double expectedValIm = 0.0;
+							if (expectedValRe != 0.0) {
+									expectedValIm = expectedValRe * -1.0;
+							}
+							Assert.assertEquals( expectedValIm, actualIm );
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	@Test
+	public void testMultipleDimArrayComplexWIndicesFromMatlabCreatedFile() throws IOException {
+		int ndims = 5;
+		int[] dims = new int[]{2, 3, 4, 5, 6};
+		File file = getTestFile("multiDimComplexMatrix.mat");
+		MatFileReader reader = new MatFileReader(file);
+		MLDouble mlArray = (MLDouble) reader.getMLArray("in");
+		
+		int testNDims = mlArray.getNDimensions();
+		Assert.assertEquals(ndims, testNDims);
+		
+		int[] testDims = mlArray.getDimensions();
+		for (int i = 0; i < ndims; i++){
+			Assert.assertEquals(dims[i], testDims[i]);
+		}
+		
+		Double expectedValRe = 0.0;
+		for (int i = 0; i < dims[4]; i++) {
+			for (int j = 0; j < dims[3]; j++) {
+				for (int k = 0; k < dims[2]; k++) {
+					for (int l = 0; l < dims[1]; l++) {
+						for (int m = 0; m < dims[0]; m++, expectedValRe += 1.0) {
+							Double actualRe = mlArray.getRealCM( m, l, k, j, i );
+							Assert.assertEquals( expectedValRe, actualRe );
+							Double actualIm = mlArray.getImaginaryCM( m, l, k, j, i );
+							Double expectedValIm = 0.0;
+							if (expectedValRe != 0.0) {
+									expectedValIm = expectedValRe * -1.0;
+							}
+							Assert.assertEquals( expectedValIm, actualIm );
+						}
+					}
+				}
+			}
+		}
+	}
+
 
 	@Test
 	public void testCellFromMatlabCreatedFile() throws IOException {

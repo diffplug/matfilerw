@@ -79,6 +79,16 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 	}
 
 	/**
+	 * Get real component of an element from a multidimensional array using indices.  This is compatible with .mat files created or used by Matlab.
+	 * 
+	 * @param indices Length must be same as number of dimensions. Element value must be >= 0 and < dimension size for the corresponding dimension.
+	 * @return The value.
+	 */
+	public T getRealCM(int... indices) {
+		return getReal(getIndexCM(indices));
+	}
+
+	/**
 	 * @param index
 	 * @return
 	 */
@@ -151,6 +161,16 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 	 */
 	public T getImaginary(int m, int n) {
 		return getImaginary(getIndex(m, n));
+	}
+
+	/**
+	 * Get an imaginary component of element from a multidimensional array using indices.  This is compatible with .mat files created or used by Matlab.
+	 * 
+	 * @param indices Length must be same as number of dimensions. Element value must be >= 0 and < dimension size for the corresponding dimension.
+	 * @return The value.
+	 */
+	public T getImaginaryCM(int... indices) {
+		return getImaginary(getIndexCM(indices));
 	}
 
 	/**
@@ -246,6 +266,16 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 	 */
 	public T get(int... indices) {
 		return get(getIndex(indices));
+	}
+
+	/**
+	 * Get an element from a multidimensional array using indices.  This is compatible with .mat files created or used by Matlab.
+	 * 
+	 * @param indices Length must be same as number of dimensions. Element value must be >= 0 and < dimension size for the corresponding dimension.
+	 * @return The value.
+	 */
+	public T getCM(int... indices) {
+		return get(getIndexCM(indices));
 	}
 
 	/**
