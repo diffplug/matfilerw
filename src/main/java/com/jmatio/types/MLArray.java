@@ -63,12 +63,12 @@ public class MLArray {
 			dimsFactors[dimIx] = f;
 			f *= dims[dimIx];
 		}
-		
+
 		// This essentially does the same thing as the previous block with dimsFactors, except
 		// the indices are processed in order from 0 to max in order to match Matlab's 
 		// column major ordering of storage in the .mat file
 		dimStrides = new int[dims.length];
-		for (int dimIx = 0, f = 1; dimIx < dims.length; dimIx++ ) {
+		for (int dimIx = 0, f = 1; dimIx < dims.length; dimIx++) {
 			dimStrides[dimIx] = f;
 			f *= dims[dimIx];
 		}
@@ -90,7 +90,7 @@ public class MLArray {
 		}
 		return ix;
 	}
-	
+
 	/**
 	 * Returns the one-dim index for the multi-dimensional indexes.  Compatible with matlab multi-dimensional indexing.
 	 * 
@@ -100,7 +100,7 @@ public class MLArray {
 	 * @param indexes Length must be same as number of dimensions. Element value must be >= 0 and < dimension size for the corresponding dimension.
 	 * @return The linear index
 	 */
-	public int getIndexCM(int ... indexes) {
+	public int getIndexCM(int... indexes) {
 		if (indexes.length != dims.length) {
 			throw new IllegalArgumentException("Cannot use " + indexes.length + " indexes for " + dims.length + " dimensions.");
 		}
