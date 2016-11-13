@@ -44,6 +44,7 @@ We have fixed some bugs and added some features (see the [changelog](CHANGES.md)
 
 People whose commits are included in this project
 * Original JMatIO project credit to Wojciech Gradkowski
+* Thanks to Tim Ryan for [finding and fixing](https://github.com/diffplug/matfilerw/pull/9) a multidimensional indexing bug.
 * MLSparse improvements credit to Sina Samangooei
 * Reading from streams credit to Jonathan Hare
 * MCOS and Simulink MAT-File parsing by Matthew Dawson
