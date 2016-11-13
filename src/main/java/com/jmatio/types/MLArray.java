@@ -6,6 +6,9 @@
 package com.jmatio.types;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+
+import javax.annotation.Nonnull;
 
 import com.jmatio.common.MatDataTypes;
 
@@ -36,7 +39,9 @@ public class MLArray {
 	public static final int mtFLAG_LOGICAL = 0x0200;
 	public static final int mtFLAG_TYPE = 0xff;
 
+	@Nonnull
 	protected int dims[];
+	@Nonnull
 	public String name;
 	protected int attributes;
 	protected int type;
@@ -46,8 +51,7 @@ public class MLArray {
 	public static final String DEFAULT_NAME = "@";
 
 	public MLArray(String name, int[] dims, int type, int attributes) {
-		this.dims = new int[dims.length];
-		System.arraycopy(dims, 0, this.dims, 0, dims.length);
+		this.dims = Arrays.copyOf(dims, dims.length);
 
 		if (name != null && !name.equals("")) {
 			this.name = name;
@@ -128,9 +132,7 @@ public class MLArray {
 	}
 
 	public int getFlags() {
-		int flags = type & mtFLAG_TYPE | attributes & 0xffffff00;
-
-		return flags;
+		return type & mtFLAG_TYPE | attributes & 0xffffff00;
 	}
 
 	public byte[] getNameToByteArray() {
@@ -142,43 +144,23 @@ public class MLArray {
 	}
 
 	public int[] getDimensions() {
-		int ai[] = null;
-		if (dims != null) {
-			ai = new int[dims.length];
-			System.arraycopy(dims, 0, ai, 0, dims.length);
-		}
-		return ai;
+		return Arrays.copyOf(dims, dims.length);
 	}
 
 	public int getM() {
-		int i = 0;
-		if (dims != null) {
-			i = dims[0];
-		}
-		return i;
+		return dims[0];
 	}
 
 	public int getN() {
-		int i = 0;
-		if (dims != null) {
-			if (dims.length > 2) {
-				i = 1;
-				for (int j = 1; j < dims.length; j++) {
-					i *= dims[j];
-				}
-			} else {
-				i = dims[1];
-			}
+		int i = dims[1];
+		for (int j = 2; j < dims.length; j++) {
+			i *= dims[j];
 		}
 		return i;
 	}
 
 	public int getNDimensions() {
-		int i = 0;
-		if (dims != null) {
-			i = dims.length;
-		}
-		return i;
+		return dims.length;
 	}
 
 	public int getSize() {
@@ -195,65 +177,29 @@ public class MLArray {
 
 	public static final String typeToString(int type) {
 		String s;
+		// @formatter:off
 		switch (type) {
-		case mxUNKNOWN_CLASS:
-			s = "unknown";
-			break;
-		case mxCELL_CLASS:
-			s = "cell";
-			break;
-		case mxSTRUCT_CLASS:
-			s = "struct";
-			break;
-		case mxCHAR_CLASS:
-			s = "char";
-			break;
-		case mxSPARSE_CLASS:
-			s = "sparse";
-			break;
-		case mxDOUBLE_CLASS:
-			s = "double";
-			break;
-		case mxSINGLE_CLASS:
-			s = "single";
-			break;
-		case mxINT8_CLASS:
-			s = "int8";
-			break;
-		case mxUINT8_CLASS:
-			s = "uint8";
-			break;
-		case mxINT16_CLASS:
-			s = "int16";
-			break;
-		case mxUINT16_CLASS:
-			s = "uint16";
-			break;
-		case mxINT32_CLASS:
-			s = "int32";
-			break;
-		case mxUINT32_CLASS:
-			s = "uint32";
-			break;
-		case mxINT64_CLASS:
-			s = "int64";
-			break;
-		case mxUINT64_CLASS:
-			s = "uint64";
-			break;
-		case mxFUNCTION_CLASS:
-			s = "function_handle";
-			break;
-		case mxOPAQUE_CLASS:
-			s = "opaque";
-			break;
-		case mxOBJECT_CLASS:
-			s = "object";
-			break;
-		default:
-			s = "unknown";
-			break;
+		case mxUNKNOWN_CLASS:	s = "unknown";			break;
+		case mxCELL_CLASS:		s = "cell";				break;
+		case mxSTRUCT_CLASS:	s = "struct";			break;
+		case mxCHAR_CLASS:		s = "char";				break;
+		case mxSPARSE_CLASS:	s = "sparse";			break;
+		case mxDOUBLE_CLASS:	s = "double";			break;
+		case mxSINGLE_CLASS:	s = "single";			break;
+		case mxINT8_CLASS:		s = "int8";				break;
+		case mxUINT8_CLASS:		s = "uint8";			break;
+		case mxINT16_CLASS:		s = "int16";			break;
+		case mxUINT16_CLASS:	s = "uint16";			break;
+		case mxINT32_CLASS:		s = "int32";			break;
+		case mxUINT32_CLASS:	s = "uint32";			break;
+		case mxINT64_CLASS:		s = "int64";			break;
+		case mxUINT64_CLASS:	s = "uint64";			break;
+		case mxFUNCTION_CLASS:	s = "function_handle";	break;
+		case mxOPAQUE_CLASS:	s = "opaque";			break;
+		case mxOBJECT_CLASS:	s = "object";			break;
+		default:				s = "unknown";			break;
 		}
+		// @formatter:on
 		return s;
 	}
 
@@ -341,50 +287,42 @@ public class MLArray {
 		return m + n * getM();
 	}
 
+	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		if (dims != null) {
-			sb.append('[');
-			if (dims.length > 3) {
-				sb.append(dims.length);
-				sb.append('D');
-			} else {
-				sb.append(dims[0]);
-				sb.append('x');
-				sb.append(dims[1]);
-				if (dims.length == 3) {
-					sb.append('x');
-					sb.append(dims[2]);
-				}
-			}
-			sb.append("  ");
-			sb.append(typeToString(type));
-			if (isLogical()) {
-				sb.append(" (logical)");
-			}
-			sb.append(" array");
-			if (isSparse()) {
-				sb.append(" (sparse");
-				if (isComplex()) {
-					sb.append(" complex");
-				}
-				sb.append(")");
-			} else if (isComplex()) {
-				sb.append(" (complex)");
-			}
-			sb.append(']');
+		StringBuilder sb = new StringBuilder();
+		sb.append('[');
+		if (dims.length > 3) {
+			sb.append(dims.length);
+			sb.append('D');
 		} else {
-			sb.append("[invalid]");
+			sb.append(dims[0]);
+			sb.append('x');
+			sb.append(dims[1]);
+			if (dims.length == 3) {
+				sb.append('x');
+				sb.append(dims[2]);
+			}
 		}
+		sb.append("  ");
+		sb.append(typeToString(type));
+		if (isLogical()) {
+			sb.append(" (logical)");
+		}
+		sb.append(" array");
+		if (isSparse()) {
+			sb.append(" (sparse");
+			if (isComplex()) {
+				sb.append(" complex");
+			}
+			sb.append(")");
+		} else if (isComplex()) {
+			sb.append(" (complex)");
+		}
+		sb.append(']');
 		return sb.toString();
 	}
 
 	public String contentToString() {
 		return "content cannot be displayed";
 	}
-
-	public void dispose() {
-
-	}
-
 }
