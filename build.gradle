@@ -127,7 +127,7 @@ spotless {
 		eclipseFormatFile	'gradle/spotless.eclipseformat.xml'	// XML file dumped out by the Eclipse formatter
 	}
 	format 'misc', {
-		target '**/.gitignore', '**/*.gradle', '**/*.md', '**/*.sh'
+		target '**/.gitignore', '**/*.gradle', '**/*.md', '**/*.sh', '**/*.m'
 		indentWithTabs()
 		trimTrailingWhitespace()
 		endWithNewline()
