@@ -68,7 +68,6 @@ public abstract class MLNumericArray<T extends Number> extends MLArray implement
 
 	/** Gets a single real array element. */
 	public T getReal(int index) {
-		assertComplex();
 		return _get(real, index);
 	}
 
@@ -84,7 +83,6 @@ public abstract class MLNumericArray<T extends Number> extends MLArray implement
 
 	/** Sets a single real array element. */
 	public void setReal(T value, int index) {
-		assertComplex();
 		_set(real, value, index);
 	}
 
@@ -100,7 +98,6 @@ public abstract class MLNumericArray<T extends Number> extends MLArray implement
 
 	/** Sets real part of a matrix. */
 	public void setReal(T[] vector) {
-		assertComplex();
 		if (vector.length != getSize()) {
 			throw new IllegalArgumentException("Matrix dimensions do not match. " + getSize() + " not " + vector.length);
 		}
@@ -145,16 +142,9 @@ public abstract class MLNumericArray<T extends Number> extends MLArray implement
 		}
 	}
 
-	protected void assertNotComplex() {
-		if (isComplex()) {
-			throw new UnsupportedOperationException("Cannot use this method for Complex matrices");
-		}
-	}
-
 	/** Sets the value at the given index for non-complex arrays. */
 	public void set(T value, int index) {
-		assertNotComplex();
-		_set(real, value, index);
+		setReal(value, index);
 	}
 
 	/** Sets the value at the given index for non-complex arrays. */
@@ -169,8 +159,7 @@ public abstract class MLNumericArray<T extends Number> extends MLArray implement
 
 	/** Returns the value at the given index for non-complex arrays. */
 	public T get(int index) {
-		assertNotComplex();
-		return _get(real, index);
+		return getReal(index);
 	}
 
 	/** Returns the value at the given index for non-complex arrays. */
@@ -185,7 +174,6 @@ public abstract class MLNumericArray<T extends Number> extends MLArray implement
 
 	/** Sets the content of this entire array for non-complex arrays. */
 	public void set(T[] vector) {
-		assertNotComplex();
 		if (vector.length != getSize()) {
 			throw new IllegalArgumentException("Matrix dimensions do not match. " + getSize() + " not " + vector.length);
 		}

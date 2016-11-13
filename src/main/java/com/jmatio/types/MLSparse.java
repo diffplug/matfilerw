@@ -106,7 +106,6 @@ public class MLSparse extends MLNumericArray<Double> {
 
 	@Override
 	public Double getReal(int m, int n) {
-		assertComplex();
 		IndexMN i = new IndexMN(m, n);
 		Double result = real.get(i);
 		return result == null ? ZERO : result;
@@ -120,7 +119,6 @@ public class MLSparse extends MLNumericArray<Double> {
 
 	@Override
 	public void setReal(Double value, int m, int n) {
-		assertComplex();
 		IndexMN i = new IndexMN(m, n);
 		indexSet.add(i);
 		real.put(i, value);
@@ -134,7 +132,6 @@ public class MLSparse extends MLNumericArray<Double> {
 
 	@Override
 	public void setImaginary(Double value, int m, int n) {
-		assertComplex();
 		IndexMN i = new IndexMN(m, n);
 		indexSet.add(i);
 		imaginary.put(i, value);
@@ -148,7 +145,6 @@ public class MLSparse extends MLNumericArray<Double> {
 
 	@Override
 	public Double getImaginary(int m, int n) {
-		assertComplex();
 		IndexMN i = new IndexMN(m, n);
 		Double result = imaginary.get(i);
 		return result == null ? ZERO : result;
@@ -162,7 +158,6 @@ public class MLSparse extends MLNumericArray<Double> {
 
 	@Override
 	public void set(Double value, int m, int n) {
-		assertNotComplex();
 		IndexMN i = new IndexMN(m, n);
 		indexSet.add(i);
 		real.put(i, value);
@@ -176,7 +171,6 @@ public class MLSparse extends MLNumericArray<Double> {
 
 	@Override
 	public Double get(int m, int n) {
-		assertNotComplex();
 		IndexMN i = new IndexMN(m, n);
 		Double result = real.get(i);
 		return result == null ? ZERO : result;
