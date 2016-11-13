@@ -45,7 +45,6 @@ public class MLArray {
 	public String name;
 	protected int attributes;
 	protected int type;
-	private int dimsFactors[]; // Used for calculating the index in arrays with higher dimensions than 2.
 	private int dimStrides[];  // Used to convert multidimensional index to linear index
 
 	public static final String DEFAULT_NAME = "@";
@@ -62,13 +61,6 @@ public class MLArray {
 		this.type = type;
 		this.attributes = attributes;
 
-		dimsFactors = new int[dims.length];
-		for (int dimIx = dims.length - 1, f = 1; dimIx >= 0; dimIx--) {
-			dimsFactors[dimIx] = f;
-			f *= dims[dimIx];
-		}
-
-		// This essentially does the same thing as the previous block with dimsFactors, except
 		// the indices are processed in order from 0 to max in order to match Matlab's 
 		// column major ordering of storage in the .mat file
 		dimStrides = new int[dims.length];
@@ -76,23 +68,6 @@ public class MLArray {
 			dimStrides[dimIx] = f;
 			f *= dims[dimIx];
 		}
-	}
-
-	/**
-	 * Returns the one-dim index for indexes in each of the dimensions for this array.
-	 *
-	 * @param indexes Length must be same as number of dimensions. Element value must be >= 0 and < dimension size for the corresponding dimension.
-	 * @return The index.
-	 */
-	public int getIndex(int... indexes) {
-		if (indexes.length != dims.length) {
-			throw new IllegalArgumentException("Cannot use " + indexes.length + " indexes for " + dims.length + " dimensions.");
-		}
-		int ix = 0;
-		for (int dimIx = 0; dimIx < indexes.length; dimIx++) {
-			ix += dimsFactors[dimIx] * validateDimSize(dimIx, indexes[dimIx]);
-		}
-		return ix;
 	}
 
 	/**
@@ -104,7 +79,7 @@ public class MLArray {
 	 * @param indexes Length must be same as number of dimensions. Element value must be >= 0 and < dimension size for the corresponding dimension.
 	 * @return The linear index
 	 */
-	public int getIndexCM(int... indexes) {
+	public int getIndex(int... indexes) {
 		if (indexes.length != dims.length) {
 			throw new IllegalArgumentException("Cannot use " + indexes.length + " indexes for " + dims.length + " dimensions.");
 		}

@@ -93,7 +93,7 @@ public class MLDouble extends MLNumericArray<Double> {
 			result[m] = new double[getN()];
 
 			for (int n = 0; n < getN(); n++) {
-				result[m][n] = getReal(m, n);
+				result[m][n] = get(m, n);
 			}
 		}
 		return result;

@@ -149,7 +149,7 @@ public class MatIOTest {
 				for (int k = 0; k < dims[2]; k++) {
 					for (int l = 0; l < dims[1]; l++) {
 						for (int m = 0; m < dims[0]; m++, expectedVal += 1.0) {
-							Double actual = mlArray.getReal(mlArray.getIndexCM(m, l, k, j, i));
+							Double actual = mlArray.get(mlArray.getIndex(m, l, k, j, i));
 							Assert.assertEquals(expectedVal, actual);
 						}
 					}
@@ -180,7 +180,7 @@ public class MatIOTest {
 				for (int k = 0; k < dims[2]; k++) {
 					for (int l = 0; l < dims[1]; l++) {
 						for (int m = 0; m < dims[0]; m++, expectedVal += 1.0) {
-							Double actual = mlArray.getRealCM(m, l, k, j, i);
+							Double actual = mlArray.get(m, l, k, j, i);
 							Assert.assertEquals(expectedVal, actual);
 						}
 					}
@@ -211,7 +211,7 @@ public class MatIOTest {
 				for (int k = 0; k < dims[2]; k++) {
 					for (int l = 0; l < dims[1]; l++) {
 						for (int m = 0; m < dims[0]; m++, expectedVal += 1.0) {
-							Double actual = mlArray.getCM(m, l, k, j, i);
+							Double actual = mlArray.get(m, l, k, j, i);
 							Assert.assertEquals(expectedVal, actual);
 						}
 					}
@@ -242,9 +242,9 @@ public class MatIOTest {
 				for (int k = 0; k < dims[2]; k++) {
 					for (int l = 0; l < dims[1]; l++) {
 						for (int m = 0; m < dims[0]; m++, expectedValRe += 1.0) {
-							Double actualRe = mlArray.getReal(mlArray.getIndexCM(m, l, k, j, i));
+							Double actualRe = mlArray.getReal(mlArray.getIndex(m, l, k, j, i));
 							Assert.assertEquals(expectedValRe, actualRe);
-							Double actualIm = mlArray.getImaginary(mlArray.getIndexCM(m, l, k, j, i));
+							Double actualIm = mlArray.getImaginary(mlArray.getIndex(m, l, k, j, i));
 							Double expectedValIm = 0.0;
 							if (expectedValRe != 0.0) {
 								expectedValIm = expectedValRe * -1.0;
@@ -279,9 +279,9 @@ public class MatIOTest {
 				for (int k = 0; k < dims[2]; k++) {
 					for (int l = 0; l < dims[1]; l++) {
 						for (int m = 0; m < dims[0]; m++, expectedValRe += 1.0) {
-							Double actualRe = mlArray.getRealCM(m, l, k, j, i);
+							Double actualRe = mlArray.getReal(m, l, k, j, i);
 							Assert.assertEquals(expectedValRe, actualRe);
-							Double actualIm = mlArray.getImaginaryCM(m, l, k, j, i);
+							Double actualIm = mlArray.getImaginary(m, l, k, j, i);
 							Double expectedValIm = 0.0;
 							if (expectedValRe != 0.0) {
 								expectedValIm = expectedValRe * -1.0;
