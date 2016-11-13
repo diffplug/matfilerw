@@ -88,7 +88,7 @@ public class MLInt32 extends MLNumericArray<Integer> {
 			result[m] = new int[getN()];
 
 			for (int n = 0; n < getN(); n++) {
-				result[m][n] = getReal(m, n);
+				result[m][n] = get(m, n);
 			}
 		}
 		return result;

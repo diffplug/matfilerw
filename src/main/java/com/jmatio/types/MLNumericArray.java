@@ -67,195 +67,130 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 		}
 	}
 
-	/**
-	 * Gets single real array element of A(m,n).
-	 * 
-	 * @param m - row index
-	 * @param n - column index
-	 * @return - array element
-	 */
+	/** Gets a single real array element. */
+	public T getReal(int index) {
+		assertComplex();
+		return _get(real, index);
+	}
+
+	/** Gets a single real array element. */
 	public T getReal(int m, int n) {
 		return getReal(getIndex(m, n));
 	}
 
-	/**
-	 * @param index
-	 * @return
-	 */
-	public T getReal(int index) {
-		return _get(real, index);
+	/** Gets a single real array element. */
+	public T getReal(int... indices) {
+		return getReal(getIndex(indices));
 	}
 
-	/**
-	 * Sets single real array element.
-	 * 
-	 * @param value - element value
-	 * @param m - row index
-	 * @param n - column index
-	 */
+	/** Sets a single real array element. */
+	public void setReal(T value, int index) {
+		assertComplex();
+		_set(real, value, index);
+	}
+
+	/** Sets a single real array element. */
 	public void setReal(T value, int m, int n) {
 		setReal(value, getIndex(m, n));
 	}
 
-	/**
-	 * Sets single real array element.
-	 * 
-	 * @param value - element value
-	 * @param index - column-packed vector index
-	 */
-	public void setReal(T value, int index) {
-		_set(real, value, index);
+	/** Sets a single real array element. */
+	public void setReal(T value, int... indices) {
+		setReal(value, getIndex(indices));
 	}
 
-	/**
-	 * Sets real part of matrix
-	 * 
-	 * @param vector - column-packed vector of elements
-	 */
+	/** Sets real part of a matrix. */
 	public void setReal(T[] vector) {
+		assertComplex();
 		if (vector.length != getSize()) {
 			throw new IllegalArgumentException("Matrix dimensions do not match. " + getSize() + " not " + vector.length);
 		}
 		System.arraycopy(vector, 0, real, 0, vector.length);
 	}
 
-	/**
-	 * Sets single imaginary array element.
-	 * 
-	 * @param value - element value
-	 * @param m - row index
-	 * @param n - column index
-	 */
+	/** Sets a single imaginary array element. */
+	public void setImaginary(T value, int index) {
+		assertComplex();
+		_set(imaginary, value, index);
+	}
+
+	/** Sets a single imaginary array element. */
 	public void setImaginary(T value, int m, int n) {
 		setImaginary(value, getIndex(m, n));
 	}
 
-	/**
-	 * Sets single real array element.
-	 * 
-	 * @param value - element value
-	 * @param index - column-packed vector index
-	 */
-	public void setImaginary(T value, int index) {
-		if (isComplex()) {
-			_set(imaginary, value, index);
-		}
+	/** Sets a single imaginary array element. */
+	public void setImaginary(T value, int... indices) {
+		setImaginary(value, getIndex(indices));
 	}
 
-	/**
-	 * Gets single imaginary array element of A(m,n).
-	 * 
-	 * @param m - row index
-	 * @param n - column index
-	 * @return - array element
-	 */
+	/** Returns the imaginary value at the given index. */
+	public T getImaginary(int index) {
+		assertComplex();
+		return _get(imaginary, index);
+	}
+
+	/** Returns the imaginary value at the given index. */
 	public T getImaginary(int m, int n) {
 		return getImaginary(getIndex(m, n));
 	}
 
-	/**
-	 * @param index
-	 * @return
-	 */
-	public T getImaginary(int index) {
-		return _get(imaginary, index);
+	/** Returns the imaginary value at the given index. */
+	public T getImaginary(int... indices) {
+		return getImaginary(getIndex(indices));
 	}
 
-	/**
-	 * Exports column-packed vector of real elements
-	 * 
-	 * @return - column-packed vector of real elements
-	 */
-	//    public T[] exportReal()
-	//    {
-	//        return real.clone();
-	//    }
-	/**
-	 * Exports column-packed vector of imaginary elements
-	 * 
-	 * @return - column-packed vector of imaginary elements
-	 */
+	private void assertComplex() {
+		if (!isComplex()) {
+			throw new IllegalStateException("Cannot use this method for non-Complex matrices");
+		}
+	}
 
-	//    public T[] exportImaginary()
-	//    {
-	//        return imaginary.clone();
-	//    }
-	/**
-	 * Does the same as <code>setReal</code>.
-	 * 
-	 * @param value - element value
-	 * @param m - row index
-	 * @param n - column index
-	 */
-	public void set(T value, int m, int n) {
+	private void assertNotComplex() {
 		if (isComplex()) {
 			throw new IllegalStateException("Cannot use this method for Complex matrices");
 		}
-		setReal(value, m, n);
 	}
 
-	/**
-	 * Does the same as <code>setReal</code>.
-	 * 
-	 * @param value - element value
-	 * @param index - column-packed vector index
-	 */
+	/** Sets the value at the given index for non-complex arrays. */
 	public void set(T value, int index) {
-		if (isComplex()) {
-			throw new IllegalStateException("Cannot use this method for Complex matrices");
-		}
-		setReal(value, index);
+		assertNotComplex();
+		_set(real, value, index);
 	}
 
-	/**
-	 * @param value		Element value.
-	 * @param indices	Length must be same as number of dimensions. Element value must be >= 0 and < dimension size for the corresponding dimension.
-	 */
+	/** Sets the value at the given index for non-complex arrays. */
+	public void set(T value, int m, int n) {
+		set(value, getIndex(m, n));
+	}
+
+	/** Sets the value at the given index for non-complex arrays. */
 	public void set(T value, int... indices) {
 		set(value, getIndex(indices));
 	}
 
-	/**
-	 * Does the same as <code>getReal</code>.
-	 * 
-	 * @param m - row index
-	 * @param n - column index
-	 * @return - array element
-	 */
-	public T get(int m, int n) {
-		if (isComplex()) {
-			throw new IllegalStateException("Cannot use this method for Complex matrices");
-		}
-		return getReal(m, n);
-	}
-
-	/**
-	 * @param index
-	 * @return
-	 */
+	/** Returns the value at the given index for non-complex arrays. */
 	public T get(int index) {
-		if (isComplex()) {
-			throw new IllegalStateException("Cannot use this method for Complex matrices");
-		}
+		assertNotComplex();
 		return _get(real, index);
 	}
 
-	/**
-	 * @param indices Length must be same as number of dimensions. Element value must be >= 0 and < dimension size for the corresponding dimension.
-	 * @return The value.
-	 */
+	/** Returns the value at the given index for non-complex arrays. */
+	public T get(int m, int n) {
+		return get(getIndex(m, n));
+	}
+
+	/** Returns the value at the given index for non-complex arrays. */
 	public T get(int... indices) {
 		return get(getIndex(indices));
 	}
 
-	/**
-	 * @param vector
-	 */
+	/** Sets the content of this entire array for non-complex arrays. */
 	public void set(T[] vector) {
-		if (isComplex()) {
-			throw new IllegalStateException("Cannot use this method for Complex matrices");
+		assertNotComplex();
+		if (vector.length != getSize()) {
+			throw new IllegalArgumentException("Matrix dimensions do not match. " + getSize() + " not " + vector.length);
 		}
-		setReal(vector);
+		System.arraycopy(vector, 0, real, 0, vector.length);
 	}
 
 	private int getByteOffset(int index) {
@@ -294,9 +229,6 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 		return real;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.jmatio.types.MLArray#contentToString()
-	 */
 	@Override
 	public String contentToString() {
 		if (getSize() > 1000) {
@@ -320,9 +252,6 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 		return sb.toString();
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof MLNumericArray) {
@@ -386,7 +315,5 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 		if (imaginary != null) {
 			real.clear();
 		}
-
 	}
-
 }

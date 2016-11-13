@@ -93,7 +93,7 @@ public class MLUInt8 extends MLNumericArray<Byte> {
 			result[m] = new byte[getN()];
 
 			for (int n = 0; n < getN(); n++) {
-				result[m][n] = getReal(m, n);
+				result[m][n] = get(m, n);
 			}
 		}
 		return result;
