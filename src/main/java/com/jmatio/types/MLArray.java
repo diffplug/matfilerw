@@ -40,12 +40,12 @@ public class MLArray {
 	public static final int mtFLAG_TYPE = 0xff;
 
 	@Nonnull
-	protected int dims[];
+	protected final int dims[];
 	@Nonnull
 	public String name;
-	protected int attributes;
-	protected int type;
-	private int dimStrides[];  // Used to convert multidimensional index to linear index
+	protected final int attributes;
+	protected final int type;
+	private final int dimStrides[];  // Used to convert multidimensional index to linear index
 
 	public static final String DEFAULT_NAME = "@";
 
@@ -300,4 +300,7 @@ public class MLArray {
 	public String contentToString() {
 		return "content cannot be displayed";
 	}
+
+	/** Clears any memory used by this MLArray.  The array cannot be used after this has been called. */
+	public void dispose() {}
 }

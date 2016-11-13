@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-public class MLChar extends MLArray implements GenericArrayCreator<Character> {
+public class MLChar extends MLArray {
 	Character[] chars;
 
 	/**
@@ -73,11 +73,7 @@ public class MLChar extends MLArray implements GenericArrayCreator<Character> {
 
 	public MLChar(String name, int[] dims, int type, int attributes) {
 		super(name, dims, type, attributes);
-		chars = createArray(getM(), getN());
-	}
-
-	public Character[] createArray(int m, int n) {
-		return new Character[m * n];
+		chars = new Character[getM() * getN()];
 	}
 
 	public void setChar(char ch, int index) {

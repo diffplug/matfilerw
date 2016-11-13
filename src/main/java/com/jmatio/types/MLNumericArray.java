@@ -20,8 +20,7 @@ import java.util.Arrays;
  *
  * @param <T>
  */
-public abstract class MLNumericArray<T extends Number> extends MLArray
-		implements GenericArrayCreator<T>,
+public abstract class MLNumericArray<T extends Number> extends MLArray implements
 		ByteStorageSupport<T> {
 	private ByteBuffer real;
 	private ByteBuffer imaginary;
@@ -140,15 +139,15 @@ public abstract class MLNumericArray<T extends Number> extends MLArray
 		return getImaginary(getIndex(indices));
 	}
 
-	private void assertComplex() {
+	protected void assertComplex() {
 		if (!isComplex()) {
-			throw new IllegalStateException("Cannot use this method for non-Complex matrices");
+			throw new UnsupportedOperationException("Cannot use this method for non-Complex matrices");
 		}
 	}
 
-	private void assertNotComplex() {
+	protected void assertNotComplex() {
 		if (isComplex()) {
-			throw new IllegalStateException("Cannot use this method for Complex matrices");
+			throw new UnsupportedOperationException("Cannot use this method for Complex matrices");
 		}
 	}
 

@@ -1080,19 +1080,18 @@ public class MatFileReader {
 			tag = new ISMatTag(buf);
 			int[] jc = tag.readToIntArray();
 
-			//read pr (real part)
-			tag = new ISMatTag(buf);
-			double[] ad1 = tag.readToDoubleArray();
-			int count = 0;
-			for (int column = 0; column < sparse.getN(); column++) {
-				while (count < jc[column + 1]) {
-					sparse.setReal(ad1[count], ir[count], column);
-					count++;
-				}
-			}
-
-			//read pi (imaginary part)
 			if (sparse.isComplex()) {
+				//read pr (real part)
+				tag = new ISMatTag(buf);
+				double[] ad1 = tag.readToDoubleArray();
+				int count = 0;
+				for (int column = 0; column < sparse.getN(); column++) {
+					while (count < jc[column + 1]) {
+						sparse.setReal(ad1[count], ir[count], column);
+						count++;
+					}
+				}
+
 				tag = new ISMatTag(buf);
 				double[] ad2 = tag.readToDoubleArray();
 
@@ -1100,6 +1099,17 @@ public class MatFileReader {
 				for (int column = 0; column < sparse.getN(); column++) {
 					while (count < jc[column + 1]) {
 						sparse.setImaginary(ad2[count], ir[count], column);
+						count++;
+					}
+				}
+			} else {
+				//read pi (real part)
+				tag = new ISMatTag(buf);
+				double[] ad1 = tag.readToDoubleArray();
+				int count = 0;
+				for (int column = 0; column < sparse.getN(); column++) {
+					while (count < jc[column + 1]) {
+						sparse.set(ad1[count], ir[count], column);
 						count++;
 					}
 				}

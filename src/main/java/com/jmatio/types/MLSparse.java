@@ -18,6 +18,8 @@ public class MLSparse extends MLNumericArray<Double> {
 	private SortedMap<IndexMN, Double> real;
 	private SortedMap<IndexMN, Double> imaginary;
 
+	private static final Double ZERO = Double.valueOf(0.0);
+
 	/**
 	 * @param name
 	 * @param dims
@@ -29,12 +31,15 @@ public class MLSparse extends MLNumericArray<Double> {
 		this.nzmax = nzmax;
 	}
 
+	@Override
 	protected void allocate() {
+		indexSet = new TreeSet<IndexMN>();
 		real = new TreeMap<IndexMN, Double>();
 		if (isComplex()) {
 			imaginary = new TreeMap<IndexMN, Double>();
+		} else {
+			imaginary = null;
 		}
-		indexSet = new TreeSet<IndexMN>();
 	}
 
 	/**
@@ -99,87 +104,86 @@ public class MLSparse extends MLNumericArray<Double> {
 		return jc;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.paradigmdesigner.matlab.types.GenericArrayCreator#createArray(int, int)
-	 */
-	public Double[] createArray(int m, int n) {
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * @see com.paradigmdesigner.matlab.types.MLNumericArray#getReal(int, int)
-	 */
+	@Override
 	public Double getReal(int m, int n) {
+		assertComplex();
 		IndexMN i = new IndexMN(m, n);
-		if (real.containsKey(i)) {
-			return real.get(i);
-		}
-		return 0.0;
+		Double result = real.get(i);
+		return result == null ? ZERO : result;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.jmatio.types.MLNumericArray#getReal(int)
-	 */
+	@Override
 	public Double getReal(int index) {
-		throw new IllegalArgumentException("Can't get Sparse array elements by index. " +
-				"Please use getReal(int index) instead.");
+		throw new UnsupportedOperationException("Can't get Sparse array elements by index. " +
+				"Please use getReal(int m, int n) instead.");
 	}
 
-	/**
-	 * @param value
-	 * @param m
-	 * @param n
-	 */
+	@Override
 	public void setReal(Double value, int m, int n) {
+		assertComplex();
 		IndexMN i = new IndexMN(m, n);
 		indexSet.add(i);
 		real.put(i, value);
 	}
 
-	/**
-	 * @param value
-	 * @param index
-	 */
+	@Override
 	public void setReal(Double value, int index) {
-		throw new IllegalArgumentException("Can't set Sparse array elements by index. " +
+		throw new UnsupportedOperationException("Can't set Sparse array elements by index. " +
 				"Please use setReal(Double value, int m, int n) instead.");
 	}
 
-	/**
-	 * @param value
-	 * @param m
-	 * @param n
-	 */
+	@Override
 	public void setImaginary(Double value, int m, int n) {
+		assertComplex();
 		IndexMN i = new IndexMN(m, n);
 		indexSet.add(i);
 		imaginary.put(i, value);
 	}
 
-	/**
-	 * @param value
-	 * @param index
-	 */
+	@Override
 	public void setImaginary(Double value, int index) {
 		throw new IllegalArgumentException("Can't set Sparse array elements by index. " +
 				"Please use setImaginary(Double value, int m, int n) instead.");
 	}
 
-	/* (non-Javadoc)
-	 * @see com.paradigmdesigner.matlab.types.MLNumericArray#getImaginary(int, int)
-	 */
+	@Override
 	public Double getImaginary(int m, int n) {
+		assertComplex();
 		IndexMN i = new IndexMN(m, n);
-		if (imaginary.containsKey(i)) {
-			return imaginary.get(i);
-		}
-		return 0.0;
+		Double result = imaginary.get(i);
+		return result == null ? ZERO : result;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.jmatio.types.MLNumericArray#getImaginary(int)
-	 */
+	@Override
 	public Double getImaginary(int index) {
+		throw new IllegalArgumentException("Can't get Sparse array elements by index. " +
+				"Please use getImaginary(int index) instead.");
+	}
+
+	@Override
+	public void set(Double value, int m, int n) {
+		assertNotComplex();
+		IndexMN i = new IndexMN(m, n);
+		indexSet.add(i);
+		real.put(i, value);
+	}
+
+	@Override
+	public void set(Double value, int index) {
+		throw new IllegalArgumentException("Can't set Sparse array elements by index. " +
+				"Please use setImaginary(Double value, int m, int n) instead.");
+	}
+
+	@Override
+	public Double get(int m, int n) {
+		assertNotComplex();
+		IndexMN i = new IndexMN(m, n);
+		Double result = real.get(i);
+		return result == null ? ZERO : result;
+	}
+
+	@Override
+	public Double get(int index) {
 		throw new IllegalArgumentException("Can't get Sparse array elements by index. " +
 				"Please use getImaginary(int index) instead.");
 	}
@@ -196,7 +200,7 @@ public class MLSparse extends MLNumericArray<Double> {
 			if (real.containsKey(index)) {
 				ad[i] = real.get(index);
 			} else {
-				ad[i] = 0.0;
+				ad[i] = ZERO;
 			}
 			i++;
 		}
@@ -215,7 +219,7 @@ public class MLSparse extends MLNumericArray<Double> {
 			if (imaginary.containsKey(index)) {
 				ad[i] = imaginary.get(index);
 			} else {
-				ad[i] = 0.0;
+				ad[i] = ZERO;
 			}
 			i++;
 		}
@@ -225,6 +229,7 @@ public class MLSparse extends MLNumericArray<Double> {
 	/* (non-Javadoc)
 	 * @see com.paradigmdesigner.matlab.types.MLArray#contentToString()
 	 */
+	@Override
 	public String contentToString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(name + " = \n");
@@ -297,10 +302,12 @@ public class MLSparse extends MLNumericArray<Double> {
 		}
 	}
 
+	@Override
 	public int getBytesAllocated() {
 		return Double.SIZE << 3;
 	}
 
+	@Override
 	public Double buldFromBytes(byte[] bytes) {
 		if (bytes.length != getBytesAllocated()) {
 			throw new IllegalArgumentException(
@@ -311,6 +318,7 @@ public class MLSparse extends MLNumericArray<Double> {
 
 	}
 
+	@Override
 	public byte[] getByteArray(Double value) {
 		int byteAllocated = getBytesAllocated();
 		ByteBuffer buff = ByteBuffer.allocate(byteAllocated);
@@ -318,8 +326,8 @@ public class MLSparse extends MLNumericArray<Double> {
 		return buff.array();
 	}
 
+	@Override
 	public Class<Double> getStorageClazz() {
 		return Double.class;
 	}
-
 }
