@@ -1,8 +1,14 @@
 # MatFileRW releases
 
-### Version 2.4.0-SNAPSHOT - TBD ([javadoc](http://diffplug.github.io/matfilerw/javadoc/snapshot/), [snapshot](https://oss.sonatype.org/content/repositories/snapshots/com/diffplug/matsim/matfilerw/))
+### Version 3.0.0-SNAPSHOT - TBD ([javadoc](http://diffplug.github.io/matfilerw/javadoc/snapshot/), [snapshot](https://oss.sonatype.org/content/repositories/snapshots/com/diffplug/matsim/matfilerw/))
 
-* Nothing so far...
+* Fixed multidimensional array indexing (see [#10](https://github.com/diffplug/matfilerw/issues/10)).
+	+ For arrays with dimension 1 or 2, there is no change.
+	+ For arrays with dimension 3 and up, matfilerw 2.x did not order the dimensions in the column-major format used by MATLAB.  In 3.x forward, matfilerw uses the same column-major format as MATLAB.
+* Complex and non-complex arrays now have separate methods.
+	+ MLNumericArray has methods `getReal/setReal`, `getImaginary/setImaginary`, and `get/set`.
+	+ In 2.x using the imaginary methods on a non-imaginary matrix would fail silently, and `get/set` were synonymous with `getReal/setReal`
+	+ In 3.x, you can't use `getReal/setReal` on a non-complex matrix, and you can't use `get/set` on a complex matrix.
 
 ### Version 2.3.0 - August 18th 2016 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/2.3.0/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/2.3.0/view))
 
