@@ -38,7 +38,6 @@ public abstract class MLNumericArray<T extends Number> extends MLArray implement
 	public MLNumericArray(String name, int[] dims, int type, int attributes) {
 		super(name, dims, type, attributes);
 		allocate();
-
 	}
 
 	protected void allocate() {
@@ -48,6 +47,9 @@ public abstract class MLNumericArray<T extends Number> extends MLArray implement
 		}
 		bytes = new byte[getBytesAllocated()];
 	}
+
+	/** Returns the value of "zero" for this type of array. */
+	protected abstract T zero();
 
 	/**
 	 * <a href="http://math.nist.gov/javanumerics/jama/">Jama</a> [math.nist.gov] style: 
@@ -120,10 +122,13 @@ public abstract class MLNumericArray<T extends Number> extends MLArray implement
 		setImaginary(value, getIndex(indices));
 	}
 
-	/** Returns the imaginary value at the given index. */
+	/** Returns the imaginary value at the given index, always 0 for non-complex arrays. */
 	public T getImaginary(int index) {
-		assertComplex();
-		return _get(imaginary, index);
+		if (isComplex()) {
+			return _get(imaginary, index);
+		} else {
+			return zero();
+		}
 	}
 
 	/** Returns the imaginary value at the given index. */

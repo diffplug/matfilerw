@@ -153,4 +153,9 @@ public class MLDouble extends MLNumericArray<Double> {
 	public Class<Double> getStorageClazz() {
 		return Double.class;
 	}
+
+	@Override
+	protected Double zero() {
+		return Zeros.DOUBLE;
+	}
 }

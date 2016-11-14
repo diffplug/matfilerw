@@ -153,4 +153,8 @@ public class MLInt64 extends MLNumericArray<Long> {
 		return buff.array();
 	}
 
+	@Override
+	protected Long zero() {
+		return Zeros.LONG;
+	}
 }

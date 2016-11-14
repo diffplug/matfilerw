@@ -160,4 +160,8 @@ public class MLUInt8 extends MLNumericArray<Byte> {
 		return buffer.get(index);
 	}
 
+	@Override
+	protected Byte zero() {
+		return Zeros.BYTE;
+	}
 }

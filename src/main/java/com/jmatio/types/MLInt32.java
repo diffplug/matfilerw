@@ -148,4 +148,8 @@ public class MLInt32 extends MLNumericArray<Integer> {
 		return buff.array();
 	}
 
+	@Override
+	protected Integer zero() {
+		return Zeros.INTEGER;
+	}
 }

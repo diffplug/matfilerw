@@ -45,4 +45,8 @@ public class MLSingle extends MLNumericArray<Float> {
 		return Float.class;
 	}
 
+	@Override
+	protected Float zero() {
+		return Zeros.FLOAT;
+	}
 }

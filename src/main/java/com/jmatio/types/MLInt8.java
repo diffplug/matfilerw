@@ -154,4 +154,8 @@ public class MLInt8 extends MLNumericArray<Byte> {
 		return buffer.get(index);
 	}
 
+	@Override
+	protected Byte zero() {
+		return Zeros.BYTE;
+	}
 }

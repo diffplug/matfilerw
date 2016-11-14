@@ -18,8 +18,6 @@ public class MLSparse extends MLNumericArray<Double> {
 	private SortedMap<IndexMN, Double> real;
 	private SortedMap<IndexMN, Double> imaginary;
 
-	private static final Double ZERO = Double.valueOf(0.0);
-
 	/**
 	 * @param name
 	 * @param dims
@@ -108,7 +106,7 @@ public class MLSparse extends MLNumericArray<Double> {
 	public Double getReal(int m, int n) {
 		IndexMN i = new IndexMN(m, n);
 		Double result = real.get(i);
-		return result == null ? ZERO : result;
+		return result == null ? Zeros.DOUBLE : result;
 	}
 
 	@Override
@@ -132,6 +130,7 @@ public class MLSparse extends MLNumericArray<Double> {
 
 	@Override
 	public void setImaginary(Double value, int m, int n) {
+		assertComplex();
 		IndexMN i = new IndexMN(m, n);
 		indexSet.add(i);
 		imaginary.put(i, value);
@@ -147,7 +146,7 @@ public class MLSparse extends MLNumericArray<Double> {
 	public Double getImaginary(int m, int n) {
 		IndexMN i = new IndexMN(m, n);
 		Double result = imaginary.get(i);
-		return result == null ? ZERO : result;
+		return result == null ? Zeros.DOUBLE : result;
 	}
 
 	@Override
@@ -173,7 +172,7 @@ public class MLSparse extends MLNumericArray<Double> {
 	public Double get(int m, int n) {
 		IndexMN i = new IndexMN(m, n);
 		Double result = real.get(i);
-		return result == null ? ZERO : result;
+		return result == null ? Zeros.DOUBLE : result;
 	}
 
 	@Override
@@ -194,7 +193,7 @@ public class MLSparse extends MLNumericArray<Double> {
 			if (real.containsKey(index)) {
 				ad[i] = real.get(index);
 			} else {
-				ad[i] = ZERO;
+				ad[i] = Zeros.DOUBLE;
 			}
 			i++;
 		}
@@ -213,7 +212,7 @@ public class MLSparse extends MLNumericArray<Double> {
 			if (imaginary.containsKey(index)) {
 				ad[i] = imaginary.get(index);
 			} else {
-				ad[i] = ZERO;
+				ad[i] = Zeros.DOUBLE;
 			}
 			i++;
 		}
@@ -323,5 +322,10 @@ public class MLSparse extends MLNumericArray<Double> {
 	@Override
 	public Class<Double> getStorageClazz() {
 		return Double.class;
+	}
+
+	@Override
+	protected Double zero() {
+		return Zeros.DOUBLE;
 	}
 }

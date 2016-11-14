@@ -152,4 +152,9 @@ public class MLInt16 extends MLNumericArray<Short> {
 	public Class<Short> getStorageClazz() {
 		return Short.class;
 	}
+
+	@Override
+	protected Short zero() {
+		return Zeros.SHORT;
+	}
 }
