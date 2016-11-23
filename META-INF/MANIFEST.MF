@@ -1,17 +1,17 @@
 Manifest-Version: 1.0
 Bundle-Description: MatFileRW - Read and write .mat files
 Bundle-DocURL: https://github.com/diffplug/matfilerw
-Bundle-License: https://github.com/diffplug/matfilerw/blob/v3.0.0/LICE
- NSE
+Bundle-License: https://github.com/diffplug/matfilerw/blob/v3.1.0-SNAP
+ SHOT/LICENSE
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: com.diffplug.matsim.matfilerw
 Bundle-Vendor: DiffPlug
-Bundle-Version: 3.0.0
-Export-Package: com.jmatio.common;version="3.0.0",com.jmatio.common.ut
- il;uses:="com.jmatio.types";version="3.0.0",com.jmatio.io;uses:="com.
- jmatio.types";version="3.0.0",com.jmatio.io.stream;uses:="com.jmatio.
- types";version="3.0.0",com.jmatio.types;uses:="com.jmatio.common";ver
- sion="3.0.0"
+Bundle-Version: 3.1.0.I201611222333
+Export-Package: com.jmatio.common;version="3.1.0",com.jmatio.common.ut
+ il;uses:="com.jmatio.types";version="3.1.0",com.jmatio.io;uses:="com.
+ jmatio.types";version="3.1.0",com.jmatio.io.stream;uses:="com.jmatio.
+ types";version="3.1.0",com.jmatio.types;uses:="com.jmatio.common";ver
+ sion="3.1.0"
 Import-Package: sun.misc;resolution:=optional,com.jmatio.common,com.jm
  atio.io.stream,com.jmatio.types
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.6))"
