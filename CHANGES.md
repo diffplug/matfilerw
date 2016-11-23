@@ -1,10 +1,13 @@
 # MatFileRW releases
 
-### Version 3.0.0-SNAPSHOT - TBD ([javadoc](http://diffplug.github.io/matfilerw/javadoc/snapshot/), [snapshot](https://oss.sonatype.org/content/repositories/snapshots/com/diffplug/matsim/matfilerw/))
+### Version 3.1.0-SNAPSHOT - TBD ([javadoc](http://diffplug.github.io/matfilerw/javadoc/snapshot/), [snapshot](https://oss.sonatype.org/content/repositories/snapshots/com/diffplug/matsim/matfilerw/))
+
+### Version 3.0.0 - November 22nd 2016 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/3.0.0/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/3.0.0/view))
 
 * Fixed multidimensional array indexing (see [#10](https://github.com/diffplug/matfilerw/issues/10)).
 	+ For arrays with dimension 1 or 2, there is no change.
 	+ For arrays with dimension 3 and up, matfilerw 2.x did not order the dimensions in the column-major format used by MATLAB.  In 3.x forward, matfilerw uses the same column-major format as MATLAB.
+* `getImaginary` will always return zero for real arrays.
 
 ### Version 2.3.0 - August 18th 2016 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/2.3.0/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/2.3.0/view))
 
