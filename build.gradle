@@ -2,7 +2,7 @@ plugins {
 	// osgi
 	id "com.diffplug.gradle.osgi.bndmanifest" version "3.4.0"
 	// code formatting
-	id "com.diffplug.gradle.spotless" version "2.0.0"
+	id "com.diffplug.gradle.spotless" version "3.0.0"
 	// bintray uploading
 	id "com.jfrog.bintray" version "1.3.1"
 	// for downloading JRE6
@@ -125,14 +125,18 @@ spotless {
 		licenseHeaderFile	'gradle/spotless.license.java'		// License header file
 		importOrderFile		'gradle/spotless.importorder'		// An import ordering file, exported from Eclipse
 		eclipseFormatFile	'gradle/spotless.eclipseformat.xml'	// XML file dumped out by the Eclipse formatter
+		removeUnusedImports()
 	}
 	format 'misc', {
-		target '**/.gitignore', '**/*.gradle', '**/*.md', '**/*.sh', '**/*.m'
+		target '.gitignore', '*.gradle', '*.md', '.ci/*.sh', '*.md'
 		indentWithTabs()
 		trimTrailingWhitespace()
 		endWithNewline()
 	}
-	freshmark {}
+	freshmark {
+		target '*.md'
+		propertiesFile('gradle.properties')
+	}
 }
 
 //////////////
