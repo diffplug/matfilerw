@@ -128,7 +128,7 @@ spotless {
 		removeUnusedImports()
 	}
 	format 'misc', {
-		target '.gitignore', '*.gradle', '*.md', '.ci/*.sh', '*.md'
+		target '.gitignore', '*.gradle', '*.md', '.ci/*.sh'
 		indentWithTabs()
 		trimTrailingWhitespace()
 		endWithNewline()
