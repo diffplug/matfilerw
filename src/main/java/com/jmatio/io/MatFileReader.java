@@ -563,7 +563,7 @@ public class MatFileReader {
 					int[][] data = ((MLUInt32) property).getArray();
 					if (data[0][0] == 0xdd000000 && data[1][0] == 0x02) {
 						MLObjectPlaceholder objHolder = new MLObjectPlaceholder(propertyName, "", data);
-						processMCOS(objHolder, classNamesList, objectInfoList);
+						mcosPlaceholders.add(objHolder);
 						property = objHolder;
 					}
 				}
