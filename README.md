@@ -12,11 +12,11 @@ output = [
 	].join('\n');
 -->
 [![Maven artifact](https://img.shields.io/badge/mavenCentral-com.diffplug.matsim%3Amatfilerw-blue.svg)](https://bintray.com/diffplug/opensource/matfilerw/view)
-[![Latest version](https://img.shields.io/badge/latest-3.0.0-blue.svg)](https://github.com/diffplug/matfilerw/releases/latest)
-[![Javadoc](https://img.shields.io/badge/javadoc-OK-blue.svg)](https://diffplug.github.io/matfilerw/javadoc/3.0.0/)
+[![Latest version](https://img.shields.io/badge/latest-3.0.1-blue.svg)](https://github.com/diffplug/matfilerw/releases/latest)
+[![Javadoc](https://img.shields.io/badge/javadoc-OK-blue.svg)](https://diffplug.github.io/matfilerw/javadoc/3.0.1/)
 [![License Apache](https://img.shields.io/badge/license-BSD-blue.svg)](https://tldrlegal.com/license/bsd-3-clause-license-(revised))
 
-[![Changelog](https://img.shields.io/badge/changelog-3.1.0--SNAPSHOT-brightgreen.svg)](CHANGES.md)
+[![Changelog](https://img.shields.io/badge/changelog-3.0.1-brightgreen.svg)](CHANGES.md)
 [![Travis CI](https://travis-ci.org/diffplug/matfilerw.svg?branch=master)](https://travis-ci.org/diffplug/matfilerw)
 <!---freshmark /shields -->
 
@@ -48,6 +48,7 @@ People whose commits are included in this project
 * MLSparse improvements credit to Sina Samangooei
 * Reading from streams credit to Jonathan Hare
 * MCOS and Simulink MAT-File parsing by Matthew Dawson
+* Further MCOS fixes thanks to Piotr Smolinski
 * int32 writing by Gabriel Shubiner
 * ZLIP EOF Exception fix by David Williams
 * Integration work by Jason Lokerson

@@ -2,6 +2,10 @@
 
 ### Version 3.1.0-SNAPSHOT - TBD ([javadoc](http://diffplug.github.io/matfilerw/javadoc/snapshot/), [snapshot](https://oss.sonatype.org/content/repositories/snapshots/com/diffplug/matsim/matfilerw/))
 
+### Version 3.0.1 - June 28th 2017 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/3.0.1/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/3.0.1/view))
+
+* Fixed second-level MCOS property dereferencing (see [#13](https://github.com/diffplug/matfilerw/issues/13)).
+
 ### Version 3.0.0 - November 22nd 2016 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/3.0.0/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/3.0.0/view))
 
 * Fixed multidimensional array indexing (see [#10](https://github.com/diffplug/matfilerw/issues/10)).
