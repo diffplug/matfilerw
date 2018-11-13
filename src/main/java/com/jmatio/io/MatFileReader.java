@@ -55,6 +55,7 @@ import com.jmatio.types.MLUInt16;
 import com.jmatio.types.MLUInt32;
 import com.jmatio.types.MLUInt64;
 import com.jmatio.types.MLUInt8;
+import us.hebi.glue.Unsafe9;
 
 /**
  * MAT-file reader. Reads MAT-file into <code>MLArray</code> objects.
@@ -323,7 +324,6 @@ public class MatFileReader {
 
 		FileChannel roChannel = null;
 		ByteBuffer buf = null;
-		WeakReference<MappedByteBuffer> bufferWeakRef = null;
 		try {
 			//Create a read-only memory-mapped file
 			roChannel = raFile.getChannel();
@@ -366,7 +366,6 @@ public class MatFileReader {
 				break;
 			case MEMORY_MAPPED_FILE:
 				buf = roChannel.map(FileChannel.MapMode.READ_ONLY, 0, (int) roChannel.size());
-				bufferWeakRef = new WeakReference<MappedByteBuffer>((MappedByteBuffer) buf);
 				break;
 			default:
 				throw new IllegalArgumentException("Unknown file allocation policy");
@@ -378,28 +377,18 @@ public class MatFileReader {
 		} catch (IOException e) {
 			throw e;
 		} finally {
+			if (buf != null && buf.isDirect()) {
+				// Forcefully unmap memory mapped buffer or direct buffer. This is a
+				// workaround for <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4724038">#4724038</a>.
+				// Note that subsequent accesses to the buffer will crash the runtime, so it may
+				// only be applied to internal buffers.
+				Unsafe9.invokeCleaner(buf);
+			}
 			if (roChannel != null) {
 				roChannel.close();
 			}
 			if (raFile != null) {
 				raFile.close();
-			}
-			if (buf != null && bufferWeakRef != null && policy == MEMORY_MAPPED_FILE) {
-				try {
-					clean(buf);
-				} catch (Exception e) {
-					int GC_TIMEOUT_MS = 1000;
-					buf = null;
-					long start = System.currentTimeMillis();
-					while (bufferWeakRef.get() != null) {
-						if (System.currentTimeMillis() - start > GC_TIMEOUT_MS) {
-							break; //a hell cannot be unmapped - hopefully GC will
-							//do it's job later
-						}
-						System.gc();
-						Thread.yield();
-					}
-				}
 			}
 		}
 	}
@@ -658,44 +647,6 @@ public class MatFileReader {
 		while (-1 != (n = stream.read(buffer))) {
 			output.write(buffer, 0, n);
 		}
-	}
-
-	/**
-	 * Workaround taken from bug <a
-	 * href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4724038">#4724038</a>
-	 * to release the memory mapped byte buffer.
-	 * <p>
-	 * Little quote from SUN: <i>This is highly inadvisable, to put it mildly.
-	 * It is exceedingly dangerous to forcibly unmap a mapped byte buffer that's
-	 * visible to Java code. Doing so risks both the security and stability of
-	 * the system</i>
-	 * <p>
-	 * Since the memory byte buffer used to map the file is not exposed to the
-	 * outside world, maybe it's save to use it without being cursed by the SUN.
-	 * Since there is no other solution this will do (don't trust voodoo GC
-	 * invocation)
-	 * 
-	 * @param buffer
-	 *            the buffer to be unmapped
-	 * @throws Exception
-	 *             all kind of evil stuff
-	 */
-	private void clean(final Object buffer) throws Exception {
-		AccessController.doPrivileged(new PrivilegedAction<Object>() {
-			public Object run() {
-				try {
-					Method getCleanerMethod = buffer.getClass().getMethod(
-							"cleaner", new Class[0]);
-					getCleanerMethod.setAccessible(true);
-					sun.misc.Cleaner cleaner = (sun.misc.Cleaner) getCleanerMethod
-							.invoke(buffer, new Object[0]);
-					cleaner.clean();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				return null;
-			}
-		});
 	}
 
 	/**

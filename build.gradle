@@ -24,6 +24,7 @@ sourceCompatibility = VER_JAVA
 targetCompatibility = VER_JAVA
 
 dependencies {
+	compile 'us.hebi.glue:glue:1.0'
 	testCompile "junit:junit:${VER_JUNIT}"
 }
 
