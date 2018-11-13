@@ -55,7 +55,6 @@ import com.jmatio.types.MLUInt16;
 import com.jmatio.types.MLUInt32;
 import com.jmatio.types.MLUInt64;
 import com.jmatio.types.MLUInt8;
-import us.hebi.glue.Unsafe9;
 
 /**
  * MAT-file reader. Reads MAT-file into <code>MLArray</code> objects.
@@ -339,7 +338,6 @@ public class MatFileReader {
 				break;
 			case HEAP_BYTE_BUFFER:
 				int filesize = (int) roChannel.size();
-				System.gc();
 				buf = ByteBuffer.allocate(filesize);
 
 				// The following two methods couldn't be used (at least under MS Windows)
@@ -382,7 +380,7 @@ public class MatFileReader {
 				// workaround for <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4724038">#4724038</a>.
 				// Note that subsequent accesses to the buffer will crash the runtime, so it may
 				// only be applied to internal buffers.
-				Unsafe9.invokeCleaner(buf);
+				Unsafe9R.invokeCleaner(buf);
 			}
 			if (roChannel != null) {
 				roChannel.close();
