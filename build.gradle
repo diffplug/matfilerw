@@ -39,6 +39,7 @@ jar.manifest.attributes (
 	'Bundle-DocURL': "https://github.com/${project.org}/${project.name}",
 	'Bundle-License': "https://github.com/${project.org}/${project.name}/blob/v${project.version}/LICENSE",
 	'-removeheaders': 'Bnd-LastModified,Bundle-Name,Created-By,Tool',
+	'Automatic-Module-Name': 'com.jmatio', // Jigsaw module name
 )
 // copy the manifest into the WC
 osgiBndManifest {
