@@ -1,7 +1,7 @@
 # MatFileRW releases
 
 ### Version 3.1.0-SNAPSHOT - TBD ([javadoc](http://diffplug.github.io/matfilerw/javadoc/snapshot/), [snapshot](https://oss.sonatype.org/content/repositories/snapshots/com/diffplug/matsim/matfilerw/))
-* Added support for Jigsaw and Java 9+
+* Added support for Jigsaw and Java 9+ (see [#16](https://github.com/diffplug/matfilerw/issues/16)).
 
 ### Version 3.0.1 - June 28th 2017 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/3.0.1/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/3.0.1/view))
 
