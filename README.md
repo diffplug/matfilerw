@@ -1,3 +1,15 @@
+## MatFileRW is not abandoned, but we recommend migrating to [HebiRobotics/MFL](https://github.com/HebiRobotics/MFL)
+
+MatFileRW will continue to accept bug reports and PRs.  However, we recommend starting new projects with [HebiRobotics/MFL](https://github.com/HebiRobotics/MFL) because it:
+
+- has every testcase from MatFileRW and more
+- has a cleaner and more modern codebase
+- supports concurrent compression and decompression
+- is designed for interoperability with native-Java matrix manipulation
+- has optional [EJML](https://ejml.org) integration
+
+Besides the effort to learn the new API, there are no downsides and quite a few upsides.   Migrating a project is a big job, so we will continue to accept bug reports and PR's for MatFileRW to support those who don't choose to migrate.
+
 # <img align="left" src="matfilerw.png"> MatFileRW: Read and write MATLAB MAT-files from Java
 
 <!---freshmark shields
