@@ -311,10 +311,7 @@ public class MatFileReader {
 	public synchronized Map<String, MLArray> read(RandomAccessFile raFile, MatFileFilter filter, int policy) throws IOException {
 		this.filter = filter;
 
-		//clear the results
-		for (String key : data.keySet()) {
-			data.remove(key);
-		}
+		data.clear();
 
 		FileChannel roChannel = null;
 		ByteBuffer buf = null;
