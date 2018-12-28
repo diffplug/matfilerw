@@ -2,6 +2,8 @@
 
 ### Version 3.2.0-SNAPSHOT - TBD ([javadoc](http://diffplug.github.io/matfilerw/javadoc/snapshot/), [snapshot](https://oss.sonatype.org/content/repositories/snapshots/com/diffplug/matsim/matfilerw/))
 
+### Version 3.1.1 - December 28th 2018 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/3.1.1/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/3.1.1/view))
+
 * Fixed MatFileReader.read(File file) to allow multiple calls(see [#20](https://github.com/diffplug/matfilerw/issues/20)).
 
 ### Version 3.1.0 - November 13th 2018 ([javadoc](http://diffplug.github.io/matfilerw/javadoc/3.1.0/), [jcenter](https://bintray.com/diffplug/opensource/matfilerw/3.1.0/view))
